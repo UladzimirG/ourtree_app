@@ -27,7 +27,6 @@ import 'package:ourtree_app/l10n/app_localizations.dart';
 /// Разделы страницы настроек.
 enum _SettingsSection { family, members, events, media, accounts, backups }
 
-
 /// Полноценная страница настроек семьи.
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -74,14 +73,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final bytes = await file.readAsBytes();
     if (bytes.isEmpty) return;
     final hash = sha256.convert(bytes).toString();
-    final existing = ref
-        .read(familyDataProvider)
-        .valueOrNull
-        ?.findDuplicateMedia(
-          hash: hash,
-          name: file.name,
-          size: bytes.length,
-        );
+    final existing =
+        ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+              hash: hash,
+              name: file.name,
+              size: bytes.length,
+            );
 
     String source;
     if (existing != null) {
@@ -105,9 +102,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (!mounted) return;
     _photoController.text = source;
-    ref
-        .read(familySettingsNotifierProvider.notifier)
-        .updateFamilyPhoto(source);
+    ref.read(familySettingsNotifierProvider.notifier).updateFamilyPhoto(source);
     setState(() {});
   }
 
@@ -154,7 +149,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _confirmRemoveMember(FamilyMember member, AppLocalizations l10n) async {
+  Future<void> _confirmRemoveMember(
+      FamilyMember member, AppLocalizations l10n) async {
     final confirmed = await _confirm(
       title: l10n.memberDeleteConfirmTitle,
       body: l10n.memberDeleteConfirmBody,
@@ -270,75 +266,82 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           )
                         : switch (section) {
-                      _SettingsSection.family => ListView(
-                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
-                          children: [
-                            _SettingsSummary(
-                              family: family,
-                              familyName: settings.familyName,
-                              l10n: l10n,
-                            ),
-                            const SizedBox(height: 14),
-                            _SettingsForm(
-                              formKey: _formKey,
-                              settings: settings,
-                              nameController: _nameController,
-                              photoController: _photoController,
-                              l10n: l10n,
-                              onNameChanged: (value) => ref
-                                  .read(familySettingsNotifierProvider.notifier)
-                                  .updateFamilyName(value),
-                              onPhotoChanged: (value) => ref
-                                  .read(familySettingsNotifierProvider.notifier)
-                                  .updateFamilyPhoto(value),
-                              onUploadPhoto: _pickFamilyPhoto,
-                              onClearPhoto: () {
-                                _photoController.clear();
-                                ref
-                                    .read(
-                                      familySettingsNotifierProvider.notifier,
-                                    )
-                                    .updateFamilyPhoto('');
-                              },
-                              onShowFamilyPhotoChanged: (value) => ref
-                                  .read(familySettingsNotifierProvider.notifier)
-                                  .updateShowFamilyPhotoInHeader(value),
-                              onShowEventPhotosChanged: (value) => ref
-                                  .read(familySettingsNotifierProvider.notifier)
-                                  .updateShowEventPhotos(value),
-                              onSave: _save,
-                            ),
-                          ],
-                        ),
-                      _SettingsSection.members => _MembersSection(
-                          members: visible.members,
-                          events: visible.timelineEvents,
-                          canManage: isAdmin,
-                          l10n: l10n,
-                          onAdd: _addMember,
-                          onChanged: (member) => ref
-                              .read(familyDataProvider.notifier)
-                              .updateMember(member.id, (_) => member),
-                          onRemove: (member) =>
-                              _confirmRemoveMember(member, l10n),
-                        ),
-                      _SettingsSection.events => _EventsSection(
-                          events: [...visible.timelineEvents]
-                            ..sort((a, b) => a.date.compareTo(b.date)),
-                          members: visible.members,
-                          canManage: isAdmin,
-                          l10n: l10n,
-                          onAdd: _addEvent,
-                          onChanged: (event) => ref
-                              .read(familyDataProvider.notifier)
-                              .updateTimelineEvent(event.id, (_) => event),
-                          onRemove: (event) =>
-                              _confirmRemoveEvent(event, l10n),
-                        ),
-                      _SettingsSection.media => const MediaLibraryPanel(),
-                      _SettingsSection.accounts => const AccountsPanel(),
-                      _SettingsSection.backups => const BackupPanel(),
-                    },
+                            _SettingsSection.family => ListView(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 6, 16, 32),
+                                children: [
+                                  _SettingsSummary(
+                                    family: family,
+                                    familyName: settings.familyName,
+                                    l10n: l10n,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _SettingsForm(
+                                    formKey: _formKey,
+                                    settings: settings,
+                                    nameController: _nameController,
+                                    photoController: _photoController,
+                                    l10n: l10n,
+                                    onNameChanged: (value) => ref
+                                        .read(familySettingsNotifierProvider
+                                            .notifier)
+                                        .updateFamilyName(value),
+                                    onPhotoChanged: (value) => ref
+                                        .read(familySettingsNotifierProvider
+                                            .notifier)
+                                        .updateFamilyPhoto(value),
+                                    onUploadPhoto: _pickFamilyPhoto,
+                                    onClearPhoto: () {
+                                      _photoController.clear();
+                                      ref
+                                          .read(
+                                            familySettingsNotifierProvider
+                                                .notifier,
+                                          )
+                                          .updateFamilyPhoto('');
+                                    },
+                                    onShowFamilyPhotoChanged: (value) => ref
+                                        .read(familySettingsNotifierProvider
+                                            .notifier)
+                                        .updateShowFamilyPhotoInHeader(value),
+                                    onShowEventPhotosChanged: (value) => ref
+                                        .read(familySettingsNotifierProvider
+                                            .notifier)
+                                        .updateShowEventPhotos(value),
+                                    onSave: _save,
+                                  ),
+                                ],
+                              ),
+                            _SettingsSection.members => _MembersSection(
+                                members: visible.members,
+                                events: visible.timelineEvents,
+                                canManage: isAdmin,
+                                l10n: l10n,
+                                onAdd: _addMember,
+                                onChanged: (member) => ref
+                                    .read(familyDataProvider.notifier)
+                                    .updateMember(member.id, (_) => member),
+                                onRemove: (member) =>
+                                    _confirmRemoveMember(member, l10n),
+                              ),
+                            _SettingsSection.events => _EventsSection(
+                                events: [...visible.timelineEvents]
+                                  ..sort((a, b) => a.date.compareTo(b.date)),
+                                members: visible.members,
+                                canManage: isAdmin,
+                                l10n: l10n,
+                                onAdd: _addEvent,
+                                onChanged: (event) => ref
+                                    .read(familyDataProvider.notifier)
+                                    .updateTimelineEvent(
+                                        event.id, (_) => event),
+                                onRemove: (event) =>
+                                    _confirmRemoveEvent(event, l10n),
+                              ),
+                            _SettingsSection.media => const MediaLibraryPanel(),
+                            _SettingsSection.accounts => const AccountsPanel(),
+                            _SettingsSection.backups => const BackupPanel(),
+                          },
                   ),
                 ],
               );
@@ -374,12 +377,15 @@ class _SettingsTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    // Wrap вместо горизонтальной прокрутки: на узком экране чипы
+    // переносятся на следующую строку и не обрезаются по бокам.
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-      child: Row(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: [
-          for (final section in sections) ...[
+          for (final section in sections)
             ChoiceChip(
               selected: section == selected,
               label: Text(_settingsSectionLabel(section, l10n)),
@@ -392,8 +398,6 @@ class _SettingsTabs extends StatelessWidget {
               backgroundColor: AppColors.kraftWash,
               side: BorderSide.none,
             ),
-            const SizedBox(width: 8),
-          ],
         ],
       ),
     );
@@ -541,7 +545,6 @@ String _settingsSectionLabel(_SettingsSection section, AppLocalizations l10n) {
     _SettingsSection.backups => l10n.settingsTabBackups,
   };
 }
-
 
 class _SettingsSummary extends StatelessWidget {
   const _SettingsSummary({

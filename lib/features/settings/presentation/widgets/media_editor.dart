@@ -7,6 +7,7 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/media_upload_preparer.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
@@ -115,7 +116,7 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
     final asset = MediaAsset(
       id: 'asset-${DateTime.now().microsecondsSinceEpoch}',
       source: source,
-      type: _typeForName(source),
+      type: mediaTypeForName(source),
     );
     ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
     _attachAsset(asset);
@@ -204,31 +205,42 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
           error = l10n.mediaUploadEmpty;
           continue;
         }
-        final hash = sha256.convert(bytes).toString();
-        final existing = ref
-            .read(familyDataProvider)
-            .valueOrNull
-            ?.findDuplicateMedia(
-              hash: hash,
-              name: file.name,
-              size: bytes.length,
-            );
+
+        // Видео автоматически приводятся к формату текущей платформы.
+        final prepared = await prepareMediaUpload(bytes, file.name);
+        if (prepared == null) {
+          error = l10n.videoConvertFailed;
+          continue;
+        }
+        final mediaBytes = prepared.bytes;
+        if (mediaBytes.length > mediaMaxBytes) {
+          error = l10n.mediaUploadTooLarge(prepared.name);
+          continue;
+        }
+
+        final hash = sha256.convert(mediaBytes).toString();
+        final existing =
+            ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+                  hash: hash,
+                  name: prepared.name,
+                  size: mediaBytes.length,
+                );
         if (existing != null) {
           added.add(_linkFromAsset(existing));
           error = l10n.mediaDuplicateAttached;
           continue;
         }
         final storedId = await MediaStorage.instance.saveBytes(
-          bytes,
-          name: file.name,
+          mediaBytes,
+          name: prepared.name,
         );
         final asset = MediaAsset(
           id: 'asset-$storedId',
           source: 'hive://$storedId',
-          type: _typeForName(file.name),
-          name: file.name,
+          type: prepared.type,
+          name: prepared.name,
           createdAt: DateTime.now().millisecondsSinceEpoch,
-          size: bytes.length,
+          size: mediaBytes.length,
           hash: hash,
         );
         ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
@@ -562,8 +574,7 @@ class _MediaTileState extends State<_MediaTile> {
   }
 
   Widget _cropSection(BuildContext context) {
-    if (widget.media.type.isVideo ||
-        widget.media.source.trim().isEmpty) {
+    if (widget.media.type.isVideo || widget.media.source.trim().isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -700,25 +711,9 @@ class _MediaTileState extends State<_MediaTile> {
   }
 }
 
-
 String _newMediaId() => 'media-${DateTime.now().microsecondsSinceEpoch}';
-
-MediaType _typeForName(String name) {
-  final lower = name.toLowerCase();
-  return _videoExtensions.any(lower.endsWith) ? MediaType.video : MediaType.image;
-}
-
-const List<String> _videoExtensions = <String>[
-  '.mp4',
-  '.webm',
-  '.mov',
-  '.m4v',
-  '.avi',
-  '.mkv',
-];
 
 bool _isOpenableLink(String source) {
   final value = source.trim();
   return value.startsWith('http://') || value.startsWith('https://');
 }
-

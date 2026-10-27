@@ -8,6 +8,7 @@ import 'package:ourtree_app/features/family/presentation/widgets/card_sheet.dart
 import 'package:ourtree_app/features/family/presentation/widgets/page_hero.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
+import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 /// Семейный календарь: месяцы, отмеченные дни и события по нажатию.
@@ -113,8 +114,7 @@ class _CalendarSectionState extends State<CalendarSection> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: cellsCount,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
                   mainAxisSpacing: 6,
                   crossAxisSpacing: 6,
@@ -130,16 +130,30 @@ class _CalendarSectionState extends State<CalendarSection> {
                     _cursor.month,
                     dayNumber,
                   );
-                  final dayEvents =
-                      _eventsOnDay(day, widget.family, l10n);
+                  final dayEvents = _eventsOnDay(day, widget.family, l10n);
                   final isToday = day.year == today.year &&
                       day.month == today.month &&
                       day.day == today.day;
+                  final birthdayMembers = widget.family.members
+                      .where(
+                        (member) =>
+                            member.showInCalendar != false &&
+                            isSameMonthDay(member.birthdayDate, day),
+                      )
+                      .toList(growable: false);
+                  // Точка нужна только для событий, которые не показаны
+                  // аватаром именинника.
+                  final hasBirthdayAvatar = birthdayMembers.isNotEmpty;
+                  final hasOtherEvents = dayEvents.any(
+                    (event) =>
+                        !hasBirthdayAvatar || event.kind != EventKind.birth,
+                  );
 
                   return _CalendarCell(
                     day: dayNumber,
                     isToday: isToday,
-                    hasEvents: dayEvents.isNotEmpty,
+                    hasEvents: hasOtherEvents,
+                    birthdayMembers: birthdayMembers,
                     onTap: () => _openDay(context, day, dayEvents, l10n),
                   );
                 },
@@ -217,12 +231,14 @@ class _CalendarCell extends StatelessWidget {
     required this.day,
     required this.isToday,
     required this.hasEvents,
+    required this.birthdayMembers,
     required this.onTap,
   });
 
   final int day;
   final bool isToday;
   final bool hasEvents;
+  final List<FamilyMember> birthdayMembers;
   final VoidCallback onTap;
 
   @override
@@ -236,22 +252,32 @@ class _CalendarCell extends StatelessWidget {
         decoration: BoxDecoration(
           color: hasEvents ? AppColors.activeWash : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: isToday
-              ? Border.all(color: AppColors.moss, width: 2)
-              : null,
+          border: isToday ? Border.all(color: AppColors.moss, width: 2) : null,
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Text(
-              '$day',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: hasEvents ? FontWeight.w700 : FontWeight.w400,
-              ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$day',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    height: 1.1,
+                    fontWeight: hasEvents ? FontWeight.w700 : FontWeight.w400,
+                  ),
+                ),
+                if (birthdayMembers.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 1),
+                  _BirthdayAvatars(members: birthdayMembers),
+                ],
+              ],
             ),
             if (hasEvents)
               Positioned(
-                bottom: 5,
+                right: birthdayMembers.isEmpty ? null : 3,
+                bottom: 4,
                 child: Container(
                   width: 6,
                   height: 6,
@@ -260,6 +286,40 @@ class _CalendarCell extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Небольшие аватары именинников: до двух, со сдвигом друг на друга.
+class _BirthdayAvatars extends StatelessWidget {
+  const _BirthdayAvatars({required this.members});
+
+  final List<FamilyMember> members;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = members.take(2).toList(growable: false);
+    final width = 16.0 + (visible.length - 1) * 12.0;
+    final names = members
+        .map((member) => member.name.trim().isEmpty ? '—' : member.name.trim())
+        .join(', ');
+
+    return Tooltip(
+      message: names,
+      child: SizedBox(
+        width: width,
+        height: 16,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (var index = 0; index < visible.length; index++)
+              Positioned(
+                left: index * 12.0,
+                child: MemberAvatar(member: visible[index], size: 16),
               ),
           ],
         ),
@@ -280,7 +340,8 @@ List<TimelineEvent> _eventsOnDay(
       date.day == day.day;
 
   final events = family.timelineEvents
-      .where((event) => event.showInCalendar != false && sameDay(event.eventDate))
+      .where(
+          (event) => event.showInCalendar != false && sameDay(event.eventDate))
       .toList(growable: false);
 
   final birthdayEvents = <TimelineEvent>[];

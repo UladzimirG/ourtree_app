@@ -12,8 +12,11 @@ const html.EventStreamProvider<html.BlobEvent> _dataEvent =
 const html.EventStreamProvider<html.Event> _stopEvent =
     html.EventStreamProvider<html.Event>('stop');
 
-/// Перекодирует видео в WebM силами браузера (MediaRecorder).
-Future<VideoConversionResult?> convertVideoToWebm(
+/// Перекодирует видео в поддерживаемый браузером контейнер (MediaRecorder).
+///
+/// Сначала пробуем MP4/H.264: его понимают и мобильные платформы. Если браузер
+/// не умеет записывать MP4, остаётся WebM — родной формат для веба.
+Future<VideoConversionResult?> convertVideoToSupportedFormat(
   Uint8List bytes, {
   String? name,
   void Function(double progress)? onProgress,
@@ -37,8 +40,8 @@ Future<VideoConversionResult?> convertVideoToWebm(
   try {
     await video.onLoadedMetadata.first;
     stream = video.captureStream();
-    final mimeType = _supportedMime();
-    recorder = html.MediaRecorder(stream, {'mimeType': mimeType});
+    final format = _supportedFormat();
+    recorder = html.MediaRecorder(stream, {'mimeType': format.mimeType});
     final chunks = <html.Blob>[];
     final stopped = Completer<void>();
 
@@ -58,8 +61,7 @@ Future<VideoConversionResult?> convertVideoToWebm(
     if (totalMs > 0) {
       video.onTimeUpdate.listen((_) {
         onProgress?.call(
-          (((video.currentTime * 1000) / totalMs).clamp(0.0, 1.0))
-              .toDouble(),
+          (((video.currentTime * 1000) / totalMs).clamp(0.0, 1.0)).toDouble(),
         );
       });
     }
@@ -74,13 +76,13 @@ Future<VideoConversionResult?> convertVideoToWebm(
     await stopped.future.timeout(const Duration(seconds: 15));
     if (chunks.isEmpty) return null;
 
-    final output = html.Blob(chunks, 'video/webm');
+    final output = html.Blob(chunks, format.mimeType);
     final converted = await _blobBytes(output);
     onProgress?.call(1);
     return VideoConversionResult(
       bytes: converted,
-      extension: 'webm',
-      mimeType: 'video/webm',
+      extension: format.extension,
+      mimeType: format.mimeType,
     );
   } catch (_) {
     return null;
@@ -123,15 +125,28 @@ Future<Uint8List> _blobBytes(html.Blob blob) {
   return completer.future;
 }
 
-String _supportedMime() {
-  for (final type in [
-    'video/webm;codecs=vp9,opus',
-    'video/webm;codecs=vp8,opus',
-    'video/webm',
-  ]) {
-    if (html.MediaRecorder.isTypeSupported(type)) return type;
+_RecordingFormat _supportedFormat() {
+  const candidates = <_RecordingFormat>[
+    _RecordingFormat(
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'mp4',
+    ),
+    _RecordingFormat('video/mp4', 'mp4'),
+    _RecordingFormat('video/webm;codecs=vp9,opus', 'webm'),
+    _RecordingFormat('video/webm;codecs=vp8,opus', 'webm'),
+    _RecordingFormat('video/webm', 'webm'),
+  ];
+  for (final format in candidates) {
+    if (html.MediaRecorder.isTypeSupported(format.mimeType)) return format;
   }
-  return 'video/webm';
+  return const _RecordingFormat('video/webm', 'webm');
+}
+
+class _RecordingFormat {
+  const _RecordingFormat(this.mimeType, this.extension);
+
+  final String mimeType;
+  final String extension;
 }
 
 String _mime(String name) {

@@ -1,22 +1,16 @@
-import 'dart:typed_data';
-
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
-import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/media_upload_preparer.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
-import 'video_converter_stub.dart'
-    if (dart.library.io) 'video_converter_io.dart'
-    if (dart.library.html) 'video_converter_web.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/settings_fields.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
@@ -32,7 +26,6 @@ class MediaLibraryPanel extends ConsumerStatefulWidget {
 class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   bool _busy = false;
   bool _onlyUnused = false;
-  String? _convertingId;
 
   Future<void> _upload() async {
     final l10n = AppLocalizations.of(context)!;
@@ -52,31 +45,42 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           error = l10n.mediaUploadEmpty;
           continue;
         }
-        final hash = sha256.convert(bytes).toString();
-        final existing = ref
-            .read(familyDataProvider)
-            .valueOrNull
-            ?.findDuplicateMedia(
-              hash: hash,
-              name: file.name,
-              size: bytes.length,
-            );
+
+        // Видео автоматически приводятся к формату текущей платформы.
+        final prepared = await prepareMediaUpload(bytes, file.name);
+        if (prepared == null) {
+          error = l10n.videoConvertFailed;
+          continue;
+        }
+        final mediaBytes = prepared.bytes;
+        if (mediaBytes.length > 20 * 1024 * 1024) {
+          error = l10n.mediaUploadTooLarge(prepared.name);
+          continue;
+        }
+
+        final hash = sha256.convert(mediaBytes).toString();
+        final existing =
+            ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+                  hash: hash,
+                  name: prepared.name,
+                  size: mediaBytes.length,
+                );
         if (existing != null) {
           error = l10n.mediaDuplicateFound;
           continue;
         }
         final storedId = await MediaStorage.instance.saveBytes(
-          bytes,
-          name: file.name,
+          mediaBytes,
+          name: prepared.name,
         );
         ref.read(familyDataProvider.notifier).upsertMediaAsset(
               MediaAsset(
                 id: 'asset-$storedId',
                 source: 'hive://$storedId',
-                type: _mediaType(file.name),
-                name: file.name,
+                type: prepared.type,
+                name: prepared.name,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
-                size: bytes.length,
+                size: mediaBytes.length,
                 hash: hash,
               ),
             );
@@ -126,61 +130,10 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           MediaAsset(
             id: 'asset-${DateTime.now().microsecondsSinceEpoch}',
             source: source,
-            type: _mediaType(source),
+            type: mediaTypeForName(source),
             createdAt: DateTime.now().millisecondsSinceEpoch,
           ),
         );
-  }
-
-  Future<void> _convert(MediaAsset asset, AppLocalizations l10n) async {
-    if (!videoConversionSupported) return;
-
-    final storedId = asset.storedId;
-    Uint8List? bytes;
-    if (storedId != null) {
-      bytes = await MediaStorage.instance.loadBytes(storedId);
-    } else {
-      final assetPath = familyPhotoAssetPath(asset.source);
-      if (assetPath != null) {
-        final data = await rootBundle.load(assetPath);
-        bytes = data.buffer.asUint8List();
-      }
-    }
-    if (bytes == null || !mounted) return;
-
-    setState(() => _convertingId = asset.id);
-    final result = await convertVideoToWebm(bytes, name: asset.name);
-    if (!mounted) return;
-    if (result == null) {
-      setState(() => _convertingId = null);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.videoConvertFailed)),
-      );
-      return;
-    }
-
-    final newStoredId = await MediaStorage.instance.saveBytes(
-      result.bytes,
-      name: 'converted.${result.extension}',
-    );
-    final base = (asset.name ?? 'video').split('.').first;
-    final updated = asset.copyWith(
-      source: 'hive://$newStoredId',
-      name: () =>
-          '${base.isEmpty ? 'video' : base}.${result.extension}',
-      type: MediaType.video,
-      size: () => result.bytes.length,
-      hash: () => sha256.convert(result.bytes).toString(),
-    );
-    ref.read(familyDataProvider.notifier).upsertMediaAsset(updated);
-    if (storedId != null) {
-      await MediaStorage.instance.deleteBytes(storedId);
-    }
-    if (!mounted) return;
-    setState(() => _convertingId = null);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.videoConverted)),
-    );
   }
 
   void _openViewer(List<MediaAsset> assets, int index) {
@@ -274,8 +227,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
               child: Text(l10n.cancel),
             ),
             FilledButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop({...selected}),
+              onPressed: () => Navigator.of(dialogContext).pop({...selected}),
               child: Text(l10n.mediaUseApply),
             ),
           ],
@@ -369,9 +321,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
               asset: assets[index],
               family: family,
               l10n: l10n,
-              converting: _convertingId == assets[index].id,
               onOpen: () => _openViewer(assets, index),
-              onConvert: () => _convert(assets[index], l10n),
               onUse: () => _use(assets[index], l10n),
               onDelete: () => _delete(assets[index], l10n),
             ),
@@ -388,9 +338,7 @@ class _MediaAssetCard extends ConsumerWidget {
     required this.asset,
     required this.family,
     required this.l10n,
-    required this.converting,
     required this.onOpen,
-    required this.onConvert,
     required this.onUse,
     required this.onDelete,
   });
@@ -398,9 +346,7 @@ class _MediaAssetCard extends ConsumerWidget {
   final MediaAsset asset;
   final FamilyData family;
   final AppLocalizations l10n;
-  final bool converting;
   final VoidCallback onOpen;
-  final VoidCallback onConvert;
   final VoidCallback onUse;
   final VoidCallback onDelete;
 
@@ -500,13 +446,12 @@ class _MediaAssetCard extends ConsumerWidget {
           SettingsTextField(
             label: l10n.mediaAssetName,
             initialValue: asset.name ?? '',
-            onChanged: (value) => ref
-                .read(familyDataProvider.notifier)
-                .upsertMediaAsset(
-                  asset.copyWith(
-                    name: () => value.trim().isEmpty ? null : value,
-                  ),
-                ),
+            onChanged: (value) =>
+                ref.read(familyDataProvider.notifier).upsertMediaAsset(
+                      asset.copyWith(
+                        name: () => value.trim().isEmpty ? null : value,
+                      ),
+                    ),
           ),
           Row(
             children: [
@@ -538,30 +483,6 @@ class _MediaAssetCard extends ConsumerWidget {
               ),
             ],
           ),
-          if (videoConversionSupported &&
-              asset.isVideo &&
-              asset.source.trim().isNotEmpty)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: converting ? null : onConvert,
-                    icon: Icon(
-                      converting ? Icons.hourglass_top : Icons.sync,
-                    ),
-                    label: Text(
-                      converting ? l10n.videoConverting : l10n.videoConvert,
-                    ),
-                  ),
-                  Text(
-                    l10n.videoConvertHint,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
           ..._peopleSection(context, ref),
           ..._usageSection(context, usages),
           if (unused)
@@ -645,8 +566,7 @@ class _MediaAssetCard extends ConsumerWidget {
                   for (final person in asset.people)
                     if (person.id == member.id)
                       person.copyWith(
-                        caption: () =>
-                            value.trim().isEmpty ? null : value,
+                        caption: () => value.trim().isEmpty ? null : value,
                       )
                     else
                       person,
@@ -731,15 +651,6 @@ List<String> mediaUsageLabels(
   }
   return result.toSet().toList(growable: false);
 }
-
-bool _isVideoName(String name) {
-  final lower = name.toLowerCase();
-  return ['.mp4', '.webm', '.mov', '.m4v', '.avi', '.mkv']
-      .any(lower.endsWith);
-}
-
-MediaType _mediaType(String name) =>
-    _isVideoName(name) ? MediaType.video : MediaType.image;
 
 String _formatSize(int bytes, AppLocalizations l10n) {
   if (bytes < 1024) return l10n.backupSizeBytes(bytes);

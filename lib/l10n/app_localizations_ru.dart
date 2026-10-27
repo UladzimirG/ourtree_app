@@ -255,7 +255,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsMediaHint =>
-      'Все фотографии и видео в одном месте. Описание и кадрирование задаются отдельно для каждого участника и события.';
+      'Все фотографии и видео в одном месте. Видео автоматически приводятся к поддерживаемому формату. Описание и кадрирование задаются отдельно для каждого участника и события.';
 
   @override
   String get mediaLibraryTitle => 'Медиатека семьи';
@@ -859,20 +859,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mediaViewerNext => 'Следующее медиа';
 
   @override
-  String get videoConvert => 'Конвертировать в WebM';
+  String get videoConvert => 'Поддерживаемый формат';
 
   @override
-  String get videoConverting => 'Конвертация…';
+  String get videoConverting => 'Подготовка видео…';
 
   @override
-  String get videoConverted => 'Видео сконвертировано в WebM.';
+  String get videoConverted => 'Видео сохранено в поддерживаемом формате.';
 
   @override
-  String get videoConvertFailed => 'Не удалось сконвертировать видео.';
+  String get videoConvertFailed =>
+      'Не удалось подготовить видео в поддерживаемом формате.';
 
   @override
   String get videoConvertHint =>
-      'Конвертация идёт в браузере. Не закрывайте экран до завершения.';
+      'Видео автоматически приводится к поддерживаемому формату.';
 
   @override
   String get mediaCropX => 'По горизонтали';
@@ -907,7 +908,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mediaUploadHint =>
-      'Фото и видео до 20 МБ. Файлы хранятся локально на этом устройстве.';
+      'Фото и видео до 20 МБ. Видео автоматически приводятся к поддерживаемому формату. Файлы хранятся локально на этом устройстве.';
 
   @override
   String mediaUploadTooLarge(String name) {

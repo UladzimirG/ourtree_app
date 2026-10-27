@@ -10,7 +10,7 @@ abstract final class AppColors {
   static const Color kraftDark = Color(0xFF6F4B2A);
   static const Color moss = Color(0xFF4E5C38);
   static const Color terracotta = Color(0xFFA44B2C);
-  static const Color background = Color(0xFF8F6236);
+  static const Color background = Color(0xFFB98B5C);
   static const Color shadow = Color(0x522A180A);
   static const Color softShadow = Color(0x332A180A);
   static const Color tape = Color(0xB8E8D6A0);

@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
                     child: FamilyHeader(
                       familyName: settings.familyName,
                       familyPhoto: settings.showFamilyPhotoInHeader
@@ -226,5 +226,3 @@ class _HomeStatus extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,9 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
-import 'package:ourtree_app/features/family/presentation/widgets/card_sheet.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
@@ -41,16 +39,36 @@ Future<void> showMediaViewer(
       .toList(growable: false);
   if (available.isEmpty) return Future<void>.value();
 
-  return showCardSheet(
-    context,
-    (sheetContext) => _MediaViewerSheet(
-      items: available,
-      initialIndex: initialIndex.clamp(0, available.length - 1),
-      eyebrow: eyebrow,
-      title: title,
-      subtitle: subtitle,
-    ),
-    maxWidth: 760,
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: AppColors.scrim,
+    builder: (sheetContext) {
+      final bottomInset = MediaQuery.viewInsetsOf(sheetContext).bottom;
+
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomInset),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: PaperCard(
+                tilt: 0.6,
+                child: _MediaViewerSheet(
+                  items: available,
+                  initialIndex: initialIndex.clamp(0, available.length - 1),
+                  eyebrow: eyebrow,
+                  title: title,
+                  subtitle: subtitle,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -104,138 +122,156 @@ class _MediaViewerSheetState extends State<_MediaViewerSheet> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final item = widget.items[_index];
-    final viewerHeight =
-        math.min(MediaQuery.sizeOf(context).height * 0.62, 560.0);
+    final media = MediaQuery.of(context);
     final caption = item.caption?.trim();
+    final hasCaption = caption != null && caption.isNotEmpty;
+    final hasSubtitle = widget.subtitle?.trim().isNotEmpty == true;
+    final hasThumbnails = widget.items.length > 1;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.eyebrow?.trim().isNotEmpty == true)
-          Text(
-            widget.eyebrow!.trim(),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkSoft,
-            ),
-          ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                widget.title?.trim().isNotEmpty == true
-                    ? widget.title!.trim()
-                    : l10n.mediaTitle,
-                style: theme.textTheme.headlineSmall,
+    // Оставляем место заголовку, подписи, навигации, миниатюрам, кнопке
+    // закрытия и отступам листа, чтобы весь просмотрщик помещался на экране.
+    final reserved = 60.0 +
+        (hasSubtitle ? 26.0 : 0.0) +
+        (hasCaption ? 64.0 : 0.0) +
+        48.0 +
+        (hasThumbnails ? 66.0 : 0.0) +
+        48.0 +
+        16.0;
+    final availableHeight =
+        media.size.height - media.padding.top - media.padding.bottom - 72.0;
+    final viewerHeight =
+        (availableHeight - reserved).clamp(120.0, 560.0).toDouble();
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.eyebrow?.trim().isNotEmpty == true)
+            Text(
+              widget.eyebrow!.trim(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.inkSoft,
               ),
             ),
-            const SizedBox(width: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.title?.trim().isNotEmpty == true
+                      ? widget.title!.trim()
+                      : l10n.mediaTitle,
+                  style: theme.textTheme.headlineSmall,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '${_index + 1} / ${widget.items.length}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.inkSoft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (widget.subtitle?.trim().isNotEmpty == true)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: 2),
               child: Text(
-                '${_index + 1} / ${widget.items.length}',
-                style: theme.textTheme.bodySmall?.copyWith(
+                widget.subtitle!.trim(),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontFamily: 'Georgia',
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.terracotta,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: viewerHeight,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: ColoredBox(
+                color: const Color(0xFF1C1712),
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: widget.items.length,
+                  onPageChanged: (index) => setState(() => _index = index),
+                  itemBuilder: (context, index) => _MediaViewerPage(
+                    item: widget.items[index],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (caption != null && caption.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                caption,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'Georgia',
+                  fontStyle: FontStyle.italic,
                   color: AppColors.inkSoft,
                 ),
               ),
             ),
-          ],
-        ),
-        if (widget.subtitle?.trim().isNotEmpty == true)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              widget.subtitle!.trim(),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontFamily: 'Georgia',
-                fontStyle: FontStyle.italic,
-                color: AppColors.terracotta,
-                fontSize: 18,
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                tooltip: l10n.mediaViewerPrevious,
+                onPressed: _index > 0 ? () => _goTo(_index - 1) : null,
+                icon: const Icon(Icons.chevron_left),
               ),
-            ),
+              Expanded(
+                child: Text(
+                  widget.items.length > 1 ? '${_index + 1}' : '',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.mediaViewerNext,
+                onPressed: _index < widget.items.length - 1
+                    ? () => _goTo(_index + 1)
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
           ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: viewerHeight,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: ColoredBox(
-              color: const Color(0xFF1C1712),
-              child: PageView.builder(
-                controller: _pages,
+          if (widget.items.length > 1) ...[
+            const SizedBox(height: 4),
+            SizedBox(
+              height: 58,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
                 itemCount: widget.items.length,
-                onPageChanged: (index) => setState(() => _index = index),
-                itemBuilder: (context, index) => _MediaViewerPage(
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => _MediaThumbnail(
                   item: widget.items[index],
+                  selected: index == _index,
+                  onTap: () => _goTo(index),
                 ),
               ),
             ),
-          ),
-        ),
-        if (caption != null && caption.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              caption,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: 'Georgia',
-                fontStyle: FontStyle.italic,
-                color: AppColors.inkSoft,
-              ),
-            ),
-          ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            IconButton(
-              tooltip: l10n.mediaViewerPrevious,
-              onPressed: _index > 0 ? () => _goTo(_index - 1) : null,
-              icon: const Icon(Icons.chevron_left),
-            ),
-            Expanded(
-              child: Text(
-                widget.items.length > 1 ? '${_index + 1}' : '',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall,
-              ),
-            ),
-            IconButton(
-              tooltip: l10n.mediaViewerNext,
-              onPressed: _index < widget.items.length - 1
-                  ? () => _goTo(_index + 1)
-                  : null,
-              icon: const Icon(Icons.chevron_right),
-            ),
           ],
-        ),
-        if (widget.items.length > 1) ...[
           const SizedBox(height: 4),
           SizedBox(
-            height: 58,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.items.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              itemBuilder: (context, index) => _MediaThumbnail(
-                item: widget.items[index],
-                selected: index == _index,
-                onTap: () => _goTo(index),
-              ),
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.close),
             ),
           ),
         ],
-        const SizedBox(height: 4),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.close),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

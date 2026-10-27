@@ -244,7 +244,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsMediaHint =>
-      'One place for every photo and video. Descriptions and cropping are set individually for each member or event.';
+      'One place for every photo and video. Videos are converted to a supported format automatically. Descriptions and cropping are set individually for each member or event.';
 
   @override
   String get mediaLibraryTitle => 'Family media library';
@@ -848,20 +848,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mediaViewerNext => 'Next media';
 
   @override
-  String get videoConvert => 'Convert to WebM';
+  String get videoConvert => 'Supported format';
 
   @override
-  String get videoConverting => 'Converting…';
+  String get videoConverting => 'Preparing video…';
 
   @override
-  String get videoConverted => 'Video converted to WebM.';
+  String get videoConverted => 'Video saved in a supported format.';
 
   @override
-  String get videoConvertFailed => 'Could not convert the video.';
+  String get videoConvertFailed =>
+      'Could not prepare the video in a supported format.';
 
   @override
   String get videoConvertHint =>
-      'Conversion runs in the browser. Keep this screen open until it finishes.';
+      'The video is converted to a supported format automatically.';
 
   @override
   String get mediaCropX => 'Horizontal';
@@ -895,7 +896,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mediaUploadHint =>
-      'Photos and videos up to 20 MB. Files are stored locally on this device.';
+      'Photos and videos up to 20 MB. Videos are converted to a supported format automatically. Files are stored locally on this device.';
 
   @override
   String mediaUploadTooLarge(String name) {

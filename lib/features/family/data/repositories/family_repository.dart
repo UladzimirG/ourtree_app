@@ -18,13 +18,26 @@ class FamilyRepository {
   /// Ключ сохранённого состояния в локальном хранилище.
   static const String storageKey = 'family_data';
 
+  /// Демонстрационные события, убранные из `assets/data/family.json`.
+  ///
+  /// Сохранённая копия архива в Hive может содержать их ещё с прошлых
+  /// запусков, поэтому при загрузке такие записи отбрасываются — иначе они
+  /// продолжали бы показываться на таймлайне после обновления ассета.
+  static const Set<String> removedEventIds = <String>{
+    'birth-sofia',
+    'birth-misha',
+    'birth-anya',
+  };
+
   Future<FamilyData> loadFamilyData() async {
     final saved = MediaStorage.instance.getString(storageKey);
     if (saved != null && saved.trim().isNotEmpty) {
       final decoded = jsonDecode(saved);
       if (decoded is Map) {
-        return FamilyData.fromJson(decoded.cast<String, dynamic>())
-            .normalizeMediaLibrary();
+        return _withoutRemovedEvents(
+          FamilyData.fromJson(decoded.cast<String, dynamic>())
+              .normalizeMediaLibrary(),
+        );
       }
     }
 
@@ -40,8 +53,23 @@ class FamilyRepository {
       );
     }
 
-    return FamilyData.fromJson(decoded.cast<String, dynamic>())
-        .normalizeMediaLibrary();
+    return _withoutRemovedEvents(
+      FamilyData.fromJson(decoded.cast<String, dynamic>())
+          .normalizeMediaLibrary(),
+    );
+  }
+
+  /// Выбрасывает события из [removedEventIds], если они ещё остались в архиве.
+  static FamilyData _withoutRemovedEvents(FamilyData data) {
+    final hasRemoved =
+        data.timelineEvents.any((event) => removedEventIds.contains(event.id));
+    if (!hasRemoved) return data;
+
+    return data.copyWith(
+      timelineEvents: data.timelineEvents
+          .where((event) => !removedEventIds.contains(event.id))
+          .toList(growable: false),
+    );
   }
 
   /// Сохраняет архив локально, чтобы правки и медиатека пережили перезапуск.

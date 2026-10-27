@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsMediaHint.
   ///
   /// In en, this message translates to:
-  /// **'One place for every photo and video. Descriptions and cropping are set individually for each member or event.'**
+  /// **'One place for every photo and video. Videos are converted to a supported format automatically. Descriptions and cropping are set individually for each member or event.'**
   String get settingsMediaHint;
 
   /// No description provided for @mediaLibraryTitle.
@@ -1595,31 +1595,31 @@ abstract class AppLocalizations {
   /// No description provided for @videoConvert.
   ///
   /// In en, this message translates to:
-  /// **'Convert to WebM'**
+  /// **'Supported format'**
   String get videoConvert;
 
   /// No description provided for @videoConverting.
   ///
   /// In en, this message translates to:
-  /// **'Converting…'**
+  /// **'Preparing video…'**
   String get videoConverting;
 
   /// No description provided for @videoConverted.
   ///
   /// In en, this message translates to:
-  /// **'Video converted to WebM.'**
+  /// **'Video saved in a supported format.'**
   String get videoConverted;
 
   /// No description provided for @videoConvertFailed.
   ///
   /// In en, this message translates to:
-  /// **'Could not convert the video.'**
+  /// **'Could not prepare the video in a supported format.'**
   String get videoConvertFailed;
 
   /// No description provided for @videoConvertHint.
   ///
   /// In en, this message translates to:
-  /// **'Conversion runs in the browser. Keep this screen open until it finishes.'**
+  /// **'The video is converted to a supported format automatically.'**
   String get videoConvertHint;
 
   /// No description provided for @mediaCropX.
@@ -1685,7 +1685,7 @@ abstract class AppLocalizations {
   /// No description provided for @mediaUploadHint.
   ///
   /// In en, this message translates to:
-  /// **'Photos and videos up to 20 MB. Files are stored locally on this device.'**
+  /// **'Photos and videos up to 20 MB. Videos are converted to a supported format automatically. Files are stored locally on this device.'**
   String get mediaUploadHint;
 
   /// Upload error with the file name

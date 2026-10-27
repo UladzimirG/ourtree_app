@@ -58,16 +58,70 @@ class FamilyHeader extends StatelessWidget {
             style: theme.textTheme.headlineSmall,
           ),
         ),
-        IconButton(
-          onPressed: onSettingsTap,
+        _HeaderSettingsButton(
           tooltip: settingsTooltip,
+          onTap: onSettingsTap,
+        ),
+      ],
+    );
+  }
+}
+
+class _HeaderSettingsButton extends StatefulWidget {
+  const _HeaderSettingsButton({
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  State<_HeaderSettingsButton> createState() => _HeaderSettingsButtonState();
+}
+
+class _HeaderSettingsButtonState extends State<_HeaderSettingsButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          // Тот же тон, что у плашки нижнего меню.
+          color: _hovered ? AppColors.paper : Colors.transparent,
+          shape: BoxShape.circle,
+          boxShadow: _hovered
+              ? const <BoxShadow>[
+                  BoxShadow(
+                    color: AppColors.softShadow,
+                    blurRadius: 14,
+                    offset: Offset(0, 5),
+                  ),
+                ]
+              : null,
+        ),
+        child: IconButton(
+          onPressed: widget.onTap,
+          tooltip: widget.tooltip,
           iconSize: 26,
+          padding: EdgeInsets.zero,
+          style: IconButton.styleFrom(
+            hoverColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+          ),
           icon: const Icon(
             Icons.settings_outlined,
             color: AppColors.inkSoft,
           ),
         ),
-      ],
+      ),
     );
   }
 }
