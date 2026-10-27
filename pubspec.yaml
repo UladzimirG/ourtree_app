@@ -19,6 +19,7 @@ dependencies:
   hive_flutter: ^1.1.0
   video_player: ^2.14.1
   path_provider: ^2.1.6
+  crypto: ^3.0.8
 
 dev_dependencies:
   flutter_test:

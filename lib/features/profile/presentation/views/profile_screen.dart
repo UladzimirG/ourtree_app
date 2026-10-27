@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
-import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
 import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
@@ -37,7 +38,8 @@ class ProfileScreen extends ConsumerWidget {
         body: SafeArea(
           child: familyAsync.when(
             data: (family) {
-              final member = family.memberById(memberId);
+              final visible = ref.watch(visibleFamilyProvider) ?? family;
+              final member = visible.memberById(memberId);
 
               return Column(
                 children: [
@@ -51,7 +53,7 @@ class ProfileScreen extends ConsumerWidget {
                         ? _ProfileNotFound(l10n: l10n)
                         : _ProfileBody(
                             member: member,
-                            family: family,
+                            family: visible,
                             l10n: l10n,
                           ),
                   ),
@@ -354,6 +356,23 @@ class _GalleryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final items = _galleryEntries(family.mediaForMember(member.id));
+    final viewerItems = [
+      for (final item in items)
+        if (item.source != null && item.source!.trim().isNotEmpty)
+          MediaViewerItem(
+            source: item.source!,
+            type: item.type,
+            name: item.name,
+            caption: item.caption,
+            position: item.position,
+            zoom: item.zoom,
+          ),
+    ];
+
+    int viewerIndexFor(int index) => items
+        .take(index)
+        .where((item) => item.source?.trim().isNotEmpty == true)
+        .length;
 
     return PaperCard(
       tilt: 0.8,
@@ -378,10 +397,20 @@ class _GalleryCard extends StatelessWidget {
                   spacing: 10,
                   runSpacing: 12,
                   children: [
-                    for (final item in items)
+                    for (var index = 0; index < items.length; index++)
                       SizedBox(
                         width: itemWidth,
-                        child: _Polaroid(entry: item),
+                        child: _Polaroid(
+                          entry: items[index],
+                          onTap: () => showMediaViewer(
+                            context,
+                            items: viewerItems,
+                            initialIndex: viewerIndexFor(index),
+                            eyebrow: formatDisplayDateFromIso(member.birthday),
+                            title: member.name,
+                            subtitle: l10n.profileGallery,
+                          ),
+                        ),
                       ),
                   ],
                 );
@@ -395,9 +424,10 @@ class _GalleryCard extends StatelessWidget {
 }
 
 class _Polaroid extends StatelessWidget {
-  const _Polaroid({required this.entry});
+  const _Polaroid({required this.entry, required this.onTap});
 
   final _GalleryEntry entry;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -421,22 +451,25 @@ class _Polaroid extends StatelessWidget {
       ),
     );
     final content = entry.type == MediaType.video
-        ? (entry.source == null || entry.source!.trim().isEmpty
-            ? fallback
-            : MediaVideoPlayer(
-                source: entry.source!,
-                name: entry.caption,
-                showControls: false,
-              ))
+        ? const ColoredBox(
+            color: Color(0xFF1C1712),
+            child: Center(
+              child: Icon(
+                Icons.play_arrow,
+                color: AppColors.paper,
+                size: 30,
+              ),
+            ),
+          )
         : entry.source == null
             ? fallback
             : FamilyPhoto(
-            source: entry.source,
-            fit: BoxFit.cover,
-            alignment: photoAlignment(entry.position),
-            zoom: entry.zoom ?? 1.4,
-            fallback: fallback,
-          );
+                source: entry.source,
+                fit: BoxFit.cover,
+                alignment: photoAlignment(entry.position),
+                zoom: entry.zoom ?? 1.4,
+                fallback: fallback,
+              );
     final caption = entry.caption?.trim();
 
     return Container(
@@ -458,7 +491,11 @@ class _Polaroid extends StatelessWidget {
             aspectRatio: 1.2,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: content,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap,
+                child: content,
+              ),
             ),
           ),
           if (caption != null && caption.isNotEmpty)
@@ -485,6 +522,7 @@ class _Polaroid extends StatelessWidget {
 class _GalleryEntry {
   const _GalleryEntry({
     required this.source,
+    this.name,
     required this.type,
     this.caption,
     this.position,
@@ -492,6 +530,7 @@ class _GalleryEntry {
   });
 
   final String? source;
+  final String? name;
   final MediaType type;
   final String? caption;
   final PhotoPosition? position;
@@ -503,6 +542,7 @@ List<_GalleryEntry> _galleryEntries(List<FamilyMedia> media) {
     for (final entry in media)
       _GalleryEntry(
         source: entry.source.trim().isEmpty ? null : entry.source.trim(),
+        name: entry.name,
         type: entry.type,
         caption: entry.caption,
         position: entry.position,

@@ -8,7 +8,7 @@ import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/page_hero.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
-import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
@@ -221,6 +221,9 @@ class _TimelineCardBody extends StatelessWidget {
           _EventMedia(
             media: family.mediaForEvent(event),
             placeholderLabel: l10n.mediaPlaceholder,
+            eyebrow: formatDisplayDateFromIso(event.date),
+            title: event.title,
+            subtitle: event.place,
           ),
           const SizedBox(height: 10),
         ],
@@ -273,10 +276,16 @@ class _EventMedia extends StatelessWidget {
   const _EventMedia({
     required this.media,
     required this.placeholderLabel,
+    required this.eyebrow,
+    required this.title,
+    this.subtitle,
   });
 
   final List<FamilyMedia> media;
   final String placeholderLabel;
+  final String eyebrow;
+  final String title;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +294,7 @@ class _EventMedia extends StatelessWidget {
         if (entry.source.trim().isNotEmpty)
           _MediaEntry(
             source: entry.source.trim(),
+            name: entry.name,
             type: entry.type,
             caption: entry.caption,
             position: entry.position,
@@ -296,6 +306,18 @@ class _EventMedia extends StatelessWidget {
       return _MediaPlaceholder(label: placeholderLabel);
     }
 
+    final viewerItems = [
+      for (final entry in items)
+        MediaViewerItem(
+          source: entry.source,
+          type: entry.type,
+          name: entry.name,
+          caption: entry.caption,
+          position: entry.position,
+          zoom: entry.zoom,
+        ),
+    ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = items.length == 1
@@ -306,12 +328,22 @@ class _EventMedia extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final item in items)
+            for (var index = 0; index < items.length; index++)
               SizedBox(
                 width: width,
                 child: AspectRatio(
                   aspectRatio: 4 / 3,
-                  child: _EventMediaFrame(entry: item),
+                  child: _EventMediaFrame(
+                    entry: items[index],
+                    onTap: () => showMediaViewer(
+                      context,
+                      items: viewerItems,
+                      initialIndex: index,
+                      eyebrow: eyebrow,
+                      title: title,
+                      subtitle: subtitle,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -322,9 +354,10 @@ class _EventMedia extends StatelessWidget {
 }
 
 class _EventMediaFrame extends StatelessWidget {
-  const _EventMediaFrame({required this.entry});
+  const _EventMediaFrame({required this.entry, required this.onTap});
 
   final _MediaEntry entry;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -334,13 +367,16 @@ class _EventMediaFrame extends StatelessWidget {
           : Icons.broken_image_outlined,
     );
     final content = entry.type == MediaType.video
-        ? (entry.source.trim().isEmpty
-            ? fallback
-            : MediaVideoPlayer(
-                source: entry.source,
-                name: entry.caption,
-                showControls: false,
-              ))
+        ? const ColoredBox(
+            color: Color(0xFF1C1712),
+            child: Center(
+              child: Icon(
+                Icons.play_arrow,
+                color: AppColors.paper,
+                size: 36,
+              ),
+            ),
+          )
         : FamilyPhoto(
             source: entry.source,
             fit: BoxFit.cover,
@@ -355,7 +391,14 @@ class _EventMediaFrame extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ColoredBox(color: const Color(0x1F6F4B2A), child: content),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: ColoredBox(
+              color: const Color(0x1F6F4B2A),
+              child: content,
+            ),
+          ),
           if (caption != null && caption.isNotEmpty)
             Positioned(
               left: 0,
@@ -404,6 +447,7 @@ class _MediaEntry {
   const _MediaEntry({
     required this.source,
     required this.type,
+    this.name,
     this.caption,
     this.position,
     this.zoom,
@@ -411,6 +455,7 @@ class _MediaEntry {
 
   final String source;
   final MediaType type;
+  final String? name;
   final String? caption;
   final PhotoPosition? position;
   final double? zoom;

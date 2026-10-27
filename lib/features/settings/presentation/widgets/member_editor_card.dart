@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
+import 'package:ourtree_app/core/utils/rich_text.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
@@ -17,6 +18,7 @@ class MemberEditorCard extends StatelessWidget {
     required this.l10n,
     required this.onChanged,
     required this.onRemove,
+    this.canDelete = true,
     this.members = const <FamilyMember>[],
     this.events = const <TimelineEvent>[],
   });
@@ -25,6 +27,7 @@ class MemberEditorCard extends StatelessWidget {
   final AppLocalizations l10n;
   final ValueChanged<FamilyMember> onChanged;
   final VoidCallback onRemove;
+  final bool canDelete;
   final List<FamilyMember> members;
   final List<TimelineEvent> events;
 
@@ -116,24 +119,30 @@ class MemberEditorCard extends StatelessWidget {
           ),
           SettingsTextField(
             label: l10n.profileAbout,
-            initialValue: member.about,
+            initialValue: stripRichText(member.about),
             maxLines: 4,
-            onChanged: (value) => onChanged(member.copyWith(about: value)),
+            onChanged: (value) => onChanged(
+              member.copyWith(about: stripRichText(value)),
+            ),
           ),
           SettingsTextField(
             label: l10n.memberHabitsField,
-            initialValue: member.habits.join('\n'),
+            initialValue: member.habits.map(stripRichText).join('\n'),
             maxLines: 4,
             onChanged: (value) => onChanged(
-              member.copyWith(habits: _lines(value)),
+              member.copyWith(
+                habits: _lines(value).map(stripRichText).toList(),
+              ),
             ),
           ),
           SettingsTextField(
             label: l10n.memberQuotesField,
-            initialValue: member.quotes.join('\n'),
+            initialValue: member.quotes.map(stripRichText).join('\n'),
             maxLines: 4,
             onChanged: (value) => onChanged(
-              member.copyWith(quotes: _lines(value)),
+              member.copyWith(
+                quotes: _lines(value).map(stripRichText).toList(),
+              ),
             ),
           ),
           SettingsTextField(
@@ -377,17 +386,18 @@ class MemberEditorCard extends StatelessWidget {
               FamilyMember.fromJson(json).copyWith(id: member.id),
             ),
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onRemove,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.terracotta,
+          if (canDelete)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onRemove,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.terracotta,
+                ),
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.memberDelete),
               ),
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.memberDelete),
             ),
-          ),
         ],
       ),
     );

@@ -5,7 +5,10 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
+import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
+import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/settings_fields.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
@@ -16,10 +19,23 @@ class AccountsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final accounts = ref.watch(accountsNotifierProvider).valueOrNull ??
-        const <Account>[];
+    final role = ref.watch(currentRoleProvider);
+    if (role != UserRole.admin) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(l10n.settingsNoAccess, textAlign: TextAlign.center),
+        ),
+      );
+    }
+    final accountsAsync = ref.watch(accountsNotifierProvider);
+    if (accountsAsync.isLoading && !accountsAsync.hasValue) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final accounts = accountsAsync.valueOrNull ?? const <Account>[];
     final links = ref.watch(guestLinksNotifierProvider).valueOrNull ??
         const <GuestLink>[];
+    final family = ref.watch(familyDataProvider).valueOrNull;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
@@ -42,7 +58,11 @@ class AccountsPanel extends ConsumerWidget {
           )
         else
           for (final account in accounts) ...[
-            _AccountEditorCard(account: account, l10n: l10n),
+            _AccountEditorCard(
+              account: account,
+              family: family,
+              l10n: l10n,
+            ),
             const SizedBox(height: 12),
           ],
         const SizedBox(height: 8),
@@ -124,7 +144,8 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
           _LabeledField(
             caption: l10n.accountLoginField,
             controller: _login,
-            hint: 'family.member',
+            hint: 'ab',
+            helper: l10n.accountLoginRequirements,
           ),
           _LabeledField(
             caption: l10n.accountNameField,
@@ -134,6 +155,7 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
             caption: l10n.accountPasswordField,
             controller: _password,
             obscure: true,
+            helper: l10n.accountPasswordRequirements,
           ),
           _RolePicker(
             label: l10n.accountRoleField,
@@ -165,9 +187,14 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
 }
 
 class _AccountEditorCard extends ConsumerStatefulWidget {
-  const _AccountEditorCard({required this.account, required this.l10n});
+  const _AccountEditorCard({
+    required this.account,
+    required this.family,
+    required this.l10n,
+  });
 
   final Account account;
+  final FamilyData? family;
   final AppLocalizations l10n;
 
   @override
@@ -241,6 +268,106 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     );
   }
 
+  void _setAccess({
+    required bool allMembersVisible,
+    required List<String> visibleMemberIds,
+  }) {
+    ref.read(accountsNotifierProvider.notifier).updateAccess(
+          widget.account.id,
+          allMembersVisible: allMembersVisible,
+          visibleMemberIds: visibleMemberIds,
+        );
+  }
+
+  void _toggleMember(String memberId, bool selected) {
+    final ids = [...widget.account.visibleMemberIds];
+    if (selected) {
+      if (!ids.contains(memberId)) ids.add(memberId);
+    } else {
+      ids.remove(memberId);
+    }
+    _setAccess(
+      allMembersVisible: widget.account.allMembersVisible,
+      visibleMemberIds: ids,
+    );
+  }
+
+  void _toggleEvent(TimelineEvent event, bool visible) {
+    final hidden = [...event.hiddenFrom];
+    if (visible) {
+      hidden.remove(widget.account.id);
+    } else if (!hidden.contains(widget.account.id)) {
+      hidden.add(widget.account.id);
+    }
+    ref.read(familyDataProvider.notifier).updateTimelineEvent(
+          event.id,
+          (_) => event.copyWith(hiddenFrom: hidden),
+        );
+  }
+
+  List<Widget> _accessSection(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final family = widget.family;
+    if (family == null) return const <Widget>[];
+    final theme = Theme.of(context);
+    final account = widget.account;
+
+    return [
+      const Divider(height: 24),
+      Text(l10n.accountAccessTitle, style: theme.textTheme.titleSmall),
+      const SizedBox(height: 4),
+      Text(l10n.accountAccessHint, style: theme.textTheme.bodySmall),
+      SwitchListTile.adaptive(
+        contentPadding: EdgeInsets.zero,
+        value: account.allMembersVisible,
+        title: Text(l10n.accountAllMembers),
+        onChanged: account.isAdmin
+            ? null
+            : (value) => _setAccess(
+                  allMembersVisible: value,
+                  visibleMemberIds: account.visibleMemberIds,
+                ),
+      ),
+      if (!account.allMembersVisible && !account.isAdmin)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final member in family.members)
+              FilterChip(
+                label: Text(
+                  member.name.trim().isEmpty ? '—' : member.name,
+                ),
+                selected: account.visibleMemberIds.contains(member.id),
+                onSelected: (selected) =>
+                    _toggleMember(member.id, selected),
+              ),
+          ],
+        ),
+      const SizedBox(height: 10),
+      Text(l10n.accountVisibleEvents, style: theme.textTheme.titleSmall),
+      for (final event in family.sortedTimelineEvents)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          value: !event.hiddenFrom.contains(account.id),
+          title: Text(
+            event.title.trim().isEmpty ? '—' : event.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(event.date),
+          onChanged: account.isAdmin
+              ? null
+              : (value) {
+                  if (value != null) _toggleEvent(event, value);
+                },
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
@@ -285,6 +412,8 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
             l10n: l10n,
             onChanged: (role) => setState(() => _role = role),
           ),
+          ..._accessSection(context, l10n),
+
           if (_error != null) ...[
             const SizedBox(height: 8),
             Text(
@@ -453,12 +582,14 @@ class _LabeledField extends StatelessWidget {
     required this.caption,
     required this.controller,
     this.hint,
+    this.helper,
     this.obscure = false,
   });
 
   final String caption;
   final TextEditingController controller;
   final String? hint;
+  final String? helper;
   final bool obscure;
 
   @override
@@ -476,7 +607,10 @@ class _LabeledField extends StatelessWidget {
           TextField(
             controller: controller,
             obscureText: obscure,
-            decoration: settingsInputDecoration(hint: hint ?? caption),
+            decoration: settingsInputDecoration(
+              hint: hint ?? caption,
+              helper: helper,
+            ),
           ),
         ],
       ),
@@ -550,6 +684,153 @@ String accountErrorLabel(AccountsError error, AppLocalizations l10n) {
     AccountsError.offline => l10n.accountOffline,
     AccountsError.unknown => l10n.accountUnknownError,
   };
+}
+
+/// Строка текущего пользователя и вход/выход из локального аккаунта.
+class AccountSessionBar extends ConsumerWidget {
+  const AccountSessionBar({super.key});
+
+  Future<void> _signIn(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final account = await showDialog<Account>(
+      context: context,
+      builder: (_) => _LoginDialog(l10n: l10n),
+    );
+    if (account == null) return;
+    ref.read(currentAccountIdProvider.notifier).setAccount(account.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.accountSignedIn(account.name))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final account = ref.watch(currentAccountProvider);
+    final accounts = ref.watch(accountsNotifierProvider).valueOrNull ??
+        const <Account>[];
+    final role = ref.watch(currentRoleProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          Icon(
+            account?.isAdmin == true
+                ? Icons.admin_panel_settings_outlined
+                : Icons.person_outline,
+            size: 18,
+            color: AppColors.moss,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              account == null
+                  ? '${l10n.accountLocalAdmin} · ${roleLabel(role, l10n)}'
+                  : '${account.name} · ${roleLabel(role, l10n)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          if (account == null && accounts.isNotEmpty)
+            TextButton(
+              onPressed: () => _signIn(context, ref),
+              child: Text(l10n.accountSignIn),
+            ),
+          if (account != null)
+            TextButton(
+              onPressed: () {
+                ref.read(currentAccountIdProvider.notifier).signOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.accountSignedOut)),
+                );
+              },
+              child: Text(l10n.accountSignOut),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoginDialog extends ConsumerStatefulWidget {
+  const _LoginDialog({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  ConsumerState<_LoginDialog> createState() => _LoginDialogState();
+}
+
+class _LoginDialogState extends ConsumerState<_LoginDialog> {
+  final TextEditingController _login = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _login.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final account = ref.read(accountsNotifierProvider.notifier).authenticate(
+          _login.text,
+          _password.text,
+        );
+    if (account == null) {
+      setState(() => _error = widget.l10n.accountLoginFailed);
+      return;
+    }
+    Navigator.of(context).pop(account);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    return AlertDialog(
+      title: Text(l10n.accountSignIn),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _LabeledField(
+            caption: l10n.accountLoginField,
+            controller: _login,
+          ),
+          _LabeledField(
+            caption: l10n.accountPasswordField,
+            controller: _password,
+            obscure: true,
+          ),
+          if (_error != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _error!,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.terracotta),
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l10n.accountSignInAction),
+        ),
+      ],
+    );
+  }
 }
 
 String guestLinkStatus(GuestLink link, DateTime now, AppLocalizations l10n) {

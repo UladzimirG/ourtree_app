@@ -19,7 +19,7 @@ Future<VideoConversionResult?> convertVideoToWebm(
   void Function(double progress)? onProgress,
 }) async {
   final sourceUrl = html.Url.createObjectUrlFromBlob(
-    html.Blob([bytes], _mime(name ?? 'video.mp4')),
+    html.Blob([bytes.buffer], _mime(name ?? 'video.mp4')),
   );
   final video = html.VideoElement()
     ..src = sourceUrl

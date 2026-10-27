@@ -590,6 +590,24 @@ abstract class AppLocalizations {
   /// **'File deleted from the library.'**
   String get mediaDeleted;
 
+  /// No description provided for @mediaDuplicateFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is already in the media library.'**
+  String get mediaDuplicateFound;
+
+  /// No description provided for @mediaDuplicateAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'This file was already in the library — the existing copy was attached.'**
+  String get mediaDuplicateAttached;
+
+  /// No description provided for @mediaViewerOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in viewer'**
+  String get mediaViewerOpen;
+
   /// Library total
   ///
   /// In en, this message translates to:
@@ -617,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAccountsLocalOnly.
   ///
   /// In en, this message translates to:
-  /// **'Accounts and guest links are kept in the app until you restart it.'**
+  /// **'Accounts, access rights and guest links are stored locally and survive restarts and backups.'**
   String get settingsAccountsLocalOnly;
 
   /// No description provided for @settingsBackupsHint.
@@ -995,8 +1013,20 @@ abstract class AppLocalizations {
   /// No description provided for @accountLoginInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Login must be 2–32 characters: letters, digits, dot, dash or underscore.'**
+  /// **'Login must be 2–32 characters: Latin letters, digits, dot, dash or underscore.'**
   String get accountLoginInvalid;
+
+  /// No description provided for @accountLoginRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'2–32 characters: Latin letters, digits, dot, dash or underscore.'**
+  String get accountLoginRequirements;
+
+  /// No description provided for @accountPasswordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 4 characters.'**
+  String get accountPasswordRequirements;
 
   /// No description provided for @accountRoleInvalid.
   ///
@@ -1213,6 +1243,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Snapshot deleted.'**
   String get backupDeleted;
+
+  /// No description provided for @backupExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Save backup'**
+  String get backupExport;
+
+  /// No description provided for @backupExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a backup'**
+  String get backupExportTitle;
+
+  /// No description provided for @backupExportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A complete copy of settings, profiles, events, accounts, access rights and the media library will be created. External links are saved without files; passwords are stored only as salted hashes.'**
+  String get backupExportHint;
+
+  /// No description provided for @backupIncludeMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Include photos and videos'**
+  String get backupIncludeMedia;
+
+  /// No description provided for @backupIncludeMediaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup will contain copies of all local media files and may be large.'**
+  String get backupIncludeMediaHint;
+
+  /// No description provided for @backupSaveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to save the family backup'**
+  String get backupSaveDialogTitle;
+
+  /// Path or URI of the saved backup
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved: {path}'**
+  String backupSavedTo(String path);
+
+  /// No description provided for @backupExportCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the backup was canceled.'**
+  String get backupExportCanceled;
+
+  /// No description provided for @backupImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import backup'**
+  String get backupImport;
+
+  /// No description provided for @backupImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported.'**
+  String get backupImportSuccess;
+
+  /// No description provided for @backupImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import this backup file.'**
+  String get backupImportFailed;
 
   /// How many snapshots are stored and their total size
   ///
@@ -1484,6 +1580,18 @@ abstract class AppLocalizations {
   /// **'Could not play this video.'**
   String get videoError;
 
+  /// No description provided for @mediaViewerPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous media'**
+  String get mediaViewerPrevious;
+
+  /// No description provided for @mediaViewerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next media'**
+  String get mediaViewerNext;
+
   /// No description provided for @videoConvert.
   ///
   /// In en, this message translates to:
@@ -1639,6 +1747,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @settingsNoAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have access to this section.'**
+  String get settingsNoAccess;
+
+  /// No description provided for @accountLocalAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Local administrator'**
+  String get accountLocalAdmin;
+
+  /// No description provided for @accountSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get accountSignIn;
+
+  /// No description provided for @accountSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get accountSignOut;
+
+  /// No description provided for @accountSignInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get accountSignInAction;
+
+  /// No description provided for @accountSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}.'**
+  String accountSignedIn(String name);
+
+  /// No description provided for @accountSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out; local administrator mode is active.'**
+  String get accountSignedOut;
+
+  /// No description provided for @accountLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong login or password.'**
+  String get accountLoginFailed;
+
+  /// No description provided for @accountAccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access'**
+  String get accountAccessTitle;
+
+  /// No description provided for @accountAccessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which family profiles and events this account can see.'**
+  String get accountAccessHint;
+
+  /// No description provided for @accountAllMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'All family members'**
+  String get accountAllMembers;
+
+  /// No description provided for @accountVisibleEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible events'**
+  String get accountVisibleEvents;
+
+  /// No description provided for @mediaUsagePersonTag.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} — tagged photo'**
+  String mediaUsagePersonTag(String name);
+
+  /// No description provided for @mediaUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Unused'**
+  String get mediaUnused;
+
+  /// No description provided for @mediaOnlyUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Only unused ({count})'**
+  String mediaOnlyUnused(int count);
+
+  /// No description provided for @mediaUseInProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Use in a profile'**
+  String get mediaUseInProfile;
+
+  /// No description provided for @mediaUseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this file in profiles'**
+  String get mediaUseTitle;
+
+  /// No description provided for @mediaUseNoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no family members to link this file to.'**
+  String get mediaUseNoMembers;
+
+  /// No description provided for @mediaUseApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get mediaUseApply;
+
+  /// No description provided for @mediaUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is now shown in the selected profiles.'**
+  String get mediaUsed;
 }
 
 class _AppLocalizationsDelegate

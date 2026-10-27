@@ -318,6 +318,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mediaDeleted => 'Файл удалён из медиатеки.';
 
   @override
+  String get mediaDuplicateFound => 'Этот файл уже есть в медиатеке.';
+
+  @override
+  String get mediaDuplicateAttached =>
+      'Этот файл уже был в медиатеке — привязана существующая копия.';
+
+  @override
+  String get mediaViewerOpen => 'Открыть в просмотрщике';
+
+  @override
   String mediaLibrarySize(int count, String size) {
     return '$count файлов · $size';
   }
@@ -336,7 +346,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAccountsLocalOnly =>
-      'Аккаунты и гостевые ссылки хранятся в приложении до перезапуска.';
+      'Аккаунты, права доступа и гостевые ссылки хранятся локально, переживают перезапуск и входят в бэкап.';
 
   @override
   String get settingsBackupsHint =>
@@ -531,13 +541,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get accountLoginInvalid =>
-      'Логин — 2–32 символа: буквы, цифры, точка, дефис или подчёркивание.';
+      'Логин — 2–32 символа: латинские буквы, цифры, точка, дефис или подчёркивание.';
+
+  @override
+  String get accountLoginRequirements =>
+      '2–32 символа: латинские буквы, цифры, точка, дефис или подчёркивание.';
+
+  @override
+  String get accountPasswordRequirements => 'Не менее 4 символов.';
 
   @override
   String get accountRoleInvalid => 'Неизвестная роль.';
 
   @override
-  String get accountPasswordTooShort => 'Пароль слишком короткий.';
+  String get accountPasswordTooShort =>
+      'Пароль слишком короткий: нужно минимум 4 символа.';
 
   @override
   String get accountLoginTaken => 'Этот логин уже занят.';
@@ -643,6 +661,43 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get backupDeleted => 'Снимок удалён.';
+
+  @override
+  String get backupExport => 'Сохранить бэкап';
+
+  @override
+  String get backupExportTitle => 'Создание бэкапа';
+
+  @override
+  String get backupExportHint =>
+      'Будет создана полная копия настроек, профилей, событий, аккаунтов, прав доступа и медиатеки. Внешние ссылки сохраняются без файлов; пароли — только в виде соли и хеша.';
+
+  @override
+  String get backupIncludeMedia => 'Сохранять фотографии и видео';
+
+  @override
+  String get backupIncludeMediaHint =>
+      'В бэкап попадут копии всех локальных медиафайлов, поэтому файл может быть большим.';
+
+  @override
+  String get backupSaveDialogTitle => 'Куда сохранить бэкап семьи';
+
+  @override
+  String backupSavedTo(String path) {
+    return 'Бэкап сохранён: $path';
+  }
+
+  @override
+  String get backupExportCanceled => 'Сохранение бэкапа отменено.';
+
+  @override
+  String get backupImport => 'Импортировать бэкап';
+
+  @override
+  String get backupImportSuccess => 'Бэкап импортирован.';
+
+  @override
+  String get backupImportFailed => 'Не удалось импортировать этот файл бэкапа.';
 
   @override
   String backupSummary(int count, int kept, String size) {
@@ -798,6 +853,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get videoError => 'Не удалось воспроизвести видео.';
 
   @override
+  String get mediaViewerPrevious => 'Предыдущее медиа';
+
+  @override
+  String get mediaViewerNext => 'Следующее медиа';
+
+  @override
   String get videoConvert => 'Конвертировать в WebM';
 
   @override
@@ -912,4 +973,73 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get close => 'Закрыть';
+
+  @override
+  String get settingsNoAccess => 'У вас нет доступа к этому разделу.';
+
+  @override
+  String get accountLocalAdmin => 'Локальный администратор';
+
+  @override
+  String get accountSignIn => 'Войти';
+
+  @override
+  String get accountSignOut => 'Выйти';
+
+  @override
+  String get accountSignInAction => 'Войти';
+
+  @override
+  String accountSignedIn(String name) {
+    return 'Вы вошли как $name.';
+  }
+
+  @override
+  String get accountSignedOut =>
+      'Вы вышли. Активен режим локального администратора.';
+
+  @override
+  String get accountLoginFailed => 'Неверный логин или пароль.';
+
+  @override
+  String get accountAccessTitle => 'Доступ';
+
+  @override
+  String get accountAccessHint =>
+      'Выберите профили и события, которые видит этот аккаунт.';
+
+  @override
+  String get accountAllMembers => 'Все члены семьи';
+
+  @override
+  String get accountVisibleEvents => 'Видимые события';
+
+  @override
+  String mediaUsagePersonTag(String name) {
+    return '$name — отмечен на фото';
+  }
+
+  @override
+  String get mediaUnused => 'Не используется';
+
+  @override
+  String mediaOnlyUnused(int count) {
+    return 'Только неиспользуемые ($count)';
+  }
+
+  @override
+  String get mediaUseInProfile => 'Использовать в профиле';
+
+  @override
+  String get mediaUseTitle => 'Показать файл в профилях';
+
+  @override
+  String get mediaUseNoMembers =>
+      'Нет членов семьи, к которым можно привязать файл.';
+
+  @override
+  String get mediaUseApply => 'Применить';
+
+  @override
+  String get mediaUsed => 'Файл теперь показывается в выбранных профилях.';
 }

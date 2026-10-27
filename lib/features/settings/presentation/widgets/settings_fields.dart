@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,12 +23,21 @@ TextStyle? settingsCaptionStyle(ThemeData theme) {
   );
 }
 
-InputDecoration settingsInputDecoration({required String hint}) {
+InputDecoration settingsInputDecoration({
+  required String hint,
+  String? helper,
+  bool dense = false,
+}) {
   return InputDecoration(
     hintText: hint,
+    helperText: helper,
     filled: true,
     fillColor: const Color(0x99FFFDF6),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+    isDense: dense,
+    contentPadding: EdgeInsets.symmetric(
+      horizontal: 12,
+      vertical: dense ? 9 : 14,
+    ),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(color: Color(0x386F4B2A)),
@@ -145,6 +155,20 @@ class SettingsPhotoField extends ConsumerWidget {
     final bytes = await file.readAsBytes();
     if (bytes.isEmpty) return;
 
+    final hash = sha256.convert(bytes).toString();
+    final existing = ref
+        .read(familyDataProvider)
+        .valueOrNull
+        ?.findDuplicateMedia(
+          hash: hash,
+          name: file.name,
+          size: bytes.length,
+        );
+    if (existing != null) {
+      onChanged(existing.source);
+      return;
+    }
+
     final storedId = await MediaStorage.instance.saveBytes(
       bytes,
       name: file.name,
@@ -156,6 +180,7 @@ class SettingsPhotoField extends ConsumerWidget {
             name: file.name,
             createdAt: DateTime.now().millisecondsSinceEpoch,
             size: bytes.length,
+            hash: hash,
           ),
         );
     onChanged('hive://$storedId');

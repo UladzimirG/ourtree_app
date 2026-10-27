@@ -1,3 +1,4 @@
+import 'package:ourtree_app/core/utils/collection_equality.dart';
 import 'package:ourtree_app/core/utils/json_reader.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 
@@ -9,6 +10,10 @@ class Account {
     required this.name,
     required this.role,
     this.createdAt = 0,
+    this.allMembersVisible = true,
+    this.visibleMemberIds = const <String>[],
+    this.passwordHash,
+    this.passwordSalt,
   });
 
   final String id;
@@ -21,7 +26,23 @@ class Account {
   /// Время создания в миллисекундах с начала эпохи.
   final int createdAt;
 
+  /// Администратор видит весь архив без ограничений.
+  final bool allMembersVisible;
+
+  /// Участники, доступные аккаунту, если [allMembersVisible] выключен.
+  final List<String> visibleMemberIds;
+
+  /// SHA-256 пароля и соль; сам пароль не хранится.
+  final String? passwordHash;
+  final String? passwordSalt;
+
   bool get isAdmin => role == UserRole.admin;
+
+  bool get canEdit => role != UserRole.viewer;
+
+  /// Виден ли аккаунту участник [memberId].
+  bool canSeeMember(String memberId) =>
+      isAdmin || allMembersVisible || visibleMemberIds.contains(memberId);
 
   factory Account.fromJson(Map<String, dynamic> json) {
     final login = readString(json['login']);
@@ -31,6 +52,10 @@ class Account {
       name: readString(json['name'], fallback: login),
       role: UserRole.tryParse(json['role']) ?? UserRole.viewer,
       createdAt: readInt(json['createdAt']) ?? 0,
+      allMembersVisible: readBool(json['allMembersVisible']) ?? true,
+      visibleMemberIds: readStringList(json['visibleMemberIds']),
+      passwordHash: readNullableString(json['passwordHash']),
+      passwordSalt: readNullableString(json['passwordSalt']),
     );
   }
 
@@ -40,6 +65,11 @@ class Account {
         'name': name,
         'role': role.wireName,
         'createdAt': createdAt,
+        'allMembersVisible': allMembersVisible,
+        if (visibleMemberIds.isNotEmpty)
+          'visibleMemberIds': visibleMemberIds,
+        if (passwordHash != null) 'passwordHash': passwordHash,
+        if (passwordSalt != null) 'passwordSalt': passwordSalt,
       };
 
   Account copyWith({
@@ -48,6 +78,10 @@ class Account {
     String? name,
     UserRole? role,
     int? createdAt,
+    bool? allMembersVisible,
+    List<String>? visibleMemberIds,
+    String? passwordHash,
+    String? passwordSalt,
   }) =>
       Account(
         id: id ?? this.id,
@@ -55,6 +89,10 @@ class Account {
         name: name ?? this.name,
         role: role ?? this.role,
         createdAt: createdAt ?? this.createdAt,
+        allMembersVisible: allMembersVisible ?? this.allMembersVisible,
+        visibleMemberIds: visibleMemberIds ?? this.visibleMemberIds,
+        passwordHash: passwordHash ?? this.passwordHash,
+        passwordSalt: passwordSalt ?? this.passwordSalt,
       );
 
   @override
@@ -65,10 +103,24 @@ class Account {
           login == other.login &&
           name == other.name &&
           role == other.role &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          allMembersVisible == other.allMembersVisible &&
+          listsEqual(visibleMemberIds, other.visibleMemberIds) &&
+          passwordHash == other.passwordHash &&
+          passwordSalt == other.passwordSalt;
 
   @override
-  int get hashCode => Object.hash(id, login, name, role, createdAt);
+  int get hashCode => Object.hash(
+        id,
+        login,
+        name,
+        role,
+        createdAt,
+        allMembersVisible,
+        Object.hashAll(visibleMemberIds),
+        passwordHash,
+        passwordSalt,
+      );
 }
 
 /// Данные для создания учётной записи (`AccountInput`).

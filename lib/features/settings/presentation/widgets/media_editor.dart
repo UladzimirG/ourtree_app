@@ -1,3 +1,4 @@
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -203,6 +204,20 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
           error = l10n.mediaUploadEmpty;
           continue;
         }
+        final hash = sha256.convert(bytes).toString();
+        final existing = ref
+            .read(familyDataProvider)
+            .valueOrNull
+            ?.findDuplicateMedia(
+              hash: hash,
+              name: file.name,
+              size: bytes.length,
+            );
+        if (existing != null) {
+          added.add(_linkFromAsset(existing));
+          error = l10n.mediaDuplicateAttached;
+          continue;
+        }
         final storedId = await MediaStorage.instance.saveBytes(
           bytes,
           name: file.name,
@@ -214,6 +229,7 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
           name: file.name,
           createdAt: DateTime.now().millisecondsSinceEpoch,
           size: bytes.length,
+          hash: hash,
         );
         ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
         added.add(_linkFromAsset(asset));
@@ -502,11 +518,16 @@ class _MediaTileState extends State<_MediaTile> {
       TextField(
         controller: _caption,
         focusNode: _captionFocus,
-        decoration: settingsInputDecoration(hint: l10n.mediaCaptionField),
+        maxLines: 2,
+        minLines: 1,
+        decoration: settingsInputDecoration(
+          hint: l10n.mediaCaptionField,
+          dense: true,
+        ),
         onChanged: (value) =>
             widget.onChanged(media.copyWith(caption: () => value)),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 6),
       Row(
         children: [
           Expanded(
@@ -605,6 +626,7 @@ class _MediaTileState extends State<_MediaTile> {
                   hint: widget.l10n.mediaPersonCaption(
                     member.name.trim().isEmpty ? '—' : member.name,
                   ),
+                  dense: true,
                 ),
                 onChanged: (value) => _updatePersonCaption(member.id, value),
               ),

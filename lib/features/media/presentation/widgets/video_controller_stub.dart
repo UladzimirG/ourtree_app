@@ -9,11 +9,19 @@ Future<PreparedVideo> prepareVideo(
   Uint8List? bytes,
   String? name,
 ) async {
-  if (bytes != null) return const PreparedVideo(controller: null);
+  if (bytes != null) {
+    return const PreparedVideo(
+      controller: null,
+      error: 'Local video bytes are not supported on this platform.',
+    );
+  }
   if (source.startsWith('http://') || source.startsWith('https://')) {
     return PreparedVideo(
       controller: VideoPlayerController.networkUrl(Uri.parse(source)),
     );
   }
-  return const PreparedVideo(controller: null);
+  return const PreparedVideo(
+    controller: null,
+    error: 'Unsupported video source.',
+  );
 }

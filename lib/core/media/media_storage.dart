@@ -86,6 +86,14 @@ class MediaStorage {
     return value is String ? value : null;
   }
 
+  Future<void> removeString(String key) async {
+    if (_appBox != null) {
+      await _appBox!.delete(key);
+    } else {
+      _memoryApp.remove(key);
+    }
+  }
+
   Future<void> putBackup(String name, Map<String, dynamic> bundle) async {
     if (_backupBox != null) {
       await _backupBox!.put(name, bundle);

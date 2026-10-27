@@ -1,12 +1,16 @@
 // Правила, общие для клиента и сервера (см. `src/lib/accounts.ts`).
 
-/// Логин: 2–32 символа, буквы, цифры, точка, дефис и подчёркивание.
+/// Минимальная и максимальная длина логина.
+const int accountMinLoginLength = 2;
+const int accountMaxLoginLength = 32;
+
+/// Логин: 2–32 латинских символа, цифры, точка, дефис и подчёркивание.
 final RegExp accountLoginPattern = RegExp(
-  r'^[a-z0-9._-]{2,32}$',
+  '^[a-z0-9._-]{$accountMinLoginLength,$accountMaxLoginLength}\$',
   caseSensitive: false,
 );
 
-/// Минимальная длина пароля, которую принимает сервер.
+/// Минимальная длина пароля — 4 символа.
 const int accountMinPasswordLength = 4;
 
 /// Срок жизни гостевой ссылки по умолчанию.

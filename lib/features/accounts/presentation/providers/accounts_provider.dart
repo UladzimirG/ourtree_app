@@ -1,11 +1,19 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
+import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
+
+/// Ключи локального хранилища аккаунтов и текущей сессии.
+const String accountsStorageKey = 'accounts';
+const String guestLinksStorageKey = 'guest_links';
+const String currentAccountStorageKey = 'current_account_id';
 
 /// Изменяемый список учётных записей семейного альбома.
 ///
-/// Пока серверного API нет, записи живут в памяти приложения — так же, как
-/// остальные правки из раздела настроек. Когда появится API, методы нотифаера
-/// останутся прежними, изменится только источник данных.
+/// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
 final accountsNotifierProvider =
     AsyncNotifierProvider<AccountsNotifier, List<Account>>(
   AccountsNotifier.new,
@@ -13,10 +21,29 @@ final accountsNotifierProvider =
 
 class AccountsNotifier extends AsyncNotifier<List<Account>> {
   @override
-  Future<List<Account>> build() async => const <Account>[];
+  Future<List<Account>> build() async => _load();
+
+  List<Account> _load() {
+    final raw = MediaStorage.instance.getString(accountsStorageKey);
+    if (raw == null || raw.trim().isEmpty) return const <Account>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const <Account>[];
+      return [
+        for (final item in decoded)
+          if (item is Map) Account.fromJson(item.cast<String, dynamic>()),
+      ];
+    } catch (_) {
+      return const <Account>[];
+    }
+  }
 
   /// Создаёт аккаунт. Возвращает `null` при успехе или код ошибки.
   AccountsError? create(AccountInput input) {
+    // Не создаём аккаунт, пока список ещё загружается: иначе build()
+    // может перезаписать добавленную запись старым состоянием.
+    if (!state.hasValue) return AccountsError.unknown;
+
     final login = input.login.trim().toLowerCase();
     final password = input.password;
 
@@ -30,12 +57,15 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
       return AccountsError.loginTaken;
     }
 
+    final salt = newPasswordSalt();
     final account = Account(
       id: _newId('account'),
       login: login,
       name: input.name.trim().isEmpty ? login : input.name.trim(),
       role: input.role,
       createdAt: DateTime.now().millisecondsSinceEpoch,
+      passwordSalt: salt,
+      passwordHash: hashAccountPassword(password, salt),
     );
     _set([..._accounts, account]);
     return null;
@@ -56,17 +86,73 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
 
     final current = _accounts[index];
     final trimmedName = patch.name?.trim();
+    String? salt;
+    String? hash;
+    if (patch.password != null) {
+      salt = newPasswordSalt();
+      hash = hashAccountPassword(patch.password!, salt);
+    }
     final updated = current.copyWith(
       name: trimmedName == null || trimmedName.isEmpty ? null : trimmedName,
       role: patch.role,
+      passwordSalt: salt,
+      passwordHash: hash,
     );
-    // Пароль в Account не хранится: в локальном режиме он не нужен, а при
-    // подключении API уйдёт отдельным защищённым запросом.
     _set([
       for (var i = 0; i < _accounts.length; i++)
         if (i == index) updated else _accounts[i],
     ]);
     return null;
+  }
+
+  /// Меняет видимость профилей, не затрагивая остальные поля аккаунта.
+  void updateAccess(
+    String id, {
+    required bool allMembersVisible,
+    required List<String> visibleMemberIds,
+  }) {
+    final index = _accounts.indexWhere((account) => account.id == id);
+    if (index < 0) return;
+    _set([
+      for (var i = 0; i < _accounts.length; i++)
+        if (i == index)
+          _accounts[i].copyWith(
+            allMembersVisible: allMembersVisible,
+            visibleMemberIds: List<String>.unmodifiable(visibleMemberIds),
+          )
+        else
+          _accounts[i],
+    ]);
+  }
+
+  /// Делает созданный редактором профиль видимым этому редактору.
+  void grantMemberVisibility(String accountId, String memberId) {
+    final account = _firstOrNull(_accounts, (item) => item.id == accountId);
+    if (account == null || account.isAdmin || account.allMembersVisible) return;
+    if (account.visibleMemberIds.contains(memberId)) return;
+    updateAccess(
+      accountId,
+      allMembersVisible: false,
+      visibleMemberIds: [...account.visibleMemberIds, memberId],
+    );
+  }
+
+  /// Проверяет логин и пароль; `null`, если данные неверны.
+  Account? authenticate(String login, String password) {
+    final normalized = login.trim().toLowerCase();
+    final account = _firstOrNull(
+      _accounts,
+      (item) => item.login.toLowerCase() == normalized,
+    );
+    if (account == null) return null;
+    if (!verifyAccountPassword(
+      password: password,
+      salt: account.passwordSalt,
+      hash: account.passwordHash,
+    )) {
+      return null;
+    }
+    return account;
   }
 
   void remove(String id) {
@@ -77,12 +163,68 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     );
   }
 
+  /// Заменяет список целиком — используется восстановлением из бэкапа.
+  void replaceAll(List<Account> accounts) {
+    _set(List<Account>.unmodifiable(accounts));
+  }
+
   List<Account> get _accounts => state.valueOrNull ?? const <Account>[];
 
   void _set(List<Account> accounts) {
-    state = AsyncData(List<Account>.unmodifiable(accounts));
+    final next = List<Account>.unmodifiable(accounts);
+    state = AsyncData(next);
+    unawaited(_persist(next));
+  }
+
+  Future<void> _persist(List<Account> accounts) {
+    return MediaStorage.instance.putString(
+      accountsStorageKey,
+      jsonEncode(accounts.map((account) => account.toJson()).toList()),
+    );
   }
 }
+
+/// Текущий пользователь; `null` — локальный администратор устройства.
+final currentAccountIdProvider =
+    NotifierProvider<CurrentAccountIdNotifier, String?>(
+  CurrentAccountIdNotifier.new,
+);
+
+class CurrentAccountIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => MediaStorage.instance.getString(currentAccountStorageKey);
+
+  void setAccount(String? id) {
+    state = id;
+    if (id == null || id.isEmpty) {
+      unawaited(MediaStorage.instance.removeString(currentAccountStorageKey));
+    } else {
+      unawaited(
+        MediaStorage.instance.putString(currentAccountStorageKey, id),
+      );
+    }
+  }
+
+  void signOut() => setAccount(null);
+}
+
+/// Аккаунт, от имени которого сейчас работает интерфейс.
+final currentAccountProvider = Provider<Account?>((ref) {
+  final id = ref.watch(currentAccountIdProvider);
+  if (id == null) return null;
+  final accounts =
+      ref.watch(accountsNotifierProvider).valueOrNull ?? const <Account>[];
+  return _firstOrNull(accounts, (account) => account.id == id);
+});
+
+/// Роль текущего пользователя. Локальный владелец устройства — админ.
+final currentRoleProvider = Provider<UserRole>((ref) {
+  return ref.watch(currentAccountProvider)?.role ?? UserRole.admin;
+});
+
+final canManageAccountsProvider = Provider<bool>((ref) {
+  return ref.watch(currentRoleProvider) == UserRole.admin;
+});
 
 /// Гостевые ссылки, выпущенные для просмотра альбома без аккаунта.
 final guestLinksNotifierProvider =
@@ -92,7 +234,22 @@ final guestLinksNotifierProvider =
 
 class GuestLinksNotifier extends AsyncNotifier<List<GuestLink>> {
   @override
-  Future<List<GuestLink>> build() async => const <GuestLink>[];
+  Future<List<GuestLink>> build() async => _load();
+
+  List<GuestLink> _load() {
+    final raw = MediaStorage.instance.getString(guestLinksStorageKey);
+    if (raw == null || raw.trim().isEmpty) return const <GuestLink>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const <GuestLink>[];
+      return [
+        for (final item in decoded)
+          if (item is Map) GuestLink.fromJson(item.cast<String, dynamic>()),
+      ];
+    } catch (_) {
+      return const <GuestLink>[];
+    }
+  }
 
   /// Выпускает ссылку и возвращает её вместе с одноразовым токеном.
   CreatedGuestLink create(GuestLinkInput input) {
@@ -121,11 +278,32 @@ class GuestLinksNotifier extends AsyncNotifier<List<GuestLink>> {
     );
   }
 
+  /// Заменяет список целиком — используется восстановлением из бэкапа.
+  void replaceAll(List<GuestLink> links) {
+    _set(List<GuestLink>.unmodifiable(links));
+  }
+
   List<GuestLink> get _links => state.valueOrNull ?? const <GuestLink>[];
 
   void _set(List<GuestLink> links) {
-    state = AsyncData(List<GuestLink>.unmodifiable(links));
+    final next = List<GuestLink>.unmodifiable(links);
+    state = AsyncData(next);
+    unawaited(_persist(next));
   }
+
+  Future<void> _persist(List<GuestLink> links) {
+    return MediaStorage.instance.putString(
+      guestLinksStorageKey,
+      jsonEncode(links.map((link) => link.toJson()).toList()),
+    );
+  }
+}
+
+T? _firstOrNull<T>(Iterable<T> items, bool Function(T item) test) {
+  for (final item in items) {
+    if (test(item)) return item;
+  }
+  return null;
 }
 
 String _newId(String prefix) {

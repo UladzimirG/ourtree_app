@@ -3,6 +3,7 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 
+import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:video_player/video_player.dart';
 import 'video_controller_model.dart';
 
@@ -13,8 +14,17 @@ Future<PreparedVideo> prepareVideo(
   String? name,
 ) async {
   if (bytes != null) {
-    final blob = html.Blob([bytes], _mime(name ?? source));
+    final mime = _mime(name ?? source);
+    final blob = html.Blob([bytes.buffer], mime);
     final url = html.Url.createObjectUrlFromBlob(blob);
+    final probe = html.VideoElement()..src = url;
+    if (probe.canPlayType(mime).isEmpty) {
+      html.Url.revokeObjectUrl(url);
+      return PreparedVideo(
+        controller: null,
+        error: 'The browser cannot play $mime.',
+      );
+    }
     return PreparedVideo(
       controller: VideoPlayerController.networkUrl(Uri.parse(url)),
       cleanup: () async => html.Url.revokeObjectUrl(url),
@@ -27,7 +37,16 @@ Future<PreparedVideo> prepareVideo(
     );
   }
 
-  return const PreparedVideo(controller: null);
+  // Видео из архива: /photos/<uuid>.mp4 → assets/photos/<uuid>.mp4.
+  final asset = familyPhotoAssetPath(source);
+  if (asset != null) {
+    return PreparedVideo(controller: VideoPlayerController.asset(asset));
+  }
+
+  return const PreparedVideo(
+    controller: null,
+    error: 'Unsupported video source.',
+  );
 }
 
 String _mime(String name) {

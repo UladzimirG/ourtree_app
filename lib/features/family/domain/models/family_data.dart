@@ -80,6 +80,30 @@ class FamilyData {
     return List<TimelineEvent>.unmodifiable(sorted);
   }
 
+  /// Ищет уже загруженную копию файла.
+  ///
+  /// Сначала сравнивает SHA-256, затем — имя и размер (для старых записей,
+  /// у которых хеша ещё нет).
+  MediaAsset? findDuplicateMedia({
+    String? hash,
+    String? name,
+    int? size,
+  }) {
+    final normalizedName = name?.trim();
+    for (final asset in mediaLibrary) {
+      if (hash != null && asset.hash == hash) return asset;
+      if (hash != null &&
+          asset.hash == null &&
+          normalizedName != null &&
+          asset.name == normalizedName &&
+          size != null &&
+          asset.size == size) {
+        return asset;
+      }
+    }
+    return null;
+  }
+
   /// Все файлы, которые должны появиться в профиле [memberId].
   ///
   /// Кроме собственной галереи сюда входят файлы из событий и чужих галерей,
@@ -134,6 +158,31 @@ class FamilyData {
           result.add(_withPersonCaption(media, memberId));
         }
       }
+    }
+
+    // Файлы из медиатеки, отмеченные этим человеком, но ещё не привязанные
+    // к конкретной галерее/событию, тоже должны быть в его галерее.
+    for (final asset in mediaLibrary) {
+      GalleryPerson? person;
+      for (final tagged in asset.people) {
+        if (tagged.id == memberId) {
+          person = tagged;
+          break;
+        }
+      }
+      if (person == null) continue;
+      final caption = person.caption?.trim();
+      result.add(
+        FamilyMedia(
+          id: 'library-${asset.id}',
+          mediaId: asset.id,
+          source: asset.source,
+          type: asset.type,
+          name: asset.name,
+          people: asset.people,
+          caption: caption == null || caption.isEmpty ? null : caption,
+        ),
+      );
     }
 
     return _uniqueMedia(result);

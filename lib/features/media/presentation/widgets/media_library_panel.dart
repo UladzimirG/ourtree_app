@@ -1,13 +1,19 @@
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
+import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
 import 'video_converter_stub.dart'
     if (dart.library.io) 'video_converter_io.dart'
     if (dart.library.html) 'video_converter_web.dart';
@@ -25,6 +31,7 @@ class MediaLibraryPanel extends ConsumerStatefulWidget {
 
 class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   bool _busy = false;
+  bool _onlyUnused = false;
   String? _convertingId;
 
   Future<void> _upload() async {
@@ -45,6 +52,19 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           error = l10n.mediaUploadEmpty;
           continue;
         }
+        final hash = sha256.convert(bytes).toString();
+        final existing = ref
+            .read(familyDataProvider)
+            .valueOrNull
+            ?.findDuplicateMedia(
+              hash: hash,
+              name: file.name,
+              size: bytes.length,
+            );
+        if (existing != null) {
+          error = l10n.mediaDuplicateFound;
+          continue;
+        }
         final storedId = await MediaStorage.instance.saveBytes(
           bytes,
           name: file.name,
@@ -57,6 +77,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
                 name: file.name,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 size: bytes.length,
+                hash: hash,
               ),
             );
       }
@@ -112,9 +133,19 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   }
 
   Future<void> _convert(MediaAsset asset, AppLocalizations l10n) async {
+    if (!videoConversionSupported) return;
+
     final storedId = asset.storedId;
-    if (storedId == null || !videoConversionSupported) return;
-    final bytes = await MediaStorage.instance.loadBytes(storedId);
+    Uint8List? bytes;
+    if (storedId != null) {
+      bytes = await MediaStorage.instance.loadBytes(storedId);
+    } else {
+      final assetPath = familyPhotoAssetPath(asset.source);
+      if (assetPath != null) {
+        final data = await rootBundle.load(assetPath);
+        bytes = data.buffer.asUint8List();
+      }
+    }
     if (bytes == null || !mounted) return;
 
     setState(() => _convertingId = asset.id);
@@ -139,13 +170,34 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           '${base.isEmpty ? 'video' : base}.${result.extension}',
       type: MediaType.video,
       size: () => result.bytes.length,
+      hash: () => sha256.convert(result.bytes).toString(),
     );
     ref.read(familyDataProvider.notifier).upsertMediaAsset(updated);
-    await MediaStorage.instance.deleteBytes(storedId);
+    if (storedId != null) {
+      await MediaStorage.instance.deleteBytes(storedId);
+    }
     if (!mounted) return;
     setState(() => _convertingId = null);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.videoConverted)),
+    );
+  }
+
+  void _openViewer(List<MediaAsset> assets, int index) {
+    final l10n = AppLocalizations.of(context)!;
+    showMediaViewer(
+      context,
+      items: [
+        for (final asset in assets)
+          MediaViewerItem(
+            source: asset.source,
+            type: asset.type,
+            name: asset.name,
+          ),
+      ],
+      initialIndex: index,
+      eyebrow: l10n.mediaLibraryTitle,
+      title: l10n.mediaLibraryTitle,
     );
   }
 
@@ -180,12 +232,89 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     );
   }
 
+  Future<void> _use(MediaAsset asset, AppLocalizations l10n) async {
+    final family = ref.read(familyDataProvider).valueOrNull;
+    if (family == null || family.members.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.mediaUseNoMembers)),
+      );
+      return;
+    }
+    final selected = {for (final person in asset.people) person.id};
+    final result = await showDialog<Set<String>>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.mediaUseTitle),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final member in family.members)
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: selected.contains(member.id),
+                    title: Text(
+                      member.name.trim().isEmpty ? '—' : member.name,
+                    ),
+                    onChanged: (value) => setDialogState(() {
+                      if (value == true) {
+                        selected.add(member.id);
+                      } else {
+                        selected.remove(member.id);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop({...selected}),
+              child: Text(l10n.mediaUseApply),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    final people = [
+      for (final person in asset.people)
+        if (result.contains(person.id)) person,
+      for (final id in result)
+        if (!asset.people.any((person) => person.id == id))
+          GalleryPerson(id: id),
+    ];
+    ref.read(familyDataProvider.notifier).upsertMediaAsset(
+          asset.copyWith(people: people),
+        );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.mediaUsed)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final family = ref.watch(familyDataProvider).valueOrNull;
-    final assets = family?.mediaLibrary ?? const <MediaAsset>[];
+    final allAssets = family?.mediaLibrary ?? const <MediaAsset>[];
+    final unusedCount = family == null
+        ? 0
+        : allAssets
+            .where((asset) => mediaUsageLabels(family, asset, l10n).isEmpty)
+            .length;
+    final assets = _onlyUnused && family != null
+        ? allAssets
+            .where((asset) => mediaUsageLabels(family, asset, l10n).isEmpty)
+            .toList(growable: false)
+        : allAssets;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
@@ -221,19 +350,30 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           ),
           style: theme.textTheme.bodySmall,
         ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilterChip(
+            selected: _onlyUnused,
+            label: Text(l10n.mediaOnlyUnused(unusedCount)),
+            onSelected: (value) => setState(() => _onlyUnused = value),
+          ),
+        ),
         const SizedBox(height: 14),
         if (assets.isEmpty)
           Text(l10n.mediaLibraryEmpty, style: theme.textTheme.bodyLarge)
         else if (family != null)
-          for (final asset in assets) ...[
+          for (var index = 0; index < assets.length; index++) ...[
             _MediaAssetCard(
-              key: ValueKey(asset.id),
-              asset: asset,
+              key: ValueKey(assets[index].id),
+              asset: assets[index],
               family: family,
               l10n: l10n,
-              converting: _convertingId == asset.id,
-              onConvert: () => _convert(asset, l10n),
-              onDelete: () => _delete(asset, l10n),
+              converting: _convertingId == assets[index].id,
+              onOpen: () => _openViewer(assets, index),
+              onConvert: () => _convert(assets[index], l10n),
+              onUse: () => _use(assets[index], l10n),
+              onDelete: () => _delete(assets[index], l10n),
             ),
             const SizedBox(height: 12),
           ],
@@ -249,7 +389,9 @@ class _MediaAssetCard extends ConsumerWidget {
     required this.family,
     required this.l10n,
     required this.converting,
+    required this.onOpen,
     required this.onConvert,
+    required this.onUse,
     required this.onDelete,
   });
 
@@ -257,12 +399,16 @@ class _MediaAssetCard extends ConsumerWidget {
   final FamilyData family;
   final AppLocalizations l10n;
   final bool converting;
+  final VoidCallback onOpen;
   final VoidCallback onConvert;
+  final VoidCallback onUse;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final usages = mediaUsageLabels(family, asset, l10n);
+    final unused = usages.isEmpty;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -271,23 +417,50 @@ class _MediaAssetCard extends ConsumerWidget {
       child: ExpansionTile(
         shape: const Border(),
         collapsedShape: const Border(),
-        leading: SizedBox(
-          width: 52,
-          height: 52,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: asset.isVideo
-                ? const ColoredBox(
-                    color: AppColors.paper,
-                    child: Icon(Icons.videocam_outlined),
-                  )
-                : FamilyPhoto(
-                    source: asset.source,
-                    fallback: const ColoredBox(
-                      color: AppColors.paper,
-                      child: Icon(Icons.image_outlined),
+        leading: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onOpen,
+          child: SizedBox(
+            width: 52,
+            height: 52,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: asset.isVideo
+                      ? const ColoredBox(
+                          color: AppColors.paper,
+                          child: Icon(Icons.videocam_outlined),
+                        )
+                      : FamilyPhoto(
+                          source: asset.source,
+                          fallback: const ColoredBox(
+                            color: AppColors.paper,
+                            child: Icon(Icons.image_outlined),
+                          ),
+                        ),
+                ),
+                Positioned(
+                  right: 3,
+                  bottom: 3,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: const Color(0xAA000000),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.zoom_out_map,
+                        size: 12,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
+                ),
+              ],
+            ),
           ),
         ),
         title: Text(
@@ -302,11 +475,20 @@ class _MediaAssetCard extends ConsumerWidget {
             asset.isVideo ? l10n.mediaTypeVideo : l10n.mediaTypeImage,
             if (asset.isStored) l10n.mediaStoredLocally,
             if (asset.size != null) _formatSize(asset.size!, l10n),
+            if (unused) l10n.mediaUnused,
           ].join(' · '),
           style: theme.textTheme.bodySmall,
         ),
         childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onOpen,
+              icon: const Icon(Icons.zoom_out_map),
+              label: Text(l10n.mediaViewerOpen),
+            ),
+          ),
           if (asset.isVideo && asset.source.trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -358,7 +540,7 @@ class _MediaAssetCard extends ConsumerWidget {
           ),
           if (videoConversionSupported &&
               asset.isVideo &&
-              asset.storedId != null)
+              asset.source.trim().isNotEmpty)
             Align(
               alignment: Alignment.centerLeft,
               child: Column(
@@ -381,7 +563,16 @@ class _MediaAssetCard extends ConsumerWidget {
               ),
             ),
           ..._peopleSection(context, ref),
-          ..._usageSection(context),
+          ..._usageSection(context, usages),
+          if (unused)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: onUse,
+                icon: const Icon(Icons.person_add_alt_1),
+                label: Text(l10n.mediaUseInProfile),
+              ),
+            ),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
@@ -396,35 +587,6 @@ class _MediaAssetCard extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  bool _matches(FamilyMedia media) =>
-      media.mediaId == asset.id || media.source == asset.source;
-
-  List<String> _usages() {
-    final result = <String>[];
-    if (family.familyPhoto == asset.source) {
-      result.add(l10n.mediaUsageFamilyPhoto);
-    }
-    for (final member in family.members) {
-      final name = member.name.trim().isEmpty ? '—' : member.name;
-      if (member.photo == asset.source) {
-        result.add(l10n.mediaUsageAvatar(name));
-      }
-      if (member.birthdayMedia.any(_matches)) {
-        result.add(l10n.mediaUsageBirthday(name));
-      }
-      final inGallery = member.gallery.any(
-        (shot) => shot.photo == asset.source || shot.media.any(_matches),
-      );
-      if (inGallery) result.add(l10n.mediaUsageGallery(name));
-    }
-    for (final event in family.timelineEvents) {
-      final name = event.title.trim().isEmpty ? '—' : event.title;
-      final inEvent = event.photo == asset.source || event.media.any(_matches);
-      if (inEvent) result.add(l10n.mediaUsageEvent(name));
-    }
-    return result;
   }
 
   List<Widget> _peopleSection(BuildContext context, WidgetRef ref) {
@@ -476,6 +638,7 @@ class _MediaAssetCard extends ConsumerWidget {
                 hint: l10n.mediaPersonCaption(
                   member.name.trim().isEmpty ? '—' : member.name,
                 ),
+                dense: true,
               ),
               onChanged: (value) {
                 final people = [
@@ -497,8 +660,10 @@ class _MediaAssetCard extends ConsumerWidget {
     ];
   }
 
-  List<Widget> _usageSection(BuildContext context) {
-    final usages = _usages();
+  List<Widget> _usageSection(
+    BuildContext context,
+    List<String> usages,
+  ) {
     return [
       const SizedBox(height: 12),
       Align(
@@ -525,6 +690,46 @@ class _MediaAssetCard extends ConsumerWidget {
         ),
     ];
   }
+}
+
+/// Где используется файл. Пустой список — «мёртвый груз».
+List<String> mediaUsageLabels(
+  FamilyData family,
+  MediaAsset asset,
+  AppLocalizations l10n,
+) {
+  final result = <String>[];
+  bool matches(FamilyMedia media) =>
+      media.mediaId == asset.id || media.source == asset.source;
+
+  if (family.familyPhoto == asset.source) {
+    result.add(l10n.mediaUsageFamilyPhoto);
+  }
+  for (final member in family.members) {
+    final name = member.name.trim().isEmpty ? '—' : member.name;
+    if (member.photo == asset.source) {
+      result.add(l10n.mediaUsageAvatar(name));
+    }
+    if (member.birthdayMedia.any(matches)) {
+      result.add(l10n.mediaUsageBirthday(name));
+    }
+    final inGallery = member.gallery.any(
+      (shot) => shot.photo == asset.source || shot.media.any(matches),
+    );
+    if (inGallery) result.add(l10n.mediaUsageGallery(name));
+  }
+  for (final event in family.timelineEvents) {
+    final name = event.title.trim().isEmpty ? '—' : event.title;
+    final inEvent = event.photo == asset.source || event.media.any(matches);
+    if (inEvent) result.add(l10n.mediaUsageEvent(name));
+  }
+  for (final person in asset.people) {
+    final member = family.memberById(person.id);
+    if (member == null) continue;
+    final name = member.name.trim().isEmpty ? '—' : member.name;
+    result.add(l10n.mediaUsagePersonTag(name));
+  }
+  return result.toSet().toList(growable: false);
 }
 
 bool _isVideoName(String name) {

@@ -36,6 +36,7 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
   Future<void> Function()? _cleanup;
   bool _loading = true;
   bool _error = false;
+  String? _errorDetail;
   bool _muted = false;
 
   @override
@@ -72,6 +73,7 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
         _cleanup = null;
         _loading = true;
         _error = false;
+        _errorDetail = null;
       });
     }
 
@@ -96,7 +98,9 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
     try {
       prepared = await prepareVideo(source, bytes, widget.name);
       final controller = prepared.controller;
-      if (controller == null) throw StateError('Unsupported source');
+      if (controller == null) {
+        throw StateError(prepared.error ?? 'Unsupported source');
+      }
       await controller.initialize();
       controller.addListener(_onValue);
       if (!mounted) {
@@ -109,11 +113,12 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
         _cleanup = prepared.cleanup;
         _loading = false;
       });
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _error = true;
+        _errorDetail = error.toString();
       });
     }
   }
@@ -183,6 +188,20 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
                   color: AppColors.paper,
                 ),
               ),
+              if (_errorDetail != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: Text(
+                    _errorDetail!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.paper.withValues(alpha: 0.7),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -200,11 +219,11 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            FittedBox(
-              fit: widget.fit,
-              child: SizedBox(
-                width: value.size.width,
-                height: value.size.height,
+            Center(
+              child: AspectRatio(
+                aspectRatio: value.aspectRatio > 0
+                    ? value.aspectRatio
+                    : 16 / 9,
                 child: VideoPlayer(controller),
               ),
             ),

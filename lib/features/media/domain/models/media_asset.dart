@@ -16,6 +16,7 @@ class MediaAsset {
     this.name,
     this.createdAt = 0,
     this.size,
+    this.hash,
     this.people = const <GalleryPerson>[],
   });
 
@@ -25,6 +26,9 @@ class MediaAsset {
   final String? name;
   final int createdAt;
   final int? size;
+
+  /// SHA-256 содержимого — для поиска дублей при загрузке.
+  final String? hash;
 
   /// Кто изображён на файле. Общее свойство самого снимка.
   final List<GalleryPerson> people;
@@ -43,6 +47,7 @@ class MediaAsset {
         name: readNullableString(json['name']),
         createdAt: readInt(json['createdAt']) ?? 0,
         size: readInt(json['size']),
+        hash: readNullableString(json['hash']),
         people: readMapList(json['people'])
             .map(GalleryPerson.fromJson)
             .toList(growable: false),
@@ -55,6 +60,7 @@ class MediaAsset {
         if (name != null) 'name': name,
         if (createdAt > 0) 'createdAt': createdAt,
         if (size != null) 'size': size,
+        if (hash != null) 'hash': hash,
         if (people.isNotEmpty)
           'people': people.map((person) => person.toJson()).toList(),
       };
@@ -66,6 +72,7 @@ class MediaAsset {
     String? Function()? name,
     int? createdAt,
     int? Function()? size,
+    String? Function()? hash,
     List<GalleryPerson>? people,
   }) =>
       MediaAsset(
@@ -75,6 +82,7 @@ class MediaAsset {
         name: name == null ? this.name : name(),
         createdAt: createdAt ?? this.createdAt,
         size: size == null ? this.size : size(),
+        hash: hash == null ? this.hash : hash(),
         people: people ?? this.people,
       );
 
@@ -88,6 +96,7 @@ class MediaAsset {
           name == other.name &&
           createdAt == other.createdAt &&
           size == other.size &&
+          hash == other.hash &&
           listsEqual(people, other.people);
 
   @override
@@ -98,6 +107,7 @@ class MediaAsset {
         name,
         createdAt,
         size,
+        hash,
         listsHash(people),
       );
 }

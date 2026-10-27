@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 
@@ -193,6 +194,63 @@ void main() {
     expect(cleaned.mediaLibrary, isEmpty);
     expect(cleaned.members.single.gallery.single.media, isEmpty);
     expect(cleaned.timelineEvents.single.media, isEmpty);
+  });
+
+  test('finds duplicate media by hash or by name and size', () {
+    const asset = MediaAsset(
+      id: 'asset-1',
+      source: 'hive://m1',
+      name: 'photo.jpg',
+      size: 42,
+      hash: 'abc',
+    );
+    final family = FamilyData(
+      settings: const FamilySettings(familyName: 'Family'),
+      mediaLibrary: const [asset],
+    );
+
+    expect(family.findDuplicateMedia(hash: 'abc'), asset);
+    expect(
+      family.findDuplicateMedia(hash: 'new-hash', name: 'photo.jpg', size: 42),
+      isNull,
+    );
+
+    const legacy = MediaAsset(
+      id: 'asset-2',
+      source: 'hive://m2',
+      name: 'legacy.jpg',
+      size: 100,
+    );
+    final withLegacy = family.copyWith(
+      mediaLibrary: const [asset, legacy],
+    );
+    expect(
+      withLegacy.findDuplicateMedia(
+        hash: 'new-hash',
+        name: 'legacy.jpg',
+        size: 100,
+      ),
+      legacy,
+    );
+  });
+
+  test('library media tagged to a person appears in that gallery', () {
+    const asset = MediaAsset(
+      id: 'asset-1',
+      source: '/photos/tagged.jpg',
+      name: 'tagged.jpg',
+      people: [GalleryPerson(id: 'mama', caption: 'Для мамы')],
+    );
+    final family = FamilyData(
+      settings: const FamilySettings(familyName: 'Family'),
+      members: [member('papa'), member('mama')],
+      mediaLibrary: const [asset],
+    );
+
+    final media = family.mediaForMember('mama');
+
+    expect(media.single.source, '/photos/tagged.jpg');
+    expect(media.single.caption, 'Для мамы');
   });
 
   test('calendar flags survive JSON and default to visible', () {

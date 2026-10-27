@@ -82,11 +82,14 @@
   "mediaDeleteBody": "The file and all its links to members and events will be removed. The action cannot be undone.",
   "mediaDelete": "Delete",
   "mediaDeleted": "File deleted from the library.",
+  "mediaDuplicateFound": "This file is already in the media library.",
+  "mediaDuplicateAttached": "This file was already in the library — the existing copy was attached.",
+  "mediaViewerOpen": "Open in viewer",
   "mediaLibrarySize": "{count} files · {size}",
   "settingsMembersHint": "Edit profiles, photos and birthday visibility. New members are saved in the app session.",
   "settingsEventsHint": "Edit timeline events, dates and places. Birthday entries are generated from member profiles.",
   "settingsAccountsHint": "Create family accounts, assign roles and issue guest links.",
-  "settingsAccountsLocalOnly": "Accounts and guest links are kept in the app until you restart it.",
+  "settingsAccountsLocalOnly": "Accounts, access rights and guest links are stored locally and survive restarts and backups.",
   "settingsBackupsHint": "Snapshots of the family archive. Restoring rolls the data back to the selected moment.",
   "memberAdd": "Add member",
   "memberAdded": "Member added.",
@@ -149,7 +152,9 @@
   "accountRoleViewer": "Viewer",
   "accountRoleEditor": "Editor",
   "accountRoleAdmin": "Admin",
-  "accountLoginInvalid": "Login must be 2–32 characters: letters, digits, dot, dash or underscore.",
+  "accountLoginInvalid": "Login must be 2–32 characters: Latin letters, digits, dot, dash or underscore.",
+  "accountLoginRequirements": "2–32 characters: Latin letters, digits, dot, dash or underscore.",
+  "accountPasswordRequirements": "At least 4 characters.",
   "accountRoleInvalid": "Unknown role.",
   "accountPasswordTooShort": "Password is too short.",
   "accountLoginTaken": "This login is already taken.",
@@ -186,6 +191,17 @@
   "backupDeleteConfirmTitle": "Delete this snapshot?",
   "backupDeleteConfirmBody": "Only the backup copy will be removed; current family data stays untouched.",
   "backupDeleted": "Snapshot deleted.",
+  "backupExport": "Save backup",
+  "backupExportTitle": "Create a backup",
+  "backupExportHint": "A complete copy of settings, profiles, events, accounts, access rights and the media library will be created. External links are saved without files; passwords are stored only as salted hashes.",
+  "backupIncludeMedia": "Include photos and videos",
+  "backupIncludeMediaHint": "The backup will contain copies of all local media files and may be large.",
+  "backupSaveDialogTitle": "Where to save the family backup",
+  "backupSavedTo": "Backup saved: {path}",
+  "backupExportCanceled": "Saving the backup was canceled.",
+  "backupImport": "Import backup",
+  "backupImportSuccess": "Backup imported.",
+  "backupImportFailed": "Could not import this backup file.",
   "backupSummary": "{count} of {kept} · {size}",
   "backupRevision": "revision {revision}",
   "backupSizeBytes": "{size} B",
@@ -231,6 +247,8 @@
   "videoMute": "Mute",
   "videoUnmute": "Unmute",
   "videoError": "Could not play this video.",
+  "mediaViewerPrevious": "Previous media",
+  "mediaViewerNext": "Next media",
   "videoConvert": "Convert to WebM",
   "videoConverting": "Converting…",
   "videoConverted": "Video converted to WebM.",
@@ -394,6 +412,10 @@
       "size": {"type": "String"}
     }
   },
+  "@backupSavedTo": {
+    "description": "Path or URI of the saved backup",
+    "placeholders": {"path": {"type": "String"}}
+  },
   "@mediaPersonCaption": {
     "description": "Personal caption of a tagged person",
     "placeholders": {"name": {"type": "String"}}
@@ -451,5 +473,34 @@
       "count": {"type": "int"}
     }
   },
-  "@close": {"description": "Closes a bottom sheet"}
+  "@close": {"description": "Closes a bottom sheet"},
+  "settingsNoAccess": "You do not have access to this section.",
+  "accountLocalAdmin": "Local administrator",
+  "accountSignIn": "Sign in",
+  "accountSignOut": "Sign out",
+  "accountSignInAction": "Sign in",
+  "accountSignedIn": "Signed in as {name}.",
+  "accountSignedOut": "Signed out; local administrator mode is active.",
+  "accountLoginFailed": "Wrong login or password.",
+  "accountAccessTitle": "Access",
+  "accountAccessHint": "Choose which family profiles and events this account can see.",
+  "accountAllMembers": "All family members",
+  "accountVisibleEvents": "Visible events",
+  "mediaUsagePersonTag": "{name} — tagged photo",
+  "mediaUnused": "Unused",
+  "mediaOnlyUnused": "Only unused ({count})",
+  "mediaUseInProfile": "Use in a profile",
+  "mediaUseTitle": "Show this file in profiles",
+  "mediaUseNoMembers": "There are no family members to link this file to.",
+  "mediaUseApply": "Apply",
+  "mediaUsed": "The file is now shown in the selected profiles.",
+  "@accountSignedIn": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsagePersonTag": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaOnlyUnused": {
+    "placeholders": {"count": {"type": "int"}}
+  }
 }

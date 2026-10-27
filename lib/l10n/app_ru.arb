@@ -82,11 +82,14 @@
   "mediaDeleteBody": "Файл и все его связи с участниками и событиями будут удалены. Действие нельзя отменить.",
   "mediaDelete": "Удалить",
   "mediaDeleted": "Файл удалён из медиатеки.",
+  "mediaDuplicateFound": "Этот файл уже есть в медиатеке.",
+  "mediaDuplicateAttached": "Этот файл уже был в медиатеке — привязана существующая копия.",
+  "mediaViewerOpen": "Открыть в просмотрщике",
   "mediaLibrarySize": "{count} файлов · {size}",
   "settingsMembersHint": "Правьте профили, фотографии и видимость дней рождения. Новые участники сохраняются в сессии приложения.",
   "settingsEventsHint": "Правьте события таймлайна, даты и места. Дни рождения формируются из профилей участников.",
   "settingsAccountsHint": "Создавайте семейные аккаунты, назначайте роли и выпускайте гостевые ссылки.",
-  "settingsAccountsLocalOnly": "Аккаунты и гостевые ссылки хранятся в приложении до перезапуска.",
+  "settingsAccountsLocalOnly": "Аккаунты, права доступа и гостевые ссылки хранятся локально, переживают перезапуск и входят в бэкап.",
   "settingsBackupsHint": "Снимки семейного архива. Восстановление откатывает данные на выбранный момент.",
   "memberAdd": "Добавить участника",
   "memberAdded": "Участник добавлен.",
@@ -149,9 +152,11 @@
   "accountRoleViewer": "Наблюдатель",
   "accountRoleEditor": "Редактор",
   "accountRoleAdmin": "Администратор",
-  "accountLoginInvalid": "Логин — 2–32 символа: буквы, цифры, точка, дефис или подчёркивание.",
+  "accountLoginInvalid": "Логин — 2–32 символа: латинские буквы, цифры, точка, дефис или подчёркивание.",
+  "accountLoginRequirements": "2–32 символа: латинские буквы, цифры, точка, дефис или подчёркивание.",
+  "accountPasswordRequirements": "Не менее 4 символов.",
   "accountRoleInvalid": "Неизвестная роль.",
-  "accountPasswordTooShort": "Пароль слишком короткий.",
+  "accountPasswordTooShort": "Пароль слишком короткий: нужно минимум 4 символа.",
   "accountLoginTaken": "Этот логин уже занят.",
   "accountCannotDeleteSelf": "Нельзя удалить собственный аккаунт.",
   "accountCannotChangeOwnRole": "Нельзя изменить собственную роль.",
@@ -186,6 +191,17 @@
   "backupDeleteConfirmTitle": "Удалить этот снимок?",
   "backupDeleteConfirmBody": "Удалится только резервная копия, данные семьи останутся прежними.",
   "backupDeleted": "Снимок удалён.",
+  "backupExport": "Сохранить бэкап",
+  "backupExportTitle": "Создание бэкапа",
+  "backupExportHint": "Будет создана полная копия настроек, профилей, событий, аккаунтов, прав доступа и медиатеки. Внешние ссылки сохраняются без файлов; пароли — только в виде соли и хеша.",
+  "backupIncludeMedia": "Сохранять фотографии и видео",
+  "backupIncludeMediaHint": "В бэкап попадут копии всех локальных медиафайлов, поэтому файл может быть большим.",
+  "backupSaveDialogTitle": "Куда сохранить бэкап семьи",
+  "backupSavedTo": "Бэкап сохранён: {path}",
+  "backupExportCanceled": "Сохранение бэкапа отменено.",
+  "backupImport": "Импортировать бэкап",
+  "backupImportSuccess": "Бэкап импортирован.",
+  "backupImportFailed": "Не удалось импортировать этот файл бэкапа.",
   "backupSummary": "{count} из {kept} · {size}",
   "backupRevision": "ревизия {revision}",
   "backupSizeBytes": "{size} Б",
@@ -231,6 +247,8 @@
   "videoMute": "Выключить звук",
   "videoUnmute": "Включить звук",
   "videoError": "Не удалось воспроизвести видео.",
+  "mediaViewerPrevious": "Предыдущее медиа",
+  "mediaViewerNext": "Следующее медиа",
   "videoConvert": "Конвертировать в WebM",
   "videoConverting": "Конвертация…",
   "videoConverted": "Видео сконвертировано в WebM.",
@@ -394,6 +412,10 @@
       "size": {"type": "String"}
     }
   },
+  "@backupSavedTo": {
+    "description": "Путь или URI сохранённого бэкапа",
+    "placeholders": {"path": {"type": "String"}}
+  },
   "@mediaPersonCaption": {
     "description": "Личная подпись отмеченного человека",
     "placeholders": {"name": {"type": "String"}}
@@ -451,5 +473,34 @@
       "count": {"type": "int"}
     }
   },
-  "@close": {"description": "Закрывает нижнюю панель"}
+  "@close": {"description": "Закрывает нижнюю панель"},
+  "settingsNoAccess": "У вас нет доступа к этому разделу.",
+  "accountLocalAdmin": "Локальный администратор",
+  "accountSignIn": "Войти",
+  "accountSignOut": "Выйти",
+  "accountSignInAction": "Войти",
+  "accountSignedIn": "Вы вошли как {name}.",
+  "accountSignedOut": "Вы вышли. Активен режим локального администратора.",
+  "accountLoginFailed": "Неверный логин или пароль.",
+  "accountAccessTitle": "Доступ",
+  "accountAccessHint": "Выберите профили и события, которые видит этот аккаунт.",
+  "accountAllMembers": "Все члены семьи",
+  "accountVisibleEvents": "Видимые события",
+  "mediaUsagePersonTag": "{name} — отмечен на фото",
+  "mediaUnused": "Не используется",
+  "mediaOnlyUnused": "Только неиспользуемые ({count})",
+  "mediaUseInProfile": "Использовать в профиле",
+  "mediaUseTitle": "Показать файл в профилях",
+  "mediaUseNoMembers": "Нет членов семьи, к которым можно привязать файл.",
+  "mediaUseApply": "Применить",
+  "mediaUsed": "Файл теперь показывается в выбранных профилях.",
+  "@accountSignedIn": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsagePersonTag": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaOnlyUnused": {
+    "placeholders": {"count": {"type": "int"}}
+  }
 }

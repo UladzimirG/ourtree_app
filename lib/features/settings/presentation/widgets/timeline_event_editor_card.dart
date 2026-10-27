@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
+import 'package:ourtree_app/core/utils/rich_text.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/media_editor.dart';
@@ -16,6 +17,7 @@ class TimelineEventEditorCard extends StatelessWidget {
     required this.l10n,
     required this.onChanged,
     required this.onRemove,
+    this.canDelete = true,
     this.otherEvents = const <TimelineEvent>[],
   });
 
@@ -25,6 +27,7 @@ class TimelineEventEditorCard extends StatelessWidget {
   final AppLocalizations l10n;
   final ValueChanged<TimelineEvent> onChanged;
   final VoidCallback onRemove;
+  final bool canDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +102,11 @@ class TimelineEventEditorCard extends StatelessWidget {
           ),
           SettingsTextField(
             label: l10n.eventTextField,
-            initialValue: event.text,
+            initialValue: stripRichText(event.text),
             maxLines: 4,
-            onChanged: (value) => onChanged(event.copyWith(text: value)),
+            onChanged: (value) => onChanged(
+              event.copyWith(text: stripRichText(value)),
+            ),
           ),
           if (event.photo != null)
             SettingsPhotoField(
@@ -184,17 +189,18 @@ class TimelineEventEditorCard extends StatelessWidget {
               event.copyWith(showInCalendar: value),
             ),
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onRemove,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.terracotta,
+          if (canDelete)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onRemove,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.terracotta,
+                ),
+                icon: const Icon(Icons.delete_outline),
+                label: Text(l10n.eventDelete),
               ),
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.eventDelete),
             ),
-          ),
         ],
       ),
     );

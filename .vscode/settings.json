@@ -1,0 +1,6 @@
+{
+  "dart.flutterHotReloadOnSave": "allIfDirty",
+  "dart.hotReloadOnSave": "allIfDirty",
+  "dart.flutterGenerateLocalizationsOnSave": "allIfDirty",
+  "dart.previewHotReloadOnSaveWatcher": true
+}

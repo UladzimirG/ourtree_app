@@ -1,9 +1,13 @@
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/widgets/accounts_panel.dart';
+import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
@@ -69,21 +73,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (file == null) return;
     final bytes = await file.readAsBytes();
     if (bytes.isEmpty) return;
-    final storedId = await MediaStorage.instance.saveBytes(
-      bytes,
-      name: file.name,
-    );
-    ref.read(familyDataProvider.notifier).upsertMediaAsset(
-          MediaAsset(
-            id: 'asset-$storedId',
-            source: 'hive://$storedId',
-            name: file.name,
-            createdAt: DateTime.now().millisecondsSinceEpoch,
-            size: bytes.length,
-          ),
+    final hash = sha256.convert(bytes).toString();
+    final existing = ref
+        .read(familyDataProvider)
+        .valueOrNull
+        ?.findDuplicateMedia(
+          hash: hash,
+          name: file.name,
+          size: bytes.length,
         );
+
+    String source;
+    if (existing != null) {
+      source = existing.source;
+    } else {
+      final storedId = await MediaStorage.instance.saveBytes(
+        bytes,
+        name: file.name,
+      );
+      ref.read(familyDataProvider.notifier).upsertMediaAsset(
+            MediaAsset(
+              id: 'asset-$storedId',
+              source: 'hive://$storedId',
+              name: file.name,
+              createdAt: DateTime.now().millisecondsSinceEpoch,
+              size: bytes.length,
+              hash: hash,
+            ),
+          );
+      source = 'hive://$storedId';
+    }
     if (!mounted) return;
-    final source = 'hive://$storedId';
     _photoController.text = source;
     ref
         .read(familySettingsNotifierProvider.notifier)
@@ -94,9 +114,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _addMember() {
     final l10n = AppLocalizations.of(context)!;
     final today = DateTime.now().toIso8601String().split('T').first;
+    final memberId = 'member-${DateTime.now().millisecondsSinceEpoch}';
     ref.read(familyDataProvider.notifier).addMember(
           FamilyMember(
-            id: 'member-${DateTime.now().millisecondsSinceEpoch}',
+            id: memberId,
             role: l10n.memberDefaultRole,
             name: l10n.memberDefaultName,
             nickname: '',
@@ -106,6 +127,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             accent: '#6b7352',
           ),
         );
+    final account = ref.read(currentAccountProvider);
+    if (account != null) {
+      ref
+          .read(accountsNotifierProvider.notifier)
+          .grantMemberVisibility(account.id, memberId);
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.memberAdded)),
     );
@@ -188,6 +215,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final familyAsync = ref.watch(familyDataProvider);
     final settingsAsync = ref.watch(familySettingsNotifierProvider);
+    final role = ref.watch(currentRoleProvider);
+    final isAdmin = role == UserRole.admin;
+    final canEdit = role != UserRole.viewer;
+    final sections = <_SettingsSection>[
+      if (isAdmin) _SettingsSection.family,
+      if (canEdit) ...const [
+        _SettingsSection.members,
+        _SettingsSection.events,
+        _SettingsSection.media,
+      ],
+      if (isAdmin) ...const [
+        _SettingsSection.accounts,
+        _SettingsSection.backups,
+      ],
+    ];
+    final section = sections.contains(_section)
+        ? _section
+        : (sections.isEmpty ? null : sections.first);
 
     return KraftBackground(
       child: Scaffold(
@@ -196,6 +241,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: familyAsync.when(
             data: (family) {
               final settings = settingsAsync.valueOrNull ?? family.settings;
+              final visible = ref.watch(visibleFamilyProvider) ?? family;
               if (!_initialized) {
                 _nameController.text = settings.familyName;
                 _photoController.text = settings.familyPhoto ?? '';
@@ -206,12 +252,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   _SettingsTopBar(title: l10n.settingsTitle),
                   _SettingsTabs(
-                    selected: _section,
+                    sections: sections,
+                    selected: section,
                     l10n: l10n,
-                    onSelected: (section) => setState(() => _section = section),
+                    onSelected: (next) => setState(() => _section = next),
                   ),
+                  const AccountSessionBar(),
                   Expanded(
-                    child: switch (_section) {
+                    child: section == null
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                l10n.settingsNoAccess,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                        : switch (section) {
                       _SettingsSection.family => ListView(
                           padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
                           children: [
@@ -253,8 +311,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ],
                         ),
                       _SettingsSection.members => _MembersSection(
-                          members: family.members,
-                          events: family.timelineEvents,
+                          members: visible.members,
+                          events: visible.timelineEvents,
+                          canManage: isAdmin,
                           l10n: l10n,
                           onAdd: _addMember,
                           onChanged: (member) => ref
@@ -264,8 +323,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _confirmRemoveMember(member, l10n),
                         ),
                       _SettingsSection.events => _EventsSection(
-                          events: family.sortedTimelineEvents,
-                          members: family.members,
+                          events: [...visible.timelineEvents]
+                            ..sort((a, b) => a.date.compareTo(b.date)),
+                          members: visible.members,
+                          canManage: isAdmin,
                           l10n: l10n,
                           onAdd: _addEvent,
                           onChanged: (event) => ref
@@ -300,12 +361,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
 class _SettingsTabs extends StatelessWidget {
   const _SettingsTabs({
+    required this.sections,
     required this.selected,
     required this.l10n,
     required this.onSelected,
   });
 
-  final _SettingsSection selected;
+  final List<_SettingsSection> sections;
+  final _SettingsSection? selected;
   final AppLocalizations l10n;
   final ValueChanged<_SettingsSection> onSelected;
 
@@ -316,7 +379,7 @@ class _SettingsTabs extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
       child: Row(
         children: [
-          for (final section in _SettingsSection.values) ...[
+          for (final section in sections) ...[
             ChoiceChip(
               selected: section == selected,
               label: Text(_settingsSectionLabel(section, l10n)),
@@ -341,6 +404,7 @@ class _MembersSection extends StatelessWidget {
   const _MembersSection({
     required this.members,
     required this.events,
+    required this.canManage,
     required this.l10n,
     required this.onAdd,
     required this.onChanged,
@@ -349,6 +413,7 @@ class _MembersSection extends StatelessWidget {
 
   final List<FamilyMember> members;
   final List<TimelineEvent> events;
+  final bool canManage;
   final AppLocalizations l10n;
   final VoidCallback onAdd;
   final ValueChanged<FamilyMember> onChanged;
@@ -388,6 +453,7 @@ class _MembersSection extends StatelessWidget {
               l10n: l10n,
               members: members,
               events: events,
+              canDelete: canManage,
               onChanged: onChanged,
               onRemove: () => onRemove(member),
             ),
@@ -402,6 +468,7 @@ class _EventsSection extends StatelessWidget {
   const _EventsSection({
     required this.events,
     required this.members,
+    required this.canManage,
     required this.l10n,
     required this.onAdd,
     required this.onChanged,
@@ -410,6 +477,7 @@ class _EventsSection extends StatelessWidget {
 
   final List<TimelineEvent> events;
   final List<FamilyMember> members;
+  final bool canManage;
   final AppLocalizations l10n;
   final VoidCallback onAdd;
   final ValueChanged<TimelineEvent> onChanged;
@@ -447,6 +515,7 @@ class _EventsSection extends StatelessWidget {
             TimelineEventEditorCard(
               event: event,
               members: members,
+              canDelete: canManage,
               otherEvents: [
                 for (final other in events)
                   if (other.id != event.id) other,

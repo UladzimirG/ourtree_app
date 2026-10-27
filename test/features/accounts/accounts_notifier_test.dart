@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
@@ -7,7 +8,8 @@ import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 void main() {
   late ProviderContainer container;
 
-  setUp(() {
+  setUp(() async {
+    await MediaStorage.instance.clearForTests();
     container = ProviderContainer();
   });
 
@@ -35,6 +37,25 @@ void main() {
 
       expect(error, AccountsError.badLogin);
       expect(container.read(accountsNotifierProvider).value, isEmpty);
+    });
+
+    test('accepts a two-letter login and a four-character password', () async {
+      final notifier = await accounts();
+
+      final error = notifier.create(
+        const AccountInput(
+          login: 'ab',
+          name: 'AB',
+          password: '1234',
+          role: UserRole.viewer,
+        ),
+      );
+
+      expect(error, isNull);
+      expect(
+        container.read(accountsNotifierProvider).value!.single.login,
+        'ab',
+      );
     });
 
     test('rejects a password shorter than the server minimum', () async {
@@ -148,6 +169,62 @@ void main() {
       notifier.remove(id);
 
       expect(container.read(accountsNotifierProvider).value, isEmpty);
+    });
+
+    test('accounts, access rights and passwords survive a new container', () async {
+      final notifier = await accounts();
+      notifier.create(
+        const AccountInput(
+          login: 'grandma',
+          name: 'Grandma',
+          password: 'secret',
+          role: UserRole.editor,
+        ),
+      );
+      final created = container.read(accountsNotifierProvider).value!.single;
+      notifier.updateAccess(
+        created.id,
+        allMembersVisible: false,
+        visibleMemberIds: ['papa'],
+      );
+
+      final next = ProviderContainer();
+      addTearDown(next.dispose);
+      final restored =
+          await next.read(accountsNotifierProvider.future);
+
+      expect(restored.single.login, 'grandma');
+      expect(restored.single.visibleMemberIds, ['papa']);
+      expect(restored.single.allMembersVisible, isFalse);
+      expect(
+        next.read(accountsNotifierProvider.notifier).authenticate(
+              'grandma',
+              'secret',
+            )?.id,
+        restored.single.id,
+      );
+      expect(
+        next.read(accountsNotifierProvider.notifier).authenticate(
+              'grandma',
+              'wrong',
+            ),
+        isNull,
+      );
+    });
+
+    test('guest links survive a new container', () async {
+      final created =
+          container.read(guestLinksNotifierProvider.notifier).create(
+                const GuestLinkInput(label: 'Друг', days: 3),
+              );
+      await container.read(guestLinksNotifierProvider.future);
+
+      final next = ProviderContainer();
+      addTearDown(next.dispose);
+      final restored = await next.read(guestLinksNotifierProvider.future);
+
+      expect(restored.single.id, created.link.id);
+      expect(restored.single.label, 'Друг');
     });
   });
 

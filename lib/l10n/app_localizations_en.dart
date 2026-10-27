@@ -307,6 +307,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mediaDeleted => 'File deleted from the library.';
 
   @override
+  String get mediaDuplicateFound =>
+      'This file is already in the media library.';
+
+  @override
+  String get mediaDuplicateAttached =>
+      'This file was already in the library — the existing copy was attached.';
+
+  @override
+  String get mediaViewerOpen => 'Open in viewer';
+
+  @override
   String mediaLibrarySize(int count, String size) {
     return '$count files · $size';
   }
@@ -325,7 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAccountsLocalOnly =>
-      'Accounts and guest links are kept in the app until you restart it.';
+      'Accounts, access rights and guest links are stored locally and survive restarts and backups.';
 
   @override
   String get settingsBackupsHint =>
@@ -520,7 +531,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountLoginInvalid =>
-      'Login must be 2–32 characters: letters, digits, dot, dash or underscore.';
+      'Login must be 2–32 characters: Latin letters, digits, dot, dash or underscore.';
+
+  @override
+  String get accountLoginRequirements =>
+      '2–32 characters: Latin letters, digits, dot, dash or underscore.';
+
+  @override
+  String get accountPasswordRequirements => 'At least 4 characters.';
 
   @override
   String get accountRoleInvalid => 'Unknown role.';
@@ -632,6 +650,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupDeleted => 'Snapshot deleted.';
+
+  @override
+  String get backupExport => 'Save backup';
+
+  @override
+  String get backupExportTitle => 'Create a backup';
+
+  @override
+  String get backupExportHint =>
+      'A complete copy of settings, profiles, events, accounts, access rights and the media library will be created. External links are saved without files; passwords are stored only as salted hashes.';
+
+  @override
+  String get backupIncludeMedia => 'Include photos and videos';
+
+  @override
+  String get backupIncludeMediaHint =>
+      'The backup will contain copies of all local media files and may be large.';
+
+  @override
+  String get backupSaveDialogTitle => 'Where to save the family backup';
+
+  @override
+  String backupSavedTo(String path) {
+    return 'Backup saved: $path';
+  }
+
+  @override
+  String get backupExportCanceled => 'Saving the backup was canceled.';
+
+  @override
+  String get backupImport => 'Import backup';
+
+  @override
+  String get backupImportSuccess => 'Backup imported.';
+
+  @override
+  String get backupImportFailed => 'Could not import this backup file.';
 
   @override
   String backupSummary(int count, int kept, String size) {
@@ -787,6 +842,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoError => 'Could not play this video.';
 
   @override
+  String get mediaViewerPrevious => 'Previous media';
+
+  @override
+  String get mediaViewerNext => 'Next media';
+
+  @override
   String get videoConvert => 'Convert to WebM';
 
   @override
@@ -894,4 +955,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get settingsNoAccess => 'You do not have access to this section.';
+
+  @override
+  String get accountLocalAdmin => 'Local administrator';
+
+  @override
+  String get accountSignIn => 'Sign in';
+
+  @override
+  String get accountSignOut => 'Sign out';
+
+  @override
+  String get accountSignInAction => 'Sign in';
+
+  @override
+  String accountSignedIn(String name) {
+    return 'Signed in as $name.';
+  }
+
+  @override
+  String get accountSignedOut =>
+      'Signed out; local administrator mode is active.';
+
+  @override
+  String get accountLoginFailed => 'Wrong login or password.';
+
+  @override
+  String get accountAccessTitle => 'Access';
+
+  @override
+  String get accountAccessHint =>
+      'Choose which family profiles and events this account can see.';
+
+  @override
+  String get accountAllMembers => 'All family members';
+
+  @override
+  String get accountVisibleEvents => 'Visible events';
+
+  @override
+  String mediaUsagePersonTag(String name) {
+    return '$name — tagged photo';
+  }
+
+  @override
+  String get mediaUnused => 'Unused';
+
+  @override
+  String mediaOnlyUnused(int count) {
+    return 'Only unused ($count)';
+  }
+
+  @override
+  String get mediaUseInProfile => 'Use in a profile';
+
+  @override
+  String get mediaUseTitle => 'Show this file in profiles';
+
+  @override
+  String get mediaUseNoMembers =>
+      'There are no family members to link this file to.';
+
+  @override
+  String get mediaUseApply => 'Apply';
+
+  @override
+  String get mediaUsed => 'The file is now shown in the selected profiles.';
 }

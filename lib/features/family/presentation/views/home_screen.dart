@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/views/calendar_section.dart';
 import 'package:ourtree_app/features/family/presentation/views/family_section.dart';
@@ -37,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
           child: familyAsync.when(
             data: (family) {
               final settings = settingsAsync.valueOrNull ?? family.settings;
+              final visible = ref.watch(visibleFamilyProvider) ?? family;
 
               return Column(
                 children: [
@@ -57,18 +59,18 @@ class HomeScreen extends ConsumerWidget {
                       child: switch (tab) {
                         HomeTab.timeline => TimelineSection(
                             key: const ValueKey<String>('timeline'),
-                            family: family,
+                            family: visible,
                             showMedia: settings.showEventPhotos,
                             onEventTap: (event) =>
                                 _showEventDetails(context, event, l10n),
                           ),
                         HomeTab.calendar => CalendarSection(
                             key: const ValueKey<String>('calendar'),
-                            family: family,
+                            family: visible,
                           ),
                         HomeTab.family => FamilySection(
                             key: const ValueKey<String>('family'),
-                            family: family,
+                            family: visible,
                             onMemberTap: (member) =>
                                 _openProfile(context, member),
                           ),

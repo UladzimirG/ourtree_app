@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,13 +12,97 @@ import 'package:ourtree_app/l10n/app_localizations.dart';
 class BackupPanel extends ConsumerWidget {
   const BackupPanel({super.key});
 
-  Future<void> _create(BuildContext context, WidgetRef ref) async {
+  Future<void> _export(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    final entry = await ref.read(backupsNotifierProvider.notifier).create();
+    var includeMedia = true;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.backupExportTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.backupExportHint),
+              const SizedBox(height: 8),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                value: includeMedia,
+                onChanged: (value) =>
+                    setDialogState(() => includeMedia = value),
+                title: Text(l10n.backupIncludeMedia),
+                subtitle: Text(l10n.backupIncludeMediaHint),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.backupExport),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final export = await ref
+        .read(backupsNotifierProvider.notifier)
+        .createExport(includeMedia: includeMedia);
     if (!context.mounted) return;
-    final message = entry == null ? l10n.backupCreateFailed : l10n.backupCreated;
+    if (export == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupCreateFailed)),
+      );
+      return;
+    }
+
+    final stamp = DateFormat('yyyyMMdd-HHmm').format(DateTime.now());
+    final uri = await FilePicker.saveFile(
+      fileName: 'ourtree-backup-$stamp.json',
+      bytes: export.bytes,
+      mimeType: 'application/json',
+      dialogTitle: l10n.backupSaveDialogTitle,
+    );
+    if (!context.mounted) return;
+    if (uri == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupExportCanceled)),
+      );
+      return;
+    }
+
+    final path = uri.path.isNotEmpty ? uri.path : uri.toString();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(content: Text(l10n.backupSavedTo(path))),
+    );
+  }
+
+  Future<void> _import(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final file = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: const ['json', 'ourtree'],
+      dialogTitle: l10n.backupImport,
+    );
+    if (file == null || !context.mounted) return;
+
+    final bytes = await file.readAsBytes();
+    final imported =
+        await ref.read(backupsNotifierProvider.notifier).importBytes(bytes);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          imported ? l10n.backupImportSuccess : l10n.backupImportFailed,
+        ),
+      ),
     );
   }
 
@@ -108,13 +193,21 @@ class BackupPanel extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () => _create(context, ref),
-                  icon: const Icon(Icons.save_alt),
-                  label: Text(l10n.backupCreate),
-                ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () => _export(context, ref),
+                    icon: const Icon(Icons.save_alt),
+                    label: Text(l10n.backupExport),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _import(context, ref),
+                    icon: const Icon(Icons.restore_page_outlined),
+                    label: Text(l10n.backupImport),
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               Text(

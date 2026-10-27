@@ -5,8 +5,9 @@ import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart
 /// Показывает содержимое как «бумажку» на затемнённом фоне снизу экрана.
 Future<void> showCardSheet(
   BuildContext context,
-  WidgetBuilder builder,
-) async {
+  WidgetBuilder builder, {
+  double maxWidth = 420,
+}) async {
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -22,7 +23,7 @@ Future<void> showCardSheet(
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: BoxConstraints(maxWidth: maxWidth),
                 child: PaperCard(
                   tilt: 0.6,
                   child: builder(sheetContext),
