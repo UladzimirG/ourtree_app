@@ -1,0 +1,455 @@
+{
+  "@@locale": "ru",
+  "appTitle": "OurTree App",
+  "welcomeTitle": "Добро пожаловать в OurTree",
+  "welcomeMessage": "Это чистый Flutter-проект с локализацией для ru/en и управлением состоянием Riverpod.",
+  "homeFamilyLabel": "Семья",
+  "homeSubtitle": "Место для семейных историй, фотографий и дат.",
+  "homeOverviewTitle": "Обзор",
+  "homeMembersCount": "{count, plural, =0{Пока нет участников} one{{count} участник} few{{count} участника} many{{count} участников} other{{count} участника}}",
+  "homeEventsCount": "{count, plural, =0{Пока нет событий} one{{count} событие} few{{count} события} many{{count} событий} other{{count} события}}",
+  "homeLoading": "Загружаем данные семьи…",
+  "homeLoadError": "Не удалось загрузить данные семьи.",
+  "homeRetry": "Повторить",
+  "settingsTitle": "Настройки семьи",
+  "navTimeline": "Таймлайн",
+  "navCalendar": "Календарь",
+  "navFamily": "Семья",
+  "timelineEyebrow": "Семейный альбом",
+  "timelineTitle": "Таймлайн жизни",
+  "timelineLede": "Нить событий, на которую нанизаны наши встречи, праздники и поездки.",
+  "timelineEmpty": "Таймлайн пока пуст.",
+  "timelineTogetherYears": "{count, plural, =0{Вместе с этого дня} one{Вместе уже {count} год} few{Вместе уже {count} года} many{Вместе уже {count} лет} other{Вместе уже {count} года}}",
+  "mediaPlaceholder": "Фото или видео",
+  "familyEyebrow": "Семь ветвей одного дерева",
+  "familyTitle": "Семья и профили",
+  "familyLede": "Нажмите на карточку, чтобы открыть домашний альбом человека.",
+  "familyEmpty": "В семье пока нет участников.",
+  "memberAgeYears": "{count, plural, =0{Меньше года} one{{count} год} few{{count} года} many{{count} лет} other{{count} года}}",
+  "calendarEyebrow": "Не забыть главное",
+  "calendarTitle": "Семейный календарь",
+  "calendarLede": "Дни с семейными событиями выделены. Нажмите на день, чтобы увидеть события.",
+  "calendarPreviousMonth": "Предыдущий месяц",
+  "calendarNextMonth": "Следующий месяц",
+  "calendarNoEvents": "В этот день событий нет.",
+  "profileBack": "Все свои",
+  "profileAbout": "Обо мне",
+  "profileWishlist": "Вишлист",
+  "profileWishlistEmpty": "Список желаний пока пуст.",
+  "profileGallery": "Мини-галерея",
+  "profileGalleryEmpty": "Фотографий пока нет.",
+  "profileNotFound": "Этот профиль ещё не записан в семейный альбом.",
+  "profileCopyWishlistLink": "Скопировать ссылку на вишлист",
+  "profileLinkCopied": "Ссылка на вишлист скопирована.",
+  "settingsFamilyName": "Название семьи",
+  "settingsDataSource": "Источник данных",
+  "settingsArchiveSource": "Семейный архив из assets/data/family.json",
+  "settingsReload": "Обновить данные",
+  "settingsReloadStarted": "Данные семьи обновлены.",
+  "settingsEditingSoon": "Редактирование появится на следующем шаге.",
+  "settingsFamilyPhoto": "Фото семьи",
+  "settingsFamilyPhotoHint": "/photos/семья.jpg или assets/photos/семья.jpg",
+  "settingsPhotoPreview": "Предпросмотр фото",
+  "settingsClearPhoto": "Убрать фото",
+  "settingsAppearance": "Внешний вид",
+  "settingsShowFamilyPhoto": "Показывать фото семьи в шапке",
+  "settingsShowEventPhotos": "Показывать фотографии в таймлайне",
+  "settingsSave": "Сохранить",
+  "settingsSaved": "Настройки сохранены.",
+  "settingsNameRequired": "Название семьи не может быть пустым.",
+  "settingsLocalOnly": "Изменения сохраняются локально на этом устройстве.",
+  "settingsTabFamily": "Семья",
+  "settingsTabMembers": "Участники",
+  "settingsTabEvents": "События",
+  "settingsTabAccounts": "Аккаунты",
+  "settingsTabBackups": "Копии",
+  "settingsTabMedia": "Медиатека",
+  "settingsMediaHint": "Все фотографии и видео в одном месте. Описание и кадрирование задаются отдельно для каждого участника и события.",
+  "mediaLibraryTitle": "Медиатека семьи",
+  "mediaLibraryUpload": "Загрузить файлы",
+  "mediaLibraryAddLink": "Добавить по ссылке",
+  "mediaAssetName": "Имя файла",
+  "mediaAssetType": "Тип",
+  "mediaUsageTitle": "Где используется",
+  "mediaUsageNone": "Пока ни с кем не связано.",
+  "mediaUsageAvatar": "{name} — аватар",
+  "mediaUsageBirthday": "{name} — день рождения",
+  "mediaUsageGallery": "{name} — галерея",
+  "mediaUsageEvent": "Событие «{name}»",
+  "mediaUsageFamilyPhoto": "Фото семьи в шапке",
+  "mediaStoredLocally": "Хранится локально",
+  "mediaDeleteTitle": "Удалить файл из медиатеки?",
+  "mediaDeleteBody": "Файл и все его связи с участниками и событиями будут удалены. Действие нельзя отменить.",
+  "mediaDelete": "Удалить",
+  "mediaDeleted": "Файл удалён из медиатеки.",
+  "mediaLibrarySize": "{count} файлов · {size}",
+  "settingsMembersHint": "Правьте профили, фотографии и видимость дней рождения. Новые участники сохраняются в сессии приложения.",
+  "settingsEventsHint": "Правьте события таймлайна, даты и места. Дни рождения формируются из профилей участников.",
+  "settingsAccountsHint": "Создавайте семейные аккаунты, назначайте роли и выпускайте гостевые ссылки.",
+  "settingsAccountsLocalOnly": "Аккаунты и гостевые ссылки хранятся в приложении до перезапуска.",
+  "settingsBackupsHint": "Снимки семейного архива. Восстановление откатывает данные на выбранный момент.",
+  "memberAdd": "Добавить участника",
+  "memberAdded": "Участник добавлен.",
+  "memberDeleted": "Участник удалён.",
+  "memberDefaultName": "Новый участник",
+  "memberDefaultRole": "Член семьи",
+  "memberDeleteConfirmTitle": "Удалить этого участника?",
+  "memberDeleteConfirmBody": "Профиль, личные фотографии и события, привязанные к участнику, исчезнут из альбома.",
+  "memberNameField": "Имя",
+  "memberRoleField": "Роль в семье",
+  "memberNicknameField": "Домашнее прозвище",
+  "memberBirthdayField": "День рождения",
+  "memberBirthdayHint": "ГГГГ-ММ-ДД",
+  "memberShowBirthday": "Показывать день рождения в таймлайне",
+  "memberMainPhoto": "Главное фото",
+  "memberHabitsField": "Привычки, по одной в строке",
+  "memberQuotesField": "Цитаты, по одной в строке",
+  "memberAccentField": "Цвет акцента",
+  "memberWishlistUrlField": "Ссылка на вишлист",
+  "memberDelete": "Удалить участника",
+  "eventAdd": "Добавить событие",
+  "eventAdded": "Событие добавлено.",
+  "eventDeleted": "Событие удалено.",
+  "eventDefaultTitle": "Новое событие",
+  "eventDelete": "Удалить событие",
+  "eventDeleteConfirmTitle": "Удалить это событие?",
+  "eventDeleteConfirmBody": "Событие и ссылки на его медиа исчезнут из таймлайна.",
+  "eventTitleField": "Название события",
+  "eventDateField": "Дата",
+  "eventKindField": "Тип события",
+  "eventPlaceField": "Место",
+  "eventTextField": "Описание",
+  "eventMemberField": "Связанный участник",
+  "eventMemberNone": "Без участника",
+  "eventShowElapsed": "Показывать, сколько прошло",
+  "eventKindMeeting": "Знакомство",
+  "eventKindDate": "Свидание",
+  "eventKindWedding": "Свадьба",
+  "eventKindChurch": "Венчание",
+  "eventKindBirth": "Рождение",
+  "eventKindTrip": "Поездка",
+  "eventKindMilestone": "Веха",
+  "photoPathHint": "/photos/фото.jpg или assets/photos/фото.jpg",
+  "settingsAdvancedJson": "Дополнительный JSON",
+  "settingsApplyJson": "Применить JSON",
+  "settingsInvalidJson": "Некорректный JSON-объект.",
+  "accountAdd": "Новый аккаунт",
+  "accountCreate": "Создать аккаунт",
+  "accountCreated": "Аккаунт создан.",
+  "accountSaved": "Аккаунт обновлён.",
+  "accountDeleted": "Аккаунт удалён.",
+  "accountDelete": "Удалить",
+  "accountDeleteConfirmTitle": "Удалить этот аккаунт?",
+  "accountDeleteConfirmBody": "Доступ к семейному альбому будет закрыт сразу.",
+  "accountLoginField": "Логин",
+  "accountNameField": "Имя",
+  "accountPasswordField": "Пароль",
+  "accountPasswordKeepHint": "Оставьте пустым, чтобы не менять пароль",
+  "accountRoleField": "Роль",
+  "accountRoleViewer": "Наблюдатель",
+  "accountRoleEditor": "Редактор",
+  "accountRoleAdmin": "Администратор",
+  "accountLoginInvalid": "Логин — 2–32 символа: буквы, цифры, точка, дефис или подчёркивание.",
+  "accountRoleInvalid": "Неизвестная роль.",
+  "accountPasswordTooShort": "Пароль слишком короткий.",
+  "accountLoginTaken": "Этот логин уже занят.",
+  "accountCannotDeleteSelf": "Нельзя удалить собственный аккаунт.",
+  "accountCannotChangeOwnRole": "Нельзя изменить собственную роль.",
+  "accountNotFound": "Аккаунт не найден.",
+  "accountForbidden": "Недостаточно прав.",
+  "accountUnauthenticated": "Войдите в аккаунт заново.",
+  "accountOffline": "Нет связи с сервером.",
+  "accountUnknownError": "Что-то пошло не так.",
+  "accountsEmpty": "Аккаунтов пока нет. Создайте первый выше.",
+  "guestLinksTitle": "Гостевые ссылки",
+  "guestLinksHint": "Гостевая ссылка открывает альбом без аккаунта и истекает автоматически.",
+  "guestLinkLabelField": "Для кого ссылка",
+  "guestLinkDaysField": "Срок действия, дней",
+  "guestLinkCreate": "Создать гостевую ссылку",
+  "guestLinkCopy": "Скопировать токен",
+  "guestLinkCopied": "Гостевой токен скопирован.",
+  "guestLinkRevoke": "Отозвать",
+  "guestLinksEmpty": "Гостевых ссылок пока нет.",
+  "guestLinkStatusActive": "Действует",
+  "guestLinkStatusExpired": "Истекла",
+  "guestLinkStatusRevoked": "Отозвана",
+  "backupCreate": "Создать копию сейчас",
+  "backupCreated": "Снимок сохранён.",
+  "backupCreateFailed": "Не удалось создать снимок.",
+  "backupEmpty": "Копий пока нет — создайте первую выше.",
+  "backupRestore": "Восстановить",
+  "backupRestoreConfirmTitle": "Восстановить этот снимок?",
+  "backupRestoreConfirmBody": "Изменения после этого момента исчезнут. Текущее состояние сначала сохранится в копию, поэтому откат можно вернуть обратно.",
+  "backupRestored": "Данные восстановлены из снимка.",
+  "backupRestoreFailed": "Не удалось восстановить снимок.",
+  "backupDelete": "Удалить",
+  "backupDeleteConfirmTitle": "Удалить этот снимок?",
+  "backupDeleteConfirmBody": "Удалится только резервная копия, данные семьи останутся прежними.",
+  "backupDeleted": "Снимок удалён.",
+  "backupSummary": "{count} из {kept} · {size}",
+  "backupRevision": "ревизия {revision}",
+  "backupSizeBytes": "{size} Б",
+  "backupSizeKb": "{size} КБ",
+  "backupSizeMb": "{size} МБ",
+  "backupLocalOnly": "Снимки хранятся локально и включают копии файлов медиатеки.",
+  "dateFormatHint": "ДД.ММ.ГГГГ",
+  "invalidDate": "Введите существующую дату: ДД.ММ.ГГГГ",
+  "memberShowInCalendar": "Отмечать день рождения в семейном календаре",
+  "memberBirthdayMedia": "Фото и видео дня рождения",
+  "memberGalleryTitle": "Фотографии и видео",
+  "memberGalleryAddShot": "Добавить фото",
+  "memberGalleryRemoveShot": "Удалить снимок",
+  "memberGalleryCaption": "Подпись снимка",
+  "memberWishlistTitle": "Вишлист",
+  "memberWishlistAdd": "Добавить желание",
+  "memberWishlistEmpty": "Желаний пока нет.",
+  "wishlistItemTitleField": "Желание",
+  "wishlistItemUrlField": "Ссылка на товар",
+  "wishlistNoteField": "Заметка",
+  "wishlistRemove": "Удалить желание",
+  "eventShowInCalendar": "Отмечать дату в семейном календаре",
+  "calendarBirthdayTitle": "День рождения: {name}",
+  "mediaTitle": "Фотографии и видео",
+  "mediaAdd": "Добавить медиа",
+  "mediaAddByLink": "Добавить по ссылке",
+  "mediaEmpty": "Фотографий и видео пока нет.",
+  "mediaSourceField": "Путь к файлу или ссылка",
+  "mediaCaptionField": "Подпись",
+  "mediaTypeField": "Тип",
+  "mediaTypeImage": "Фото",
+  "mediaTypeVideo": "Видео",
+  "mediaPeopleField": "Кто на фото",
+  "mediaEventsField": "Связанные события",
+  "mediaPeopleHint": "Отмеченное фото появится в профиле каждого выбранного человека.",
+  "mediaPersonCaption": "Подпись для {name}",
+  "mediaEventsHint": "Связанное фото появится в выбранных событиях.",
+  "mediaFromLibrary": "Из медиатеки",
+  "mediaLibraryEmpty": "Медиатека пуста. Загрузите файлы в «Настройки → Медиатека».",
+  "mediaCropField": "Видимая часть для этой связи",
+  "videoPlay": "Играть",
+  "videoPause": "Пауза",
+  "videoMute": "Выключить звук",
+  "videoUnmute": "Включить звук",
+  "videoError": "Не удалось воспроизвести видео.",
+  "videoConvert": "Конвертировать в WebM",
+  "videoConverting": "Конвертация…",
+  "videoConverted": "Видео сконвертировано в WebM.",
+  "videoConvertFailed": "Не удалось сконвертировать видео.",
+  "videoConvertHint": "Конвертация идёт в браузере. Не закрывайте экран до завершения.",
+  "mediaCropX": "По горизонтали",
+  "mediaCropY": "По вертикали",
+  "mediaZoom": "Масштаб",
+  "mediaCropHint": "Перетащите фото и используйте жест масштабирования",
+  "mediaCropReset": "Сбросить кадр",
+  "mediaZoomIn": "Приблизить",
+  "mediaZoomOut": "Отдалить",
+  "mediaRemove": "Удалить медиа",
+  "mediaUpload": "Загрузить с устройства",
+  "mediaUploading": "Загрузка…",
+  "mediaUploadHint": "Фото и видео до 20 МБ. Файлы хранятся локально на этом устройстве.",
+  "mediaUploadTooLarge": "Файл больше 20 МБ: {name}",
+  "mediaUploadFailed": "Не удалось загрузить файл.",
+  "mediaUploadEmpty": "Выбранный файл пуст.",
+  "mediaOpenLink": "Открыть ссылку",
+  "mediaLinkCopied": "Ссылка скопирована.",
+  "timelineElapsedYears": "{count, plural, =0{{count} лет} one{{count} год} few{{count} года} many{{count} лет} other{{count} года}}",
+  "timelineElapsedMonths": "{count, plural, =0{{count} месяцев} one{{count} месяц} few{{count} месяца} many{{count} месяцев} other{{count} месяца}}",
+  "timelineElapsedDays": "{count, plural, =0{{count} дней} one{{count} день} few{{count} дня} many{{count} дней} other{{count} дня}}",
+  "cancel": "Отмена",
+  "close": "Закрыть",
+
+  "@appTitle": {
+    "description": "Название приложения"
+  },
+  "@welcomeTitle": {
+    "description": "Заголовок приветствия"
+  },
+  "@welcomeMessage": {
+    "description": "Сообщение приветствия"
+  },
+  "@homeFamilyLabel": {
+    "description": "Подпись над названием семьи"
+  },
+  "@homeSubtitle": {
+    "description": "Короткое описание под названием семьи"
+  },
+  "@homeOverviewTitle": {
+    "description": "Заголовок блока со статистикой"
+  },
+  "@homeMembersCount": {
+    "description": "Количество членов семьи в обзоре",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeEventsCount": {
+    "description": "Количество событий таймлайна в обзоре",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeLoading": {
+    "description": "Показывается во время загрузки данных семьи"
+  },
+  "@homeLoadError": {
+    "description": "Показывается, если данные семьи не загрузились"
+  },
+  "@homeRetry": {
+    "description": "Кнопка повторной загрузки данных семьи"
+  },
+  "@settingsTitle": {"description": "Заголовок настроек и подсказка шестерёнки"},
+  "@navTimeline": {"description": "Подпись вкладки таймлайна"},
+  "@navCalendar": {"description": "Подпись вкладки календаря"},
+  "@navFamily": {"description": "Подпись вкладки семьи"},
+  "@timelineEyebrow": {"description": "Подпись над заголовком таймлайна"},
+  "@timelineTitle": {"description": "Заголовок страницы таймлайна"},
+  "@timelineLede": {"description": "Описание страницы таймлайна"},
+  "@timelineEmpty": {"description": "Показывается, если событий нет"},
+  "@timelineTogetherYears": {
+    "description": "Сколько лет вместе",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@mediaPlaceholder": {"description": "Заглушка для отсутствующего фото или видео"},
+  "@familyEyebrow": {"description": "Подпись над заголовком семьи"},
+  "@familyTitle": {"description": "Заголовок страницы семьи"},
+  "@familyLede": {"description": "Описание страницы семьи"},
+  "@familyEmpty": {"description": "Показывается, если участников нет"},
+  "@memberAgeYears": {
+    "description": "Возраст члена семьи",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@calendarEyebrow": {"description": "Подпись над заголовком календаря"},
+  "@calendarTitle": {"description": "Заголовок страницы календаря"},
+  "@calendarLede": {"description": "Описание страницы календаря"},
+  "@calendarPreviousMonth": {"description": "Подсказка кнопки предыдущего месяца"},
+  "@calendarNextMonth": {"description": "Подсказка кнопки следующего месяца"},
+  "@calendarNoEvents": {"description": "Показывается для дня без событий"},
+  "@profileBack": {"description": "Кнопка возврата к семье"},
+  "@profileAbout": {"description": "Заголовок блока «Обо мне»"},
+  "@profileWishlist": {"description": "Заголовок блока вишлиста"},
+  "@profileWishlistEmpty": {"description": "Показывается, если вишлист пуст"},
+  "@profileGallery": {"description": "Заголовок мини-галереи"},
+  "@profileGalleryEmpty": {"description": "Показывается, если фотографий нет"},
+  "@profileNotFound": {"description": "Показывается, если профиль не найден"},
+  "@profileCopyWishlistLink": {"description": "Кнопка копирования ссылки на вишлист"},
+  "@profileLinkCopied": {"description": "Подтверждение копирования ссылки"},
+  "@settingsFamilyName": {"description": "Подпись поля названия семьи"},
+  "@settingsDataSource": {"description": "Подпись блока источника данных"},
+  "@settingsArchiveSource": {"description": "Описание источника данных"},
+  "@settingsReload": {"description": "Кнопка обновления данных семьи"},
+  "@settingsReloadStarted": {"description": "Подтверждение обновления данных"},
+  "@settingsEditingSoon": {"description": "Заметка о будущем редактировании"},
+  "@settingsFamilyPhoto": {"description": "Подпись поля фото семьи"},
+  "@settingsFamilyPhotoHint": {"description": "Подсказка для пути к фото семьи"},
+  "@settingsPhotoPreview": {"description": "Заглушка предпросмотра фото"},
+  "@settingsClearPhoto": {"description": "Кнопка удаления фото семьи"},
+  "@settingsAppearance": {"description": "Заголовок раздела внешнего вида"},
+  "@settingsShowFamilyPhoto": {"description": "Переключатель фото в шапке"},
+  "@settingsShowEventPhotos": {"description": "Переключатель фото в таймлайне"},
+  "@settingsSave": {"description": "Кнопка сохранения настроек"},
+  "@settingsSaved": {"description": "Подтверждение сохранения настроек"},
+  "@settingsNameRequired": {"description": "Ошибка пустого названия семьи"},
+  "@settingsLocalOnly": {"description": "Заметка о хранении изменений в памяти"},
+  "@backupSummary": {
+    "description": "Сколько снимков хранится и их суммарный размер",
+    "placeholders": {
+      "count": {"type": "int"},
+      "kept": {"type": "int"},
+      "size": {"type": "String"}
+    }
+  },
+  "@backupRevision": {
+    "description": "Ревизия снимка",
+    "placeholders": {
+      "revision": {"type": "int"}
+    }
+  },
+  "@backupSizeBytes": {
+    "description": "Размер копии в байтах",
+    "placeholders": {
+      "size": {"type": "int"}
+    }
+  },
+  "@backupSizeKb": {
+    "description": "Размер копии в килобайтах",
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "@backupSizeMb": {
+    "description": "Размер копии в мегабайтах",
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "@mediaPersonCaption": {
+    "description": "Личная подпись отмеченного человека",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageAvatar": {
+    "description": "Использование медиа как аватара",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageBirthday": {
+    "description": "Использование медиа в дне рождения",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageGallery": {
+    "description": "Использование медиа в галерее",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageEvent": {
+    "description": "Использование медиа в событии",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaLibrarySize": {
+    "description": "Итог по медиатеке",
+    "placeholders": {
+      "count": {"type": "int"},
+      "size": {"type": "String"}
+    }
+  },
+  "@calendarBirthdayTitle": {
+    "description": "Синтетическая запись дня рождения в календаре",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "@mediaUploadTooLarge": {
+    "description": "Ошибка загрузки с именем файла",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "@timelineElapsedYears": {
+    "description": "Прошло полных лет",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@timelineElapsedMonths": {
+    "description": "Прошло полных месяцев",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@timelineElapsedDays": {
+    "description": "Прошло дней",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@close": {"description": "Закрывает нижнюю панель"}
+}

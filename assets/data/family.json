@@ -1,0 +1,1192 @@
+{
+  "familyName": "OUR TREE",
+  "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
+  "revision": 1791218268782,
+  "members": [
+    {
+      "id": "papa",
+      "role": "Папа",
+      "name": "ВГ",
+      "nickname": "Кот",
+      "birthday": "1980-09-17",
+      "showBirthdayOnTimeline": false,
+      "accent": "#6b4f32",
+      "about": "<em>Главный по неважным решениям. Специалист по понятным только ему шуткам</em>",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Фартук с надписью «Шеф семьи»",
+          "url": "https://www.wildberries.ru/"
+        },
+        {
+          "title": "Набор для костра",
+          "note": "Чугунная сковорода"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "",
+          "media": [
+            {
+              "id": "bf047015-67c3-47e7-86d6-4cb25e6e534c",
+              "source": "/photos/bf047015-67c3-47e7-86d6-4cb25e6e534c.jpg",
+              "type": "image",
+              "name": "трио.jpg",
+              "zoom": 1.25,
+              "people": [
+                {
+                  "id": "mama"
+                },
+                {
+                  "id": "child-1"
+                }
+              ]
+            },
+            {
+              "id": "1d345752-6de0-47fc-9ccf-2aac80caf77b",
+              "source": "/photos/1d345752-6de0-47fc-9ccf-2aac80caf77b.jpg",
+              "type": "image",
+              "name": "2е.jpg",
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            },
+            {
+              "id": "f29536a7-0695-4d0f-8155-8fcf46ac30a9",
+              "source": "/photos/f29536a7-0695-4d0f-8155-8fcf46ac30a9.jpg",
+              "type": "image",
+              "name": "2е2.jpg",
+              "zoom": 1.05,
+              "position": {
+                "x": 50,
+                "y": 0
+              },
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            },
+            {
+              "id": "183dbeea-eaee-46df-b8fc-b3375b56f426",
+              "source": "/photos/183dbeea-eaee-46df-b8fc-b3375b56f426.jpg",
+              "type": "image",
+              "name": "3о.jpg",
+              "zoom": 1.3,
+              "people": [
+                {
+                  "id": "child-2"
+                },
+                {
+                  "id": "child-3"
+                }
+              ]
+            },
+            {
+              "id": "cfd68d12-63ca-4e41-ab21-45dd33e57d9d",
+              "source": "/photos/cfd68d12-63ca-4e41-ab21-45dd33e57d9d.jpg",
+              "type": "image",
+              "name": "596510986_26362512853338355_1987701266733351322_n.jpg",
+              "zoom": 1.45,
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.4,
+      "photo": "/photos/media-023_portrait.jpg",
+      "photoPosition": {
+        "x": 41.666666666666664,
+        "y": 50
+      }
+    },
+    {
+      "id": "mama",
+      "role": "Мама, главная девочка в семье",
+      "name": "Оля",
+      "nickname": "Котамля",
+      "birthday": "1983-10-08",
+      "showBirthdayOnTimeline": false,
+      "accent": "#8a5a44",
+      "about": "<em>Главная </em>в семье <em>по важным решениям, </em>человек с множеством ипостасей, <em>специалист по связям с внешним и внутренним миром, органайзер всего</em>",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Керамическая кружка ручной работы",
+          "url": "https://www.ozon.ru/"
+        },
+        {
+          "title": "Выходные без готовки",
+          "note": "Сертификат в любимое кафе"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Одна из ипостасей нашей Олечки. Фото с друзьями",
+          "media": [
+            {
+              "id": "1f6b2392-0091-41c8-94e3-87f9cf39f709",
+              "source": "/photos/1f6b2392-0091-41c8-94e3-87f9cf39f709.jpg",
+              "type": "image",
+              "name": "Одна из ипостасей.jpg",
+              "zoom": 2.5,
+              "position": {
+                "x": 60.666666666666664,
+                "y": 56.333333333333336
+              }
+            },
+            {
+              "id": "ad7f6de6-9517-43e1-8df1-206381f5df01",
+              "source": "/photos/ad7f6de6-9517-43e1-8df1-206381f5df01.jpg",
+              "type": "image",
+              "name": "7 в машине.jpg",
+              "zoom": 1.75,
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "child-1"
+                },
+                {
+                  "id": "child-2"
+                },
+                {
+                  "id": "child-3"
+                },
+                {
+                  "id": "child-4"
+                },
+                {
+                  "id": "child-5"
+                }
+              ]
+            },
+            {
+              "id": "fc705fd2-9265-4902-9637-cdf6d3daf660",
+              "source": "/photos/fc705fd2-9265-4902-9637-cdf6d3daf660.mp4",
+              "type": "video",
+              "name": "842186874494686.mp4",
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "child-1"
+                },
+                {
+                  "id": "child-2"
+                },
+                {
+                  "id": "child-3"
+                },
+                {
+                  "id": "child-4"
+                },
+                {
+                  "id": "child-5"
+                }
+              ]
+            },
+            {
+              "id": "8bb2678b-cee4-4a34-bc54-2f913eafd061",
+              "source": "/photos/8bb2678b-cee4-4a34-bc54-2f913eafd061.jpg",
+              "type": "image",
+              "name": "машина.jpg",
+              "zoom": 1.05,
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "child-2"
+                },
+                {
+                  "id": "child-3"
+                },
+                {
+                  "id": "child-1"
+                }
+              ]
+            },
+            {
+              "id": "d7e9f37b-1329-4266-8779-7431118d46f8",
+              "source": "/photos/d7e9f37b-1329-4266-8779-7431118d46f8.jpg",
+              "type": "image",
+              "name": "597938996_26362757896647184_3278911880578784727_n.jpg",
+              "zoom": 1
+            },
+            {
+              "id": "f3189017-24ca-4e7e-a1af-b32b88b92372",
+              "source": "/photos/f3189017-24ca-4e7e-a1af-b32b88b92372.jpg",
+              "type": "image",
+              "name": "597637176_26362509776671996_1591938244094665891_n.jpg",
+              "position": {
+                "x": 50,
+                "y": 0
+              },
+              "zoom": 1.05
+            },
+            {
+              "id": "9d56951b-2e90-4f69-9337-9c2d2673d9f5",
+              "source": "/photos/9d56951b-2e90-4f69-9337-9c2d2673d9f5.jpg",
+              "type": "image",
+              "name": "556397820_25657470780509236_6508054146794731552_n.jpg",
+              "zoom": 1.1,
+              "position": {
+                "x": 51.666666666666664,
+                "y": 50
+              }
+            }
+          ]
+        }
+      ],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.75,
+      "photo": "/photos/0b377b59-c45a-4e28-aac8-b52bdcf517c6.jpg",
+      "photoPosition": {
+        "x": 49.666666666666664,
+        "y": 35
+      }
+    },
+    {
+      "id": "child-1",
+      "role": "Старшенькая",
+      "name": "Алиса",
+      "nickname": "Аля",
+      "birthday": "2002-08-25",
+      "showBirthdayOnTimeline": false,
+      "accent": "#7a5c7a",
+      "about": "<br>",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Акварельный набор",
+          "url": "https://www.wildberries.ru/"
+        },
+        {
+          "title": "Наушники"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "",
+          "media": [
+            {
+              "id": "a6da9a77-82f4-4164-8735-65649fc99edd",
+              "source": "/photos/a6da9a77-82f4-4164-8735-65649fc99edd.jpg",
+              "type": "image",
+              "name": "ррр.jpg",
+              "zoom": 1
+            },
+            {
+              "id": "5d1fdfd8-f6f5-43d0-9b9f-8ddac1c2208e",
+              "source": "/photos/5d1fdfd8-f6f5-43d0-9b9f-8ddac1c2208e.jpg",
+              "type": "image",
+              "name": "36439467_2230670080282636_2957881411966599168_n.jpg",
+              "zoom": 1
+            },
+            {
+              "id": "db12aaa8-d8b5-4e7d-aedb-8983c8490ab2",
+              "source": "/photos/db12aaa8-d8b5-4e7d-aedb-8983c8490ab2.jpg",
+              "type": "image",
+              "name": "566380041_25898691086387203_4751866870054008892_n.jpg",
+              "position": {
+                "x": 50,
+                "y": 96.33333333333333
+              },
+              "zoom": 1.3
+            },
+            {
+              "id": "7719e139-8f6a-42f2-b2df-885993cec948",
+              "source": "/photos/7719e139-8f6a-42f2-b2df-885993cec948.jpg",
+              "type": "image",
+              "name": "556045833_25670917729164541_4714812690209572273_n.jpg",
+              "zoom": 1
+            },
+            {
+              "id": "0b72435f-ae73-48e5-9fad-c6898d84d36d",
+              "source": "/photos/0b72435f-ae73-48e5-9fad-c6898d84d36d.jpg",
+              "type": "image",
+              "name": "556142146_25663187976604183_4673539365867842590_n.jpg",
+              "zoom": 1
+            }
+          ]
+        }
+      ],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.4,
+      "photo": "/photos/media-028_portrait.jpg",
+      "photoPosition": {
+        "x": 50,
+        "y": 38.333333333333336
+      }
+    },
+    {
+      "id": "child-2",
+      "role": "Младшая Алиса в семье",
+      "name": "Алиса ",
+      "nickname": "Алисик",
+      "birthday": "2010-08-12",
+      "showBirthdayOnTimeline": false,
+      "accent": "#4d6a4d",
+      "about": "Вечно в движении (если не лежит).",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Фонарик",
+          "url": "https://www.wildberries.ru/"
+        },
+        {
+          "title": "Палатка для двора"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "",
+          "media": [
+            {
+              "id": "50ab9f66-2e42-4bde-a58d-39a6f8c40cd9",
+              "source": "/photos/50ab9f66-2e42-4bde-a58d-39a6f8c40cd9.jpg",
+              "type": "image",
+              "name": "568223692_25898972049692440_1996710494039336565_n.jpg",
+              "zoom": 1.05,
+              "position": {
+                "x": 50,
+                "y": 100
+              }
+            },
+            {
+              "id": "5efa888c-ee75-400b-b2d6-08c8feec7326",
+              "source": "/photos/5efa888c-ee75-400b-b2d6-08c8feec7326.jpg",
+              "type": "image",
+              "name": "2018-09-01 11-50-06.JPG",
+              "zoom": 1,
+              "position": {
+                "x": 50,
+                "y": 34.666666666666664
+              },
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "child-3"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.6,
+      "photo": "/photos/media-017_portrait.jpg",
+      "photoPosition": {
+        "x": 53,
+        "y": 9.333333333333334
+      }
+    },
+    {
+      "id": "child-3",
+      "role": "Младшая дочь из старших",
+      "name": "Юля",
+      "nickname": "Юльчик-лемурчик",
+      "birthday": "2014-01-04",
+      "showBirthdayOnTimeline": false,
+      "accent": "#b07a3a",
+      "about": "<br>",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Набор стикеров"
+        },
+        {
+          "title": "Лейка для цветов",
+          "url": "https://www.ozon.ru/"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "",
+          "media": [
+            {
+              "id": "0c9bdd97-101d-4e3c-9dbe-800a999500dc",
+              "source": "/photos/0c9bdd97-101d-4e3c-9dbe-800a999500dc.jpg",
+              "type": "image",
+              "name": "юльчик.jpg",
+              "zoom": 1
+            },
+            {
+              "id": "c4923765-78c8-4483-904b-3ab7f8e4fe52",
+              "source": "/photos/c4923765-78c8-4483-904b-3ab7f8e4fe52.jpg",
+              "type": "image",
+              "name": "юл.jpg",
+              "zoom": 1.2
+            },
+            {
+              "id": "042ed2ca-1173-4720-874e-d5adc5276638",
+              "source": "/photos/042ed2ca-1173-4720-874e-d5adc5276638.jpg",
+              "type": "image",
+              "name": "568719337_25898971939692451_6691489628253395004_n.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                }
+              ]
+            },
+            {
+              "id": "f98fbfa7-8bdb-41f1-a681-589084ae9844",
+              "source": "/photos/f98fbfa7-8bdb-41f1-a681-589084ae9844.jpg",
+              "type": "image",
+              "name": "2018-12-15 19-05-03_1544910283891.JPG",
+              "zoom": 1.05
+            }
+          ]
+        }
+      ],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.4,
+      "photo": "/photos/media-011_portrait.jpg",
+      "photoPosition": {
+        "x": 50,
+        "y": 11.333333333333334
+      }
+    },
+    {
+      "id": "child-4",
+      "role": "Младшенькая девочка",
+      "name": "Марианна",
+      "nickname": "Маняня",
+      "birthday": "2019-12-09",
+      "showBirthdayOnTimeline": true,
+      "accent": "#3f5f73",
+      "about": "Человек, который точно знает, чего хочет",
+      "habits": [],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Магнитный конструктор",
+          "url": "https://www.wildberries.ru/"
+        },
+        {
+          "title": "Поезд"
+        }
+      ],
+      "gallery": [],
+      "birthdayMedia": [],
+      "wishlistUrl": "",
+      "photoZoom": 1.2,
+      "photo": "/photos/dc097785-eda3-41f0-a6c4-5a8781c0f0b4.jpg",
+      "photoPosition": {
+        "x": 49.666666666666664,
+        "y": 33.666666666666664
+      }
+    },
+    {
+      "id": "child-5",
+      "role": "Сын",
+      "name": "Лев",
+      "nickname": "Просто Лев",
+      "birthday": "2023-03-07",
+      "showBirthdayOnTimeline": true,
+      "accent": "#c46a4a",
+      "about": "Самый младший и самый громкий ",
+      "habits": [
+        "«Я сам. Почти сам.»"
+      ],
+      "quotes": [],
+      "wishlist": [
+        {
+          "title": "Мягкий лисёнок"
+        },
+        {
+          "title": "Книжка с окошками",
+          "url": "https://www.ozon.ru/"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "",
+          "media": []
+        }
+      ],
+      "birthdayMedia": [
+        {
+          "id": "dc5ef67a-1523-44d0-98d9-8aacf551dc29",
+          "source": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
+          "type": "image",
+          "name": "Рождение Льва.jpg",
+          "zoom": 1.55
+        }
+      ],
+      "wishlistUrl": "",
+      "photoZoom": 1.4,
+      "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg"
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "birth-sofia",
+      "date": "2011-03-08",
+      "title": "Рождение Софии",
+      "text": "Первая дочь. С этого дня в доме всегда есть список дел и пачка цветных карандашей.",
+      "kind": "birth",
+      "memberId": "child-1",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "meet",
+      "date": "2013-10-01",
+      "title": "Знакомство",
+      "place": "Космос",
+      "text": "Случайная встреча<em> где-то</em> на просторах Вселенной , которая перестала быть случайной",
+      "kind": "meeting",
+      "showElapsed": true,
+      "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
+      "photoZoom": 1.1,
+      "photoPosition": {
+        "x": 100,
+        "y": 0
+      },
+      "media": []
+    },
+    {
+      "id": "birth-misha",
+      "date": "2013-11-19",
+      "title": "Рождение Михаила",
+      "text": "Появился тот, кто научил всех бегать быстрее и спать крепче.",
+      "kind": "birth",
+      "memberId": "child-2",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "first-date",
+      "date": "2014-06-13",
+      "title": "Первое свидание",
+      "place": "Маленькое гнездо ",
+      "text": "Долгий разговор, остывший <s>чай<em> с тоником</em></s> и неукротимое желание встретиться снова.",
+      "kind": "date",
+      "showElapsed": true,
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "event-1791022985434",
+      "date": "2016-01-12",
+      "title": "Это наш Рай",
+      "text": "<em>15.03.2007-07.06.2022</em>",
+      "kind": "milestone",
+      "photoZoom": 1.15,
+      "place": "Котодом",
+      "photo": "/photos/media-032_image.jpg",
+      "photoPosition": {
+        "x": 50,
+        "y": 97.33333333333333
+      },
+      "media": [
+        {
+          "zoom": 1.75,
+          "id": "a9a07b86-b4f4-4d4e-85b0-7b73e9cabc23",
+          "source": "/photos/a9a07b86-b4f4-4d4e-85b0-7b73e9cabc23.jpg",
+          "type": "image",
+          "name": "Рай.jpg",
+          "position": {
+            "x": 50,
+            "y": 86.33333333333333
+          }
+        }
+      ]
+    },
+    {
+      "id": "birth-anya",
+      "date": "2016-05-02",
+      "title": "Рождение Анны",
+      "text": "Дом стал пахнуть цветами, пластилином и секретными записками.",
+      "kind": "birth",
+      "memberId": "child-3",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "event-1791022585122",
+      "date": "2016-05-08",
+      "title": "Путешствие в Мир и Несвиж",
+      "text": "",
+      "kind": "trip",
+      "photoZoom": 1.4,
+      "photo": "/photos/media-031_image.jpg",
+      "place": "Мир, Несвиж",
+      "media": []
+    },
+    {
+      "id": "event-1791022465275",
+      "date": "2016-07-30",
+      "title": "Путешествие в Москву",
+      "text": "",
+      "kind": "trip",
+      "photoZoom": 1.4,
+      "media": [
+        {
+          "zoom": 1,
+          "id": "834c5952-8e7c-40f0-ae71-8bd9b0409613",
+          "source": "/photos/834c5952-8e7c-40f0-ae71-8bd9b0409613.jpg",
+          "type": "image",
+          "name": "моск.jpg"
+        }
+      ]
+    },
+    {
+      "id": "event-1791200900835",
+      "date": "2017-04-25",
+      "title": "Издание книги некоей Хольман",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "media": [
+        {
+          "zoom": 1.4,
+          "id": "f3634017-447a-4ce4-865e-aa1f54618b94",
+          "source": "/photos/f3634017-447a-4ce4-865e-aa1f54618b94.jpg",
+          "type": "image",
+          "name": "557630912_25744233461832967_643424325913570781_n.jpg",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event-1791022442133",
+      "date": "2017-06-19",
+      "title": "Путешествие в Киев",
+      "text": "",
+      "kind": "trip",
+      "photoZoom": 1.6,
+      "photo": "/photos/media-012_image.jpg",
+      "photoPosition": {
+        "x": 11.333333333333334,
+        "y": 44
+      },
+      "media": [
+        {
+          "zoom": 1.05,
+          "id": "f1233e2c-592b-4f95-ad04-11d4092ccf54",
+          "source": "/photos/f1233e2c-592b-4f95-ad04-11d4092ccf54.jpg",
+          "type": "image",
+          "name": "34118848_2186180554731589_8295247900749856768_n.jpg"
+        },
+        {
+          "zoom": 1,
+          "id": "015323eb-a66c-40c0-bd73-2331b9d955b7",
+          "source": "/photos/015323eb-a66c-40c0-bd73-2331b9d955b7.jpg",
+          "type": "image",
+          "name": "557618126_25672296949026619_8644948432290858300_n.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1.05,
+          "id": "36c7aa93-300f-4870-87a6-0558371f2a51",
+          "source": "/photos/36c7aa93-300f-4870-87a6-0558371f2a51.jpg",
+          "type": "image",
+          "name": "556496409_25672296982359949_3528433208044542548_n.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wedding",
+      "date": "2018-01-26",
+      "title": "Свадьба",
+      "place": "ЗАГС тихая роспись и только мы вдвоéм",
+      "text": "День, с которого началась наша общая фамилия",
+      "kind": "wedding",
+      "showElapsed": true,
+      "photo": "/photos/media-024_image.jpg",
+      "photoZoom": 1.75,
+      "photoPosition": {
+        "x": 50,
+        "y": 63.666666666666664
+      },
+      "media": []
+    },
+    {
+      "id": "event-1791022380944",
+      "date": "2018-06-03",
+      "title": "Путешествие в Турцию",
+      "text": "<br>",
+      "kind": "trip",
+      "photoZoom": 1.35,
+      "place": "Анталия",
+      "photo": "/photos/media-006_1.jpg",
+      "photoPosition": {
+        "x": 48.333333333333336,
+        "y": 21
+      },
+      "media": [
+        {
+          "zoom": 1.1,
+          "id": "a2fbf272-2972-4974-be67-5e7e26538eab",
+          "source": "/photos/a2fbf272-2972-4974-be67-5e7e26538eab.jpg",
+          "type": "image",
+          "name": "турц.jpg",
+          "position": {
+            "x": 37.666666666666664,
+            "y": 93
+          }
+        },
+        {
+          "zoom": 1.25,
+          "id": "9e75e98b-19c5-4733-84f0-b773ceb1aa31",
+          "source": "/photos/9e75e98b-19c5-4733-84f0-b773ceb1aa31.jpg",
+          "type": "image",
+          "name": "Сиде.jpg",
+          "position": {
+            "x": 49.666666666666664,
+            "y": 57.666666666666664
+          }
+        },
+        {
+          "zoom": 1.35,
+          "id": "8d8bd018-6579-4673-8f40-44a9fdb1c245",
+          "source": "/photos/8d8bd018-6579-4673-8f40-44a9fdb1c245.jpg",
+          "type": "image",
+          "name": "турц3.jpg",
+          "position": {
+            "x": 50,
+            "y": 40.333333333333336
+          }
+        },
+        {
+          "zoom": 1.15,
+          "id": "73decc1e-86d1-4460-8ed4-10b10ebc3033",
+          "source": "/photos/73decc1e-86d1-4460-8ed4-10b10ebc3033.jpg",
+          "type": "image",
+          "name": "турц2.jpg",
+          "position": {
+            "x": 50,
+            "y": 85.33333333333333
+          }
+        },
+        {
+          "zoom": 1,
+          "id": "debb3ecb-3cab-4b10-952b-154ea5a449a4",
+          "source": "/photos/debb3ecb-3cab-4b10-952b-154ea5a449a4.jpg",
+          "type": "image",
+          "name": "36175849_2221360081213636_6309374182652116992_n.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1.4,
+          "id": "496bdd1a-078d-4de3-9d72-c8765a5be21e",
+          "source": "/photos/496bdd1a-078d-4de3-9d72-c8765a5be21e.mp4",
+          "type": "video",
+          "name": "2209832659033045.mp4",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1.4,
+          "id": "ca4a564b-8ade-4791-8e31-5b806ee5df5d",
+          "source": "/photos/ca4a564b-8ade-4791-8e31-5b806ee5df5d.mp4",
+          "type": "video",
+          "name": "2206133852736259.mp4",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1,
+          "id": "3f71a363-d51f-42c1-b5a9-23675a67077a",
+          "source": "/photos/3f71a363-d51f-42c1-b5a9-23675a67077a.jpg",
+          "type": "image",
+          "name": "от.jpg",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1.2,
+          "id": "38cc951d-725b-49f2-a5b7-247a31cf42ea",
+          "source": "/photos/38cc951d-725b-49f2-a5b7-247a31cf42ea.jpg",
+          "type": "image",
+          "name": "35325180_2203854069630904_4139503228075114496_n.jpg",
+          "position": {
+            "x": 50,
+            "y": 100
+          },
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1.4,
+          "id": "c2976a0d-c5c8-49e3-a28b-6934f54f66ae",
+          "source": "/photos/c2976a0d-c5c8-49e3-a28b-6934f54f66ae.mp4",
+          "type": "video",
+          "name": "2193337257349252.mp4",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        },
+        {
+          "zoom": 1,
+          "id": "171b3e4f-8ee7-43b1-b94c-bd713f21e139",
+          "source": "/photos/171b3e4f-8ee7-43b1-b94c-bd713f21e139.jpg",
+          "type": "image",
+          "name": "34276631_2187222677960710_3802844076298993664_n.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event-1791197755256",
+      "date": "2018-08-11",
+      "title": "Путешествие на море",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "media": [
+        {
+          "zoom": 1.05,
+          "id": "64285a67-7ae0-4433-800e-774be7d0864a",
+          "source": "/photos/64285a67-7ae0-4433-800e-774be7d0864a.jpg",
+          "type": "image",
+          "name": "Одесса1.jpg",
+          "position": {
+            "x": 62.333333333333336,
+            "y": 39.666666666666664
+          },
+          "people": [
+            {
+              "id": "mama"
+            },
+            {
+              "id": "child-1"
+            },
+            {
+              "id": "child-2"
+            },
+            {
+              "id": "child-4"
+            }
+          ]
+        },
+        {
+          "zoom": 1.25,
+          "id": "543b4628-588f-4504-89fc-0e6a2bf2cbbc",
+          "source": "/photos/543b4628-588f-4504-89fc-0e6a2bf2cbbc.jpg",
+          "type": "image",
+          "name": "IMG_20190815_161931.jpg",
+          "people": [
+            {
+              "id": "child-1"
+            }
+          ]
+        },
+        {
+          "zoom": 1.35,
+          "id": "a09b6305-431d-49af-a024-c4095fc3982b",
+          "source": "/photos/a09b6305-431d-49af-a024-c4095fc3982b.jpg",
+          "type": "image",
+          "name": "IMG_20190817_203226.jpg"
+        },
+        {
+          "zoom": 1.8,
+          "id": "547a479c-5ca3-4671-9ddb-b6e2a6063729",
+          "source": "/photos/547a479c-5ca3-4671-9ddb-b6e2a6063729.jpg",
+          "type": "image",
+          "name": "IMG_20190815_163855.jpg",
+          "people": [
+            {
+              "id": "mama"
+            },
+            {
+              "id": "child-1"
+            },
+            {
+              "id": "child-3"
+            },
+            {
+              "id": "child-2"
+            }
+          ]
+        },
+        {
+          "zoom": 1.4,
+          "id": "678bb3fb-aca7-4d48-87ca-df2eea7c3aa1",
+          "source": "/photos/678bb3fb-aca7-4d48-87ca-df2eea7c3aa1.jpg",
+          "type": "image",
+          "name": "IMG_20190818_183815.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "child-2"
+            },
+            {
+              "id": "child-3"
+            }
+          ]
+        },
+        {
+          "zoom": 1.35,
+          "id": "34b5fcad-155c-4118-8803-7b498cfb3def",
+          "source": "/photos/34b5fcad-155c-4118-8803-7b498cfb3def.jpg",
+          "type": "image",
+          "name": "Санж.jpg",
+          "position": {
+            "x": 47.31975337894918,
+            "y": 100
+          },
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            },
+            {
+              "id": "child-4"
+            }
+          ]
+        }
+      ],
+      "place": "Киев-Одесса-Черноморск-Санжейка"
+    },
+    {
+      "id": "event-1791028468297",
+      "date": "2018-09-09",
+      "title": "Марафон",
+      "text": "<em>Беги, Оля, беги! </em>",
+      "kind": "milestone",
+      "photoZoom": 1.05,
+      "place": "Минск ",
+      "photo": "/photos/media-026_image.jpg",
+      "media": []
+    },
+    {
+      "id": "birth-danya",
+      "date": "2018-09-27",
+      "title": "Рождение Даниила",
+      "text": ".",
+      "kind": "birth",
+      "memberId": "child-4",
+      "media": [
+        {
+          "zoom": 1.6,
+          "id": "e3815d7b-eb31-4c07-ad34-79b6a72721ca",
+          "source": "/photos/e3815d7b-eb31-4c07-ad34-79b6a72721ca.jpg",
+          "type": "image",
+          "name": "М-ка.jpg"
+        }
+      ],
+      "showElapsed": true,
+      "photoZoom": 1.4
+    },
+    {
+      "id": "event-1791022484716",
+      "date": "2018-11-19",
+      "title": "Путешествие в Швейцарию",
+      "text": "<em>Горы, коровы и спа</em>",
+      "kind": "trip",
+      "photoZoom": 1.4,
+      "place": "Sweet The Rland",
+      "media": []
+    },
+    {
+      "id": "church",
+      "date": "2018-12-22",
+      "title": "Венчание",
+      "place": "Храм",
+      "text": "Тихий день единение душ.",
+      "kind": "church",
+      "showElapsed": true,
+      "photo": "/photos/media-019_image.jpg",
+      "photoZoom": 3,
+      "media": []
+    },
+    {
+      "id": "event-1791022911508",
+      "date": "2019-06-25",
+      "title": "Выпускной Алисы",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "photo": "/photos/media-016_image.jpg",
+      "media": [
+        {
+          "zoom": 1,
+          "id": "7ec84758-6b3c-49d7-805a-67e38d013d03",
+          "source": "/photos/7ec84758-6b3c-49d7-805a-67e38d013d03.jpg",
+          "type": "image",
+          "name": "вып.jpg",
+          "people": [
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "event-1791022504990",
+      "date": "2019-09-17",
+      "title": "Путешествие в Полоцк и Витебск",
+      "text": "",
+      "kind": "trip",
+      "photoZoom": 3,
+      "photo": "/photos/media-010_image.jpg",
+      "media": []
+    },
+    {
+      "id": "event-1791196800156",
+      "date": "2021-05-08",
+      "title": "Родилась Янтарная Фея",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "media": [],
+      "showElapsed": true
+    },
+    {
+      "id": "event-1791022913814",
+      "date": "2021-10-02",
+      "title": "Крещение Марианны",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.9,
+      "place": "Костел на Золотой Горке",
+      "photo": "/photos/media-030_image.jpg",
+      "photoPosition": {
+        "x": 50,
+        "y": 68
+      },
+      "media": []
+    },
+    {
+      "id": "car",
+      "date": "2022-12-10",
+      "title": "Покупка машины",
+      "place": "Салон",
+      "text": "<em>Новая </em>семейная машина: <em>счастье </em>на задних сиденьях.",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "event-1791022824653",
+      "date": "2023-05-03",
+      "title": "Покупка квартиры",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "place": "Котодом",
+      "media": []
+    },
+    {
+      "id": "batumi",
+      "date": "2025-02-18",
+      "title": "Путешествие в Батуми",
+      "place": "Батуми",
+      "text": "Белый снег, серый лёд, холодное море, и попытка выжить в апокалипсис.",
+      "kind": "trip",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "event-1791022555354",
+      "date": "2026-10-03",
+      "title": "Путешествие в Новогрудок",
+      "text": "",
+      "kind": "trip",
+      "photoZoom": 1.4,
+      "media": []
+    },
+    {
+      "id": "event-1791022955864",
+      "date": "2026-10-03",
+      "title": "Крещение Льва",
+      "text": "",
+      "kind": "milestone",
+      "photoZoom": 1.4,
+      "place": "Костёл на Золотой Горке",
+      "photo": "/photos/media-009_image.jpg",
+      "media": []
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+

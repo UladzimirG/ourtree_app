@@ -1,0 +1,455 @@
+{
+  "@@locale": "en",
+  "appTitle": "OurTree App",
+  "welcomeTitle": "Welcome to OurTree",
+  "welcomeMessage": "This is a clean Flutter project with localizations for ru/en and Riverpod state management.",
+  "homeFamilyLabel": "Family",
+  "homeSubtitle": "A place for your family stories, photos and dates.",
+  "homeOverviewTitle": "Overview",
+  "homeMembersCount": "{count, plural, =0{No members yet} one{{count} member} other{{count} members}}",
+  "homeEventsCount": "{count, plural, =0{No events yet} one{{count} event} other{{count} events}}",
+  "homeLoading": "Loading family data…",
+  "homeLoadError": "We couldn't load the family data.",
+  "homeRetry": "Try again",
+  "settingsTitle": "Family settings",
+  "navTimeline": "Timeline",
+  "navCalendar": "Calendar",
+  "navFamily": "Family",
+  "timelineEyebrow": "Family album",
+  "timelineTitle": "Life timeline",
+  "timelineLede": "A thread of events with our meetings, holidays and trips.",
+  "timelineEmpty": "The timeline is still empty.",
+  "timelineTogetherYears": "{count, plural, =0{Together since this day} one{Together for {count} year} other{Together for {count} years}}",
+  "mediaPlaceholder": "Photo or video",
+  "familyEyebrow": "Seven branches of one tree",
+  "familyTitle": "Family and profiles",
+  "familyLede": "Tap a card to open a person's home album.",
+  "familyEmpty": "No family members yet.",
+  "memberAgeYears": "{count, plural, =0{Less than a year} one{{count} year} other{{count} years}}",
+  "calendarEyebrow": "Don't forget the important dates",
+  "calendarTitle": "Family calendar",
+  "calendarLede": "Days with family events are highlighted. Tap a day to see what happened.",
+  "calendarPreviousMonth": "Previous month",
+  "calendarNextMonth": "Next month",
+  "calendarNoEvents": "No events on this day.",
+  "profileBack": "All family",
+  "profileAbout": "About me",
+  "profileWishlist": "Wishlist",
+  "profileWishlistEmpty": "The wishlist is still empty.",
+  "profileGallery": "Mini gallery",
+  "profileGalleryEmpty": "No photos yet.",
+  "profileNotFound": "This profile is not in the family album yet.",
+  "profileCopyWishlistLink": "Copy wishlist link",
+  "profileLinkCopied": "Wishlist link copied.",
+  "settingsFamilyName": "Family name",
+  "settingsDataSource": "Data source",
+  "settingsArchiveSource": "Family archive from assets/data/family.json",
+  "settingsReload": "Reload data",
+  "settingsReloadStarted": "Family data reloaded.",
+  "settingsEditingSoon": "Editing will appear in the next step.",
+  "settingsFamilyPhoto": "Family photo",
+  "settingsFamilyPhotoHint": "/photos/family.jpg or assets/photos/family.jpg",
+  "settingsPhotoPreview": "Photo preview",
+  "settingsClearPhoto": "Clear photo",
+  "settingsAppearance": "Appearance",
+  "settingsShowFamilyPhoto": "Show family photo in the header",
+  "settingsShowEventPhotos": "Show photos in the timeline",
+  "settingsSave": "Save",
+  "settingsSaved": "Settings saved.",
+  "settingsNameRequired": "Family name cannot be empty.",
+  "settingsLocalOnly": "Changes are saved locally on this device.",
+  "settingsTabFamily": "Family",
+  "settingsTabMembers": "Members",
+  "settingsTabEvents": "Events",
+  "settingsTabAccounts": "Accounts",
+  "settingsTabBackups": "Backups",
+  "settingsTabMedia": "Media library",
+  "settingsMediaHint": "One place for every photo and video. Descriptions and cropping are set individually for each member or event.",
+  "mediaLibraryTitle": "Family media library",
+  "mediaLibraryUpload": "Upload files",
+  "mediaLibraryAddLink": "Add by link",
+  "mediaAssetName": "File name",
+  "mediaAssetType": "Type",
+  "mediaUsageTitle": "Where it is used",
+  "mediaUsageNone": "Not linked to anyone yet.",
+  "mediaUsageAvatar": "{name} — avatar",
+  "mediaUsageBirthday": "{name} — birthday",
+  "mediaUsageGallery": "{name} — gallery",
+  "mediaUsageEvent": "Event \"{name}\"",
+  "mediaUsageFamilyPhoto": "Family photo in the header",
+  "mediaStoredLocally": "Stored locally",
+  "mediaDeleteTitle": "Delete this file from the library?",
+  "mediaDeleteBody": "The file and all its links to members and events will be removed. The action cannot be undone.",
+  "mediaDelete": "Delete",
+  "mediaDeleted": "File deleted from the library.",
+  "mediaLibrarySize": "{count} files · {size}",
+  "settingsMembersHint": "Edit profiles, photos and birthday visibility. New members are saved in the app session.",
+  "settingsEventsHint": "Edit timeline events, dates and places. Birthday entries are generated from member profiles.",
+  "settingsAccountsHint": "Create family accounts, assign roles and issue guest links.",
+  "settingsAccountsLocalOnly": "Accounts and guest links are kept in the app until you restart it.",
+  "settingsBackupsHint": "Snapshots of the family archive. Restoring rolls the data back to the selected moment.",
+  "memberAdd": "Add member",
+  "memberAdded": "Member added.",
+  "memberDeleted": "Member removed.",
+  "memberDefaultName": "New member",
+  "memberDefaultRole": "Family member",
+  "memberDeleteConfirmTitle": "Remove this member?",
+  "memberDeleteConfirmBody": "The profile, personal photos and events tied to this member will be removed from the album.",
+  "memberNameField": "Name",
+  "memberRoleField": "Role in the family",
+  "memberNicknameField": "Nickname",
+  "memberBirthdayField": "Birthday",
+  "memberBirthdayHint": "YYYY-MM-DD",
+  "memberShowBirthday": "Show birthday on the timeline",
+  "memberMainPhoto": "Main photo",
+  "memberHabitsField": "Habits, one per line",
+  "memberQuotesField": "Quotes, one per line",
+  "memberAccentField": "Accent color",
+  "memberWishlistUrlField": "Wishlist link",
+  "memberDelete": "Remove member",
+  "eventAdd": "Add event",
+  "eventAdded": "Event added.",
+  "eventDeleted": "Event removed.",
+  "eventDefaultTitle": "New event",
+  "eventDelete": "Remove event",
+  "eventDeleteConfirmTitle": "Remove this event?",
+  "eventDeleteConfirmBody": "The event and its media references will disappear from the timeline.",
+  "eventTitleField": "Event title",
+  "eventDateField": "Date",
+  "eventKindField": "Event type",
+  "eventPlaceField": "Place",
+  "eventTextField": "Description",
+  "eventMemberField": "Related member",
+  "eventMemberNone": "No member",
+  "eventShowElapsed": "Show time elapsed",
+  "eventKindMeeting": "Meeting",
+  "eventKindDate": "Date",
+  "eventKindWedding": "Wedding",
+  "eventKindChurch": "Church wedding",
+  "eventKindBirth": "Birth",
+  "eventKindTrip": "Trip",
+  "eventKindMilestone": "Milestone",
+  "photoPathHint": "/photos/photo.jpg or assets/photos/photo.jpg",
+  "settingsAdvancedJson": "Advanced JSON",
+  "settingsApplyJson": "Apply JSON",
+  "settingsInvalidJson": "Invalid JSON object.",
+  "accountAdd": "New account",
+  "accountCreate": "Create account",
+  "accountCreated": "Account created.",
+  "accountSaved": "Account updated.",
+  "accountDeleted": "Account deleted.",
+  "accountDelete": "Delete",
+  "accountDeleteConfirmTitle": "Delete this account?",
+  "accountDeleteConfirmBody": "The person will lose access to the family album immediately.",
+  "accountLoginField": "Login",
+  "accountNameField": "Name",
+  "accountPasswordField": "Password",
+  "accountPasswordKeepHint": "Leave empty to keep the current password",
+  "accountRoleField": "Role",
+  "accountRoleViewer": "Viewer",
+  "accountRoleEditor": "Editor",
+  "accountRoleAdmin": "Admin",
+  "accountLoginInvalid": "Login must be 2–32 characters: letters, digits, dot, dash or underscore.",
+  "accountRoleInvalid": "Unknown role.",
+  "accountPasswordTooShort": "Password is too short.",
+  "accountLoginTaken": "This login is already taken.",
+  "accountCannotDeleteSelf": "You cannot delete your own account.",
+  "accountCannotChangeOwnRole": "You cannot change your own role.",
+  "accountNotFound": "Account not found.",
+  "accountForbidden": "You do not have enough rights.",
+  "accountUnauthenticated": "Please sign in again.",
+  "accountOffline": "No connection to the server.",
+  "accountUnknownError": "Something went wrong.",
+  "accountsEmpty": "No accounts yet. Create the first one above.",
+  "guestLinksTitle": "Guest links",
+  "guestLinksHint": "A guest link opens the album without an account and expires automatically.",
+  "guestLinkLabelField": "Who is the link for",
+  "guestLinkDaysField": "Valid for, days",
+  "guestLinkCreate": "Create guest link",
+  "guestLinkCopy": "Copy token",
+  "guestLinkCopied": "Guest token copied.",
+  "guestLinkRevoke": "Revoke",
+  "guestLinksEmpty": "No guest links yet.",
+  "guestLinkStatusActive": "Active",
+  "guestLinkStatusExpired": "Expired",
+  "guestLinkStatusRevoked": "Revoked",
+  "backupCreate": "Create snapshot now",
+  "backupCreated": "Snapshot saved.",
+  "backupCreateFailed": "Could not create a snapshot.",
+  "backupEmpty": "No snapshots yet — create one above.",
+  "backupRestore": "Restore",
+  "backupRestoreConfirmTitle": "Restore this snapshot?",
+  "backupRestoreConfirmBody": "Changes made after this moment will disappear. The current state is saved in a backup first, so the rollback can be undone.",
+  "backupRestored": "Data restored from the snapshot.",
+  "backupRestoreFailed": "Could not restore the snapshot.",
+  "backupDelete": "Delete",
+  "backupDeleteConfirmTitle": "Delete this snapshot?",
+  "backupDeleteConfirmBody": "Only the backup copy will be removed; current family data stays untouched.",
+  "backupDeleted": "Snapshot deleted.",
+  "backupSummary": "{count} of {kept} · {size}",
+  "backupRevision": "revision {revision}",
+  "backupSizeBytes": "{size} B",
+  "backupSizeKb": "{size} KB",
+  "backupSizeMb": "{size} MB",
+  "backupLocalOnly": "Snapshots are stored locally and include copies of media files.",
+  "dateFormatHint": "DD.MM.YYYY",
+  "invalidDate": "Enter an existing date: DD.MM.YYYY",
+  "memberShowInCalendar": "Mark birthday in the family calendar",
+  "memberBirthdayMedia": "Birthday photos and videos",
+  "memberGalleryTitle": "Photos and videos",
+  "memberGalleryAddShot": "Add photo",
+  "memberGalleryRemoveShot": "Remove shot",
+  "memberGalleryCaption": "Shot caption",
+  "memberWishlistTitle": "Wishlist",
+  "memberWishlistAdd": "Add wish",
+  "memberWishlistEmpty": "No wishes yet.",
+  "wishlistItemTitleField": "Wish",
+  "wishlistItemUrlField": "Link to the item",
+  "wishlistNoteField": "Note",
+  "wishlistRemove": "Remove wish",
+  "eventShowInCalendar": "Mark date in the family calendar",
+  "calendarBirthdayTitle": "Birthday: {name}",
+  "mediaTitle": "Photos and videos",
+  "mediaAdd": "Add media",
+  "mediaAddByLink": "Add by link",
+  "mediaEmpty": "No photos or videos yet.",
+  "mediaSourceField": "File path or link",
+  "mediaCaptionField": "Caption",
+  "mediaTypeField": "Type",
+  "mediaTypeImage": "Photo",
+  "mediaTypeVideo": "Video",
+  "mediaPeopleField": "Who is on the photo",
+  "mediaEventsField": "Related events",
+  "mediaPeopleHint": "A tagged photo appears on every selected person's profile.",
+  "mediaPersonCaption": "Caption for {name}",
+  "mediaEventsHint": "A linked photo appears in the selected events.",
+  "mediaFromLibrary": "From the library",
+  "mediaLibraryEmpty": "The media library is empty. Upload files in Settings → Media.",
+  "mediaCropField": "Visible part for this link",
+  "videoPlay": "Play",
+  "videoPause": "Pause",
+  "videoMute": "Mute",
+  "videoUnmute": "Unmute",
+  "videoError": "Could not play this video.",
+  "videoConvert": "Convert to WebM",
+  "videoConverting": "Converting…",
+  "videoConverted": "Video converted to WebM.",
+  "videoConvertFailed": "Could not convert the video.",
+  "videoConvertHint": "Conversion runs in the browser. Keep this screen open until it finishes.",
+  "mediaCropX": "Horizontal",
+  "mediaCropY": "Vertical",
+  "mediaZoom": "Zoom",
+  "mediaCropHint": "Drag the photo and pinch to zoom",
+  "mediaCropReset": "Reset crop",
+  "mediaZoomIn": "Zoom in",
+  "mediaZoomOut": "Zoom out",
+  "mediaRemove": "Remove media",
+  "mediaUpload": "Upload from device",
+  "mediaUploading": "Uploading…",
+  "mediaUploadHint": "Photos and videos up to 20 MB. Files are stored locally on this device.",
+  "mediaUploadTooLarge": "File is larger than 20 MB: {name}",
+  "mediaUploadFailed": "Could not upload the file.",
+  "mediaUploadEmpty": "The selected file is empty.",
+  "mediaOpenLink": "Open link",
+  "mediaLinkCopied": "Link copied.",
+  "timelineElapsedYears": "{count, plural, =0{{count} years} one{{count} year} other{{count} years}}",
+  "timelineElapsedMonths": "{count, plural, =0{{count} months} one{{count} month} other{{count} months}}",
+  "timelineElapsedDays": "{count, plural, =0{{count} days} one{{count} day} other{{count} days}}",
+  "cancel": "Cancel",
+  "close": "Close",
+
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "@welcomeTitle": {
+    "description": "Welcome screen title"
+  },
+  "@welcomeMessage": {
+    "description": "Welcome screen message"
+  },
+  "@homeFamilyLabel": {
+    "description": "Small label above the family name"
+  },
+  "@homeSubtitle": {
+    "description": "Short description under the family name"
+  },
+  "@homeOverviewTitle": {
+    "description": "Title of the statistics section"
+  },
+  "@homeMembersCount": {
+    "description": "Number of family members in the overview",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeEventsCount": {
+    "description": "Number of timeline events in the overview",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeLoading": {
+    "description": "Shown while family data is loading"
+  },
+  "@homeLoadError": {
+    "description": "Shown when family data failed to load"
+  },
+  "@homeRetry": {
+    "description": "Button that retries loading family data"
+  },
+  "@settingsTitle": {"description": "Settings screen title and tooltip"},
+  "@navTimeline": {"description": "Timeline tab label"},
+  "@navCalendar": {"description": "Calendar tab label"},
+  "@navFamily": {"description": "Family tab label"},
+  "@timelineEyebrow": {"description": "Small label above the timeline title"},
+  "@timelineTitle": {"description": "Timeline page title"},
+  "@timelineLede": {"description": "Timeline page description"},
+  "@timelineEmpty": {"description": "Shown when the timeline has no events"},
+  "@timelineTogetherYears": {
+    "description": "How long a couple has been together",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@mediaPlaceholder": {"description": "Placeholder for a missing photo or video"},
+  "@familyEyebrow": {"description": "Small label above the family title"},
+  "@familyTitle": {"description": "Family page title"},
+  "@familyLede": {"description": "Family page description"},
+  "@familyEmpty": {"description": "Shown when there are no family members"},
+  "@memberAgeYears": {
+    "description": "Age of a family member",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@calendarEyebrow": {"description": "Small label above the calendar title"},
+  "@calendarTitle": {"description": "Calendar page title"},
+  "@calendarLede": {"description": "Calendar page description"},
+  "@calendarPreviousMonth": {"description": "Previous month button tooltip"},
+  "@calendarNextMonth": {"description": "Next month button tooltip"},
+  "@calendarNoEvents": {"description": "Shown for a day without events"},
+  "@profileBack": {"description": "Back to family button"},
+  "@profileAbout": {"description": "About section title"},
+  "@profileWishlist": {"description": "Wishlist section title"},
+  "@profileWishlistEmpty": {"description": "Shown when the wishlist is empty"},
+  "@profileGallery": {"description": "Gallery section title"},
+  "@profileGalleryEmpty": {"description": "Shown when the gallery is empty"},
+  "@profileNotFound": {"description": "Shown when a profile is missing"},
+  "@profileCopyWishlistLink": {"description": "Button that copies the wishlist link"},
+  "@profileLinkCopied": {"description": "Confirmation after copying the link"},
+  "@settingsFamilyName": {"description": "Family name field label"},
+  "@settingsDataSource": {"description": "Data source section label"},
+  "@settingsArchiveSource": {"description": "Description of the bundled family archive"},
+  "@settingsReload": {"description": "Button that reloads family data"},
+  "@settingsReloadStarted": {"description": "Confirmation after reloading data"},
+  "@settingsEditingSoon": {"description": "Note about upcoming editing"},
+  "@settingsFamilyPhoto": {"description": "Family photo field label"},
+  "@settingsFamilyPhotoHint": {"description": "Hint for the family photo path field"},
+  "@settingsPhotoPreview": {"description": "Placeholder above the photo preview"},
+  "@settingsClearPhoto": {"description": "Button that clears the family photo"},
+  "@settingsAppearance": {"description": "Appearance section title"},
+  "@settingsShowFamilyPhoto": {"description": "Toggle for the header family photo"},
+  "@settingsShowEventPhotos": {"description": "Toggle for photos in the timeline"},
+  "@settingsSave": {"description": "Save settings button"},
+  "@settingsSaved": {"description": "Confirmation after saving settings"},
+  "@settingsNameRequired": {"description": "Validation message for an empty family name"},
+  "@settingsLocalOnly": {"description": "Note that changes are kept in memory"},
+  "@backupSummary": {
+    "description": "How many snapshots are stored and their total size",
+    "placeholders": {
+      "count": {"type": "int"},
+      "kept": {"type": "int"},
+      "size": {"type": "String"}
+    }
+  },
+  "@backupRevision": {
+    "description": "Snapshot revision label",
+    "placeholders": {
+      "revision": {"type": "int"}
+    }
+  },
+  "@backupSizeBytes": {
+    "description": "Backup size in bytes",
+    "placeholders": {
+      "size": {"type": "int"}
+    }
+  },
+  "@backupSizeKb": {
+    "description": "Backup size in kilobytes",
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "@backupSizeMb": {
+    "description": "Backup size in megabytes",
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "@mediaPersonCaption": {
+    "description": "Personal caption of a tagged person",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageAvatar": {
+    "description": "Media usage on a member avatar",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageBirthday": {
+    "description": "Media usage on a birthday",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageGallery": {
+    "description": "Media usage in a gallery",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaUsageEvent": {
+    "description": "Media usage in an event",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "@mediaLibrarySize": {
+    "description": "Library total",
+    "placeholders": {
+      "count": {"type": "int"},
+      "size": {"type": "String"}
+    }
+  },
+  "@calendarBirthdayTitle": {
+    "description": "Synthetic birthday entry in the calendar",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "@mediaUploadTooLarge": {
+    "description": "Upload error with the file name",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "@timelineElapsedYears": {
+    "description": "Elapsed full years",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@timelineElapsedMonths": {
+    "description": "Elapsed full months",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@timelineElapsedDays": {
+    "description": "Elapsed days",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "@close": {"description": "Closes a bottom sheet"}
+}
