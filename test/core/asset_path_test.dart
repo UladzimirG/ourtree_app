@@ -24,5 +24,10 @@ void main() {
       expect(familyPhotoAssetPath(''), isNull);
       expect(familyPhotoAssetPath(null), isNull);
     });
+
+    test('keeps locally stored media out of assets', () {
+      // `hive://...` читает MediaStorage, а не Image.asset.
+      expect(familyPhotoAssetPath('hive://media-1730123456789'), isNull);
+    });
   });
 }

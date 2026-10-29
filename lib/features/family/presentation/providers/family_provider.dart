@@ -133,8 +133,13 @@ class FamilyDataNotifier extends _$FamilyDataNotifier {
     unawaited(_save(normalized));
   }
 
-  /// Возвращает данные к исходному архиву.
-  void reset() {
+  /// Возвращает данные к исходному демо-архиву.
+  ///
+  /// Локальные правки удаляются, иначе архив снова прочитается из Hive.
+  Future<void> resetToDemo() async {
+    await ref
+        .read(familyRepositoryProvider)
+        .clearSaved(localeName: _localeCode);
     ref.invalidateSelf();
   }
 

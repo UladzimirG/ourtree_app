@@ -100,9 +100,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mediaPlaceholder => 'Фото или видео';
 
   @override
-  String get familyEyebrow => 'Семь ветвей одного дерева';
-
-  @override
   String get familyTitle => 'Семья и профили';
 
   @override
@@ -177,6 +174,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsFamilyName => 'Название семьи';
 
   @override
+  String get settingsFamilySubtitle => 'Подзаголовок семьи';
+
+  @override
+  String get settingsFamilySubtitleHint =>
+      'Показывается под названием семьи на главной странице';
+
+  @override
   String get settingsDataSource => 'Источник данных';
 
   @override
@@ -245,6 +249,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsTabMedia => 'Медиатека';
+
+  @override
+  String get settingsTabGeneral => 'Общие настройки';
+
+  @override
+  String get settingsGeneralHint =>
+      'Резервные копии, язык интерфейса и доступы к альбому.';
 
   @override
   String get settingsMediaHint =>
@@ -1054,4 +1065,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageBelarusian => 'Беларуская';
+
+  @override
+  String get settingsLanguageUkrainian => 'Українська';
 }

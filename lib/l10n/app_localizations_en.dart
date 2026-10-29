@@ -95,9 +95,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mediaPlaceholder => 'Photo or video';
 
   @override
-  String get familyEyebrow => 'Seven branches of one tree';
-
-  @override
   String get familyTitle => 'Family and profiles';
 
   @override
@@ -168,6 +165,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFamilyName => 'Family name';
 
   @override
+  String get settingsFamilySubtitle => 'Family subtitle';
+
+  @override
+  String get settingsFamilySubtitleHint =>
+      'Shown under the family name on the main page';
+
+  @override
   String get settingsDataSource => 'Data source';
 
   @override
@@ -234,6 +238,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsTabMedia => 'Media library';
+
+  @override
+  String get settingsTabGeneral => 'General settings';
+
+  @override
+  String get settingsGeneralHint =>
+      'Backups, interface language and album access.';
 
   @override
   String get settingsMediaHint =>
@@ -1036,4 +1047,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageBelarusian => 'Беларуская';
+
+  @override
+  String get settingsLanguageUkrainian => 'Українська';
 }

@@ -15,6 +15,11 @@ String? familyPhotoAssetPath(String? source) {
     return null;
   }
 
+  // `hive://...` — файл из локального хранилища, его читает MediaStorage.
+  // Без этой проверки путь превращался в `assets/photos/media-...` и
+  // изображение «ломилось» в несуществующий ассет.
+  if (normalized.contains('://')) return null;
+
   final relative = normalized.replaceFirst(RegExp(r'^/+'), '');
   if (relative.startsWith('assets/')) return relative;
   if (relative.startsWith('photos/')) return 'assets/$relative';

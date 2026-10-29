@@ -1,12 +1,13 @@
 {
   "familyName": "Our Tree",
+  "familySubtitle": "Seven branches of one tree",
   "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
   "revision": 1,
   "members": [
     {
       "id": "papa",
       "role": "Dad",
-      "name": "Artem",
+      "name": "Arthur",
       "nickname": "Bear",
       "birthday": "1985-04-12",
       "showBirthdayOnTimeline": true,
@@ -51,8 +52,8 @@
     {
       "id": "mama",
       "role": "Mom",
-      "name": "Olga",
-      "nickname": "Swallow",
+      "name": "Olivia",
+      "nickname": "Sparrow",
       "birthday": "1987-09-03",
       "showBirthdayOnTimeline": true,
       "showInCalendar": true,
@@ -95,8 +96,8 @@
     {
       "id": "masha",
       "role": "Daughter",
-      "name": "Maria",
-      "nickname": "Masha",
+      "name": "Mary",
+      "nickname": "Mia",
       "birthday": "2013-06-21",
       "showBirthdayOnTimeline": true,
       "showInCalendar": true,
@@ -136,8 +137,8 @@
     {
       "id": "vanya",
       "role": "Son",
-      "name": "Ivan",
-      "nickname": "Vanya",
+      "name": "John",
+      "nickname": "Johnny",
       "birthday": "2016-11-08",
       "showBirthdayOnTimeline": true,
       "showInCalendar": true,
@@ -182,7 +183,7 @@
       "title": "We met",
       "text": "We met in a tiny café and talked until it closed.",
       "kind": "meeting",
-      "place": "A café on Tverskaya",
+      "place": "A little café in town",
       "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
       "showElapsed": true,
       "showInCalendar": true
@@ -193,7 +194,7 @@
       "title": "Wedding",
       "text": "The warmest day of the summer and the longest table in the yard.",
       "kind": "wedding",
-      "place": "Moscow region",
+      "place": "The countryside",
       "photo": "/photos/media-024_image.jpg",
       "showElapsed": true,
       "showInCalendar": true
@@ -201,7 +202,7 @@
     {
       "id": "birth-masha",
       "date": "2013-06-21",
-      "title": "Maria is born",
+      "title": "Mary is born",
       "text": "Our life became louder and happier.",
       "kind": "birth",
       "memberId": "masha",
@@ -236,7 +237,7 @@
     {
       "id": "birth-vanya",
       "date": "2016-11-08",
-      "title": "Ivan is born",
+      "title": "John is born",
       "text": "Two little explorers in the house now.",
       "kind": "birth",
       "memberId": "vanya",
@@ -257,7 +258,7 @@
       "title": "Hiking in the mountains",
       "text": "A tent, the stars and porridge over the fire.",
       "kind": "trip",
-      "place": "Caucasus",
+      "place": "The Caucasus",
       "photo": "/photos/media-032_image.jpg",
       "media": [
         {

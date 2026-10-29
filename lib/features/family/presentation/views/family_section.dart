@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
@@ -6,12 +7,13 @@ import 'package:ourtree_app/features/family/presentation/widgets/page_hero.dart'
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 const List<double> _tilts = <double>[-0.8, 1, -0.4, 0.7, -1.1, 0.5, -0.3];
 
 /// Раздел «Семья»: карточки участников, по нажатию открывается профиль.
-class FamilySection extends StatelessWidget {
+class FamilySection extends ConsumerWidget {
   const FamilySection({
     super.key,
     required this.family,
@@ -22,16 +24,21 @@ class FamilySection extends StatelessWidget {
   final ValueChanged<FamilyMember> onMemberTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final members = family.members;
+
+    // Подзаголовок читаем из настроек, чтобы он менялся сразу после правки,
+    // не дожидаясь повторной загрузки архива.
+    final subtitle = ref.watch(familySettingsProvider).value?.familySubtitle ??
+        family.settings.familySubtitle;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 120),
       children: [
         PageHero(
-          eyebrow: l10n.familyEyebrow,
+          eyebrow: subtitle,
           title: l10n.familyTitle,
           lede: l10n.familyLede,
         ),

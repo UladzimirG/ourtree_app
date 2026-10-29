@@ -19,7 +19,6 @@
   "timelineEmpty": "Таймлайн пока пуст.",
   "timelineTogetherYears": "{count, plural, =0{Вместе с этого дня} one{Вместе уже {count} год} few{Вместе уже {count} года} many{Вместе уже {count} лет} other{Вместе уже {count} года}}",
   "mediaPlaceholder": "Фото или видео",
-  "familyEyebrow": "Семь ветвей одного дерева",
   "familyTitle": "Семья и профили",
   "familyLede": "Нажмите на карточку, чтобы открыть домашний альбом человека.",
   "familyEmpty": "В семье пока нет участников.",
@@ -40,6 +39,8 @@
   "profileCopyWishlistLink": "Скопировать ссылку на вишлист",
   "profileLinkCopied": "Ссылка на вишлист скопирована.",
   "settingsFamilyName": "Название семьи",
+  "settingsFamilySubtitle": "Подзаголовок семьи",
+  "settingsFamilySubtitleHint": "Показывается под названием семьи на главной странице",
   "settingsDataSource": "Источник данных",
   "settingsArchiveSource": "Семейный архив из демонстрационных файлов приложения",
   "settingsReload": "Обновить данные",
@@ -62,6 +63,8 @@
   "settingsTabAccounts": "Аккаунты",
   "settingsTabBackups": "Копии",
   "settingsTabMedia": "Медиатека",
+  "settingsTabGeneral": "Общие настройки",
+  "settingsGeneralHint": "Резервные копии, язык интерфейса и доступы к альбому.",
   "settingsMediaHint": "Все фотографии и видео в одном месте. Видео автоматически приводятся к поддерживаемому формату. Описание и кадрирование задаются отдельно для каждого участника и события.",
   "mediaLibraryTitle": "Медиатека семьи",
   "mediaLibraryUpload": "Загрузить файлы",
@@ -328,7 +331,6 @@
     }
   },
   "@mediaPlaceholder": {"description": "Заглушка для отсутствующего фото или видео"},
-  "@familyEyebrow": {"description": "Подпись над заголовком семьи"},
   "@familyTitle": {"description": "Заголовок страницы семьи"},
   "@familyLede": {"description": "Описание страницы семьи"},
   "@familyEmpty": {"description": "Показывается, если участников нет"},
@@ -501,6 +503,8 @@
   "settingsLanguageSystem": "Как в системе",
   "settingsLanguageRussian": "Русский",
   "settingsLanguageEnglish": "English",
+  "settingsLanguageBelarusian": "Беларуская",
+  "settingsLanguageUkrainian": "Українська",
   "@settingsTabLanguage": {
     "description": "Вкладка настроек с выбором языка"
   },
@@ -515,6 +519,24 @@
   },
   "@settingsLanguageRussian": {
     "description": "Пункт выбора русского языка"
+  },
+  "@settingsFamilySubtitle": {
+    "description": "Редактируемый подзаголовок страницы семьи"
+  },
+  "@settingsFamilySubtitleHint": {
+    "description": "Поясняет, где виден подзаголовок"
+  },
+  "@settingsTabGeneral": {
+    "description": "Вкладка, объединяющая копии, язык и аккаунты"
+  },
+  "@settingsGeneralHint": {
+    "description": "Вступление страницы общих настроек"
+  },
+  "@settingsLanguageBelarusian": {
+    "description": "Пункт выбора белорусского языка"
+  },
+  "@settingsLanguageUkrainian": {
+    "description": "Пункт выбора украинского языка"
   },
   "@settingsLanguageEnglish": {
     "description": "Пункт выбора английского языка"

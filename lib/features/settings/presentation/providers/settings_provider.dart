@@ -18,7 +18,26 @@ class FamilySettingsNotifier extends _$FamilySettingsNotifier {
   }
 
   void updateFamilyName(String name) {
-    _update((settings) => settings.copyWith(familyName: name));
+    _update(
+      (settings) => settings.copyWith(
+        familyName: name,
+        // Как только значение отличается от загруженного, это правка
+        // пользователя и её больше не перекрывает демо-название.
+        nameIsCustom: settings.nameIsCustom || name.trim() != settings.familyName,
+      ),
+    );
+  }
+
+  /// Подзаголовок главной страницы; пустая строка скрывает его.
+  void updateFamilySubtitle(String subtitle) {
+    final value = subtitle.trim();
+    _update(
+      (settings) => settings.copyWith(
+        familySubtitle: value,
+        subtitleIsCustom:
+            settings.subtitleIsCustom || value != settings.familySubtitle,
+      ),
+    );
   }
 
   void updateFamilyPhoto(String path) {

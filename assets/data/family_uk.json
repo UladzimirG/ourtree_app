@@ -1,0 +1,287 @@
+{
+  "familyName": "Наше дерево",
+  "familySubtitle": "Сім гілок одного дерева",
+  "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
+  "revision": 1,
+  "members": [
+    {
+      "id": "papa",
+      "role": "Тато",
+      "name": "Артем",
+      "nickname": "Ведмідь",
+      "birthday": "1985-04-12",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-023_portrait.jpg",
+      "about": "<em>Варить найкращу каву в родині, лагодить усе, що зламалося, і точно знає, де лежить потрібний провід.</em>",
+      "habits": ["Ранкова пробіжка", "Недільні млинці"],
+      "quotes": ["Головне — не швидкість, а напрямок"],
+      "wishlist": [
+        {
+          "title": "Чавунна сковорода",
+          "note": "Діаметр 26 см"
+        },
+        {
+          "title": "Набір викруток",
+          "url": "https://www.ozon.ru/"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "На дачі",
+          "media": [
+            {
+              "id": "media-papa-1",
+              "source": "/photos/media-006_1.jpg",
+              "type": "image",
+              "name": "dacha.jpg",
+              "people": [
+                {
+                  "id": "masha"
+                },
+                {
+                  "id": "vanya"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#6b4f32"
+    },
+    {
+      "id": "mama",
+      "role": "Мама",
+      "name": "Ольга",
+      "nickname": "Ластівка",
+      "birthday": "1987-09-03",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/0b377b59-c45a-4e28-aac8-b52bdcf517c6.jpg",
+      "about": "<em>Збирає сімейний альбом по крихтах, пам'ятає всі дати й уміє знаходити спільну мову з ким завгодно.</em>",
+      "habits": ["Йога зранку", "Пече хліб"],
+      "quotes": ["Дім там, де всі разом"],
+      "wishlist": [
+        {
+          "title": "Керамічна ваза",
+          "note": "Висока, світла"
+        },
+        {
+          "title": "Книга про садівництво"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Сімейна вечеря",
+          "media": [
+            {
+              "id": "media-mama-1",
+              "source": "/photos/media-030_image.jpg",
+              "type": "image",
+              "name": "dinner.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "masha"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#a44b2c"
+    },
+    {
+      "id": "masha",
+      "role": "Донька",
+      "name": "Марія",
+      "nickname": "Маша",
+      "birthday": "2013-06-21",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-028_portrait.jpg",
+      "about": "<em>Малює на всьому, що лежить без діла, і знає напам'ять усіх динозаврів.</em>",
+      "habits": ["Уроки малювання", "Плавання"],
+      "quotes": ["А можна ще п'ять хвилин?"],
+      "wishlist": [
+        {
+          "title": "Набір акварелі",
+          "note": "24 кольори"
+        },
+        {
+          "title": "Плюшеве лисеня"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Перший клас",
+          "media": [
+            {
+              "id": "media-masha-1",
+              "source": "/photos/media-016_image.jpg",
+              "type": "image",
+              "name": "school.jpg",
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#4e5c38"
+    },
+    {
+      "id": "vanya",
+      "role": "Син",
+      "name": "Іван",
+      "nickname": "Ваня",
+      "birthday": "2016-11-08",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
+      "about": "<em>Складає конструктори швидше, ніж дорослі читають інструкцію.</em>",
+      "habits": ["Конструювання", "Футбол щосуботи"],
+      "quotes": ["Я сам!"],
+      "wishlist": [
+        {
+          "title": "Великий конструктор",
+          "note": "Космічна станція"
+        },
+        {
+          "title": "Самокат"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "У дворі",
+          "media": [
+            {
+              "id": "media-vanya-1",
+              "source": "/photos/media-009_image.jpg",
+              "type": "image",
+              "name": "yard.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#2f4858"
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "meet",
+      "date": "2009-07-18",
+      "title": "Знайомство",
+      "text": "Зустрілися в маленькій кав'ярні й проговорили до закриття.",
+      "kind": "meeting",
+      "place": "Кав'ярня на Тверській",
+      "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "wedding",
+      "date": "2011-08-20",
+      "title": "Весілля",
+      "text": "Найтепліший день літа і найдовший стіл у дворі.",
+      "kind": "wedding",
+      "place": "Підмосков'я",
+      "photo": "/photos/media-024_image.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-masha",
+      "date": "2013-06-21",
+      "title": "Народилася Марія",
+      "text": "Наше життя стало гучнішим і щасливішим.",
+      "kind": "birth",
+      "memberId": "masha",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-sea",
+      "date": "2016-08-06",
+      "title": "Перше море",
+      "text": "Перша поїздка на море всією родиною.",
+      "kind": "trip",
+      "place": "Сочі",
+      "photo": "/photos/media-031_image.jpg",
+      "media": [
+        {
+          "id": "media-sea-1",
+          "source": "/photos/media-031_image.jpg",
+          "type": "image",
+          "name": "sea.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ],
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-vanya",
+      "date": "2016-11-08",
+      "title": "Народився Іван",
+      "text": "Тепер у домі два маленькі дослідники.",
+      "kind": "birth",
+      "memberId": "vanya",
+      "showInCalendar": true
+    },
+    {
+      "id": "new-home",
+      "date": "2019-05-25",
+      "title": "Переїхали у власну квартиру",
+      "text": "Перший вечір із чаєм на підлозі, бо меблі ще не приїхали.",
+      "kind": "milestone",
+      "place": "Київ",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-mountains",
+      "date": "2023-07-15",
+      "title": "Похід у гори",
+      "text": "Намет, зорі й каша на вогнищі.",
+      "kind": "trip",
+      "place": "Карпати",
+      "photo": "/photos/media-032_image.jpg",
+      "media": [
+        {
+          "id": "media-mountains-1",
+          "source": "/photos/media-032_image.jpg",
+          "type": "image",
+          "name": "mountains.jpg",
+          "people": [
+            {
+              "id": "masha"
+            },
+            {
+              "id": "vanya"
+            }
+          ]
+        },
+        {
+          "id": "media-mountains-2",
+          "source": "/photos/media-012_image.jpg",
+          "type": "image",
+          "name": "camp.jpg"
+        }
+      ]
+    }
+  ]
+}

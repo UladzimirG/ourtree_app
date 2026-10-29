@@ -26,7 +26,11 @@ import 'package:ourtree_app/features/settings/presentation/widgets/timeline_even
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 /// Разделы страницы настроек.
-enum _SettingsSection { family, members, events, media, accounts, backups, language }
+///
+/// «Общие настройки» объединяют то, что не относится к контенту семьи:
+/// язык интерфейса, резервные копии и доступы. Внутри они открываются
+/// отдельными подстраницами.
+enum _SettingsSection { family, members, events, media, general }
 
 /// Полноценная страница настроек семьи.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -39,6 +43,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _subtitleController = TextEditingController();
   final TextEditingController _photoController = TextEditingController();
   bool _initialized = false;
   _SettingsSection _section = _SettingsSection.family;
@@ -49,6 +54,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _subtitleController.dispose();
     _photoController.dispose();
     super.dispose();
   }
@@ -59,6 +65,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(familySettingsProvider.notifier);
     notifier.updateFamilyName(_nameController.text.trim());
+    notifier.updateFamilySubtitle(_subtitleController.text);
     notifier.updateFamilyPhoto(_photoController.text);
     await notifier.save();
     // Автоматический снимок перед следующей правкой — как делал сервер
@@ -232,12 +239,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _SettingsSection.events,
         _SettingsSection.media,
       ],
-      if (isAdmin) ...const [
-        _SettingsSection.accounts,
-        _SettingsSection.backups,
-      ],
-      // Язык — настройка устройства, а не семьи: доступна любой роли.
-      _SettingsSection.language,
+      // Общие настройки доступны всем: язык — это настройка устройства.
+      _SettingsSection.general,
     ];
     final section = sections.contains(_section)
         ? _section
@@ -253,6 +256,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               final visible = ref.watch(visibleFamilyProvider) ?? family;
               if (!_initialized) {
                 _nameController.text = settings.familyName;
+                _subtitleController.text = settings.familySubtitle;
                 _photoController.text = settings.familyPhoto ?? '';
                 _initialized = true;
               }
@@ -293,15 +297,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     formKey: _formKey,
                                     settings: settings,
                                     nameController: _nameController,
+                                    subtitleController: _subtitleController,
                                     photoController: _photoController,
                                     l10n: l10n,
                                     onNameChanged: (value) => ref
-                                        .read(familySettingsProvider
-                                            .notifier)
+                                        .read(familySettingsProvider.notifier)
                                         .updateFamilyName(value),
+                                    onSubtitleChanged: (value) => ref
+                                        .read(familySettingsProvider.notifier)
+                                        .updateFamilySubtitle(value),
                                     onPhotoChanged: (value) => ref
-                                        .read(familySettingsProvider
-                                            .notifier)
+                                        .read(familySettingsProvider.notifier)
                                         .updateFamilyPhoto(value),
                                     onUploadPhoto: _pickFamilyPhoto,
                                     onClearPhoto: () {
@@ -352,9 +358,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     _confirmRemoveEvent(event, l10n),
                               ),
                             _SettingsSection.media => const MediaLibraryPanel(),
-                            _SettingsSection.accounts => const AccountsPanel(),
-                            _SettingsSection.backups => const BackupPanel(),
-                            _SettingsSection.language => const _LanguageSection(),
+                            _SettingsSection.general =>
+                              const _GeneralSection(),
                           },
                   ),
                 ],
@@ -549,6 +554,157 @@ class _EventsSection extends StatelessWidget {
   }
 }
 
+/// Общие настройки семьи: точки входа в подстраницы.
+///
+/// Здесь только то, что не относится к контенту семьи. Панели копий и
+/// аккаунтов — самостоятельные страницы с собственной прокруткой, поэтому
+/// открываем их отдельными маршрутами, а не аккордеоном внутри списка.
+class _GeneralSection extends ConsumerWidget {
+  const _GeneralSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isAdmin = ref.watch(currentRoleProvider) == UserRole.admin;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
+      children: [
+        Text(l10n.settingsGeneralHint, style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 14),
+        _SettingsLink(
+          icon: Icons.translate,
+          title: l10n.settingsTabLanguage,
+          subtitle: l10n.settingsLanguageHint,
+          page: (_) => const _LanguageSection(),
+        ),
+        if (isAdmin) ...[
+          const SizedBox(height: 10),
+          _SettingsLink(
+            icon: Icons.history,
+            title: l10n.settingsTabBackups,
+            subtitle: l10n.settingsBackupsHint,
+            page: (_) => const BackupPanel(),
+          ),
+          const SizedBox(height: 10),
+          _SettingsLink(
+            icon: Icons.people_outline,
+            title: l10n.settingsTabAccounts,
+            subtitle: l10n.settingsAccountsHint,
+            page: (_) => const AccountsPanel(),
+          ),
+          const SizedBox(height: 10),
+          _SettingsLink(
+            icon: Icons.restore,
+            title: l10n.settingsReload,
+            subtitle: l10n.settingsArchiveSource,
+            onTap: () => _resetToDemo(context, ref),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Сбрасывает локальные правки и возвращает демо-архив.
+  Future<void> _resetToDemo(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    await ref.read(familyDataProvider.notifier).resetToDemo();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.settingsReloadStarted)),
+    );
+  }
+}
+
+/// Строка-переход на подстраницу общих настроек.
+class _SettingsLink extends StatelessWidget {
+  const _SettingsLink({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.page,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  /// Куда ведёт строка. Если не задано, используется [onTap].
+  final WidgetBuilder? page;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return PaperCard(
+      onTap: () {
+        if (onTap != null) {
+          onTap!();
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (pageContext) => _SettingsSubpage(
+              title: title,
+              child: page!(pageContext),
+            ),
+          ),
+        );
+      },
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.terracotta),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.inkSoft,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: AppColors.inkSoft),
+        ],
+      ),
+    );
+  }
+}
+
+/// Подстраница общих настроек: та же «бумажная» рамка и кнопка «назад».
+class _SettingsSubpage extends StatelessWidget {
+  const _SettingsSubpage({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return KraftBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _SettingsTopBar(title: title),
+              Expanded(child: child),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Выбор языка интерфейса.
 ///
 /// Это настройка конкретного устройства, поэтому она не зависит от роли
@@ -586,15 +742,26 @@ class _LanguageSection extends ConsumerWidget {
                 selected: selectedCode == systemLocaleCode,
                 onTap: () => select(systemLocaleCode),
               ),
+              // Языки — по алфавиту: English, Беларуская, Русский, Українська.
+              _LanguageOption(
+                label: l10n.settingsLanguageEnglish,
+                selected: selectedCode == 'en',
+                onTap: () => select('en'),
+              ),
+              _LanguageOption(
+                label: l10n.settingsLanguageBelarusian,
+                selected: selectedCode == 'be',
+                onTap: () => select('be'),
+              ),
               _LanguageOption(
                 label: l10n.settingsLanguageRussian,
                 selected: selectedCode == 'ru',
                 onTap: () => select('ru'),
               ),
               _LanguageOption(
-                label: l10n.settingsLanguageEnglish,
-                selected: selectedCode == 'en',
-                onTap: () => select('en'),
+                label: l10n.settingsLanguageUkrainian,
+                selected: selectedCode == 'uk',
+                onTap: () => select('uk'),
               ),
             ],
           ),
@@ -657,9 +824,7 @@ String _settingsSectionLabel(_SettingsSection section, AppLocalizations l10n) {
     _SettingsSection.members => l10n.settingsTabMembers,
     _SettingsSection.events => l10n.settingsTabEvents,
     _SettingsSection.media => l10n.settingsTabMedia,
-    _SettingsSection.accounts => l10n.settingsTabAccounts,
-    _SettingsSection.backups => l10n.settingsTabBackups,
-    _SettingsSection.language => l10n.settingsTabLanguage,
+    _SettingsSection.general => l10n.settingsTabGeneral,
   };
 }
 
@@ -712,9 +877,11 @@ class _SettingsForm extends StatelessWidget {
     required this.formKey,
     required this.settings,
     required this.nameController,
+    required this.subtitleController,
     required this.photoController,
     required this.l10n,
     required this.onNameChanged,
+    required this.onSubtitleChanged,
     required this.onPhotoChanged,
     required this.onUploadPhoto,
     required this.onClearPhoto,
@@ -726,9 +893,11 @@ class _SettingsForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final FamilySettings settings;
   final TextEditingController nameController;
+  final TextEditingController subtitleController;
   final TextEditingController photoController;
   final AppLocalizations l10n;
   final ValueChanged<String> onNameChanged;
+  final ValueChanged<String> onSubtitleChanged;
   final ValueChanged<String> onPhotoChanged;
   final VoidCallback onUploadPhoto;
   final VoidCallback onClearPhoto;
@@ -760,6 +929,17 @@ class _SettingsForm extends StatelessWidget {
                 return null;
               },
               decoration: _inputDecoration(hint: l10n.settingsFamilyName),
+            ),
+            const SizedBox(height: 16),
+            _Caption(label: l10n.settingsFamilySubtitle),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: subtitleController,
+              onChanged: onSubtitleChanged,
+              textInputAction: TextInputAction.next,
+              decoration: _inputDecoration(
+                hint: l10n.settingsFamilySubtitleHint,
+              ),
             ),
             const SizedBox(height: 16),
             _Caption(label: l10n.settingsFamilyPhoto),

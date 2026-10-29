@@ -7,7 +7,7 @@ library;
 import 'package:intl/intl.dart';
 
 /// Язык по умолчанию, если формат запрошен без локали.
-const String defaultDateLocale = 'ru';
+const String defaultDateLocale = 'en';
 
 /// Сколько полных лет, месяцев и дней прошло с даты.
 class Elapsed {
@@ -148,6 +148,8 @@ class DisplayDatePattern {
   /// локали, а формат даты нужен в том числе в чистых unit-тестах.
   static const Map<String, String> _patterns = <String, String>{
     'ru': 'dd.MM.yyyy',
+    'be': 'dd.MM.yyyy',
+    'uk': 'dd.MM.yyyy',
     'en': 'M/d/y',
   };
 

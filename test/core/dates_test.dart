@@ -3,34 +3,53 @@ import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/l10n/app_localizations_ru.dart';
 
 void main() {
-  group('display date', () {
+  group('Russian display date', () {
+    const ru = 'ru';
+
     test('formats ISO as DD.MM.YYYY', () {
-      expect(formatDisplayDateFromIso('1984-04-11'), '11.04.1984');
-      expect(formatDisplayDate(DateTime(2024, 1, 5)), '05.01.2024');
+      expect(
+        formatDisplayDateFromIso('1984-04-11', localeName: ru),
+        '11.04.1984',
+      );
+      expect(
+        formatDisplayDate(DateTime(2024, 1, 5), localeName: ru),
+        '05.01.2024',
+      );
     });
 
     test('masks input while typing', () {
-      expect(maskDisplayDate('1'), '1');
-      expect(maskDisplayDate('1104'), '11.04');
-      expect(maskDisplayDate('11041984'), '11.04.1984');
-      expect(maskDisplayDate('11/04/1984'), '11.04.1984');
-      expect(maskDisplayDate('1104198499'), '11.04.1984');
+      expect(maskDisplayDate('1', localeName: ru), '1');
+      expect(maskDisplayDate('1104', localeName: ru), '11.04');
+      expect(maskDisplayDate('11041984', localeName: ru), '11.04.1984');
+      expect(maskDisplayDate('11/04/1984', localeName: ru), '11.04.1984');
+      expect(maskDisplayDate('1104198499', localeName: ru), '11.04.1984');
     });
 
     test('converts display date back to ISO', () {
-      expect(isoFromDisplayDate('11.04.1984'), '1984-04-11');
-      expect(isoFromDisplayDate('05.01.2024'), '2024-01-05');
+      expect(isoFromDisplayDate('11.04.1984', localeName: ru), '1984-04-11');
+      expect(isoFromDisplayDate('05.01.2024', localeName: ru), '2024-01-05');
     });
 
     test('rejects impossible dates', () {
-      expect(isoFromDisplayDate('31.02.2024'), '');
-      expect(isoFromDisplayDate('11.04'), '');
+      expect(isoFromDisplayDate('31.02.2024', localeName: ru), '');
+      expect(isoFromDisplayDate('11.04', localeName: ru), '');
       expect(parseIsoDate('2024-02-31'), isNull);
     });
 
     test('keeps invalid ISO text unchanged for display', () {
-      expect(formatDisplayDateFromIso('not-a-date'), 'not-a-date');
-      expect(formatDisplayDateFromIso(''), '');
+      expect(
+        formatDisplayDateFromIso('not-a-date', localeName: ru),
+        'not-a-date',
+      );
+      expect(formatDisplayDateFromIso('', localeName: ru), '');
+    });
+  });
+
+  group('default date format', () {
+    test('follows the English default when no locale is given', () {
+      expect(formatDisplayDateFromIso('1984-04-11'), '04/11/1984');
+      expect(maskDisplayDate('11041984'), '11/04/1984');
+      expect(isoFromDisplayDate('11/04/1984'), '1984-11-04');
     });
   });
 

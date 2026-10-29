@@ -5,8 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_be.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_ru.dart';
+import 'app_localizations_uk.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +96,10 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
     Locale('ru'),
-    Locale('en')
+    Locale('be'),
+    Locale('uk')
   ];
 
   /// Application title
@@ -211,12 +215,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo or video'**
   String get mediaPlaceholder;
-
-  /// Small label above the family title
-  ///
-  /// In en, this message translates to:
-  /// **'Seven branches of one tree'**
-  String get familyEyebrow;
 
   /// Family page title
   ///
@@ -337,6 +335,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Family name'**
   String get settingsFamilyName;
+
+  /// Editable subtitle of the family page
+  ///
+  /// In en, this message translates to:
+  /// **'Family subtitle'**
+  String get settingsFamilySubtitle;
+
+  /// Explains where the subtitle is shown
+  ///
+  /// In en, this message translates to:
+  /// **'Shown under the family name on the main page'**
+  String get settingsFamilySubtitleHint;
 
   /// Data source section label
   ///
@@ -469,6 +479,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Media library'**
   String get settingsTabMedia;
+
+  /// Settings tab that groups backups, language and accounts
+  ///
+  /// In en, this message translates to:
+  /// **'General settings'**
+  String get settingsTabGeneral;
+
+  /// Intro of the general settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Backups, interface language and album access.'**
+  String get settingsGeneralHint;
 
   /// No description provided for @settingsMediaHint.
   ///
@@ -1891,6 +1913,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get settingsLanguageEnglish;
+
+  /// Belarusian language option
+  ///
+  /// In en, this message translates to:
+  /// **'Беларуская'**
+  String get settingsLanguageBelarusian;
+
+  /// Ukrainian language option
+  ///
+  /// In en, this message translates to:
+  /// **'Українська'**
+  String get settingsLanguageUkrainian;
 }
 
 class _AppLocalizationsDelegate
@@ -1904,7 +1938,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'ru'].contains(locale.languageCode);
+      <String>['be', 'en', 'ru', 'uk'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1913,10 +1947,14 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'be':
+      return AppLocalizationsBe();
     case 'en':
       return AppLocalizationsEn();
     case 'ru':
       return AppLocalizationsRu();
+    case 'uk':
+      return AppLocalizationsUk();
   }
 
   throw FlutterError(

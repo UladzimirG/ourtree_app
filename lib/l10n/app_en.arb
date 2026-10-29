@@ -19,7 +19,6 @@
   "timelineEmpty": "The timeline is still empty.",
   "timelineTogetherYears": "{count, plural, =0{Together since this day} one{Together for {count} year} other{Together for {count} years}}",
   "mediaPlaceholder": "Photo or video",
-  "familyEyebrow": "Seven branches of one tree",
   "familyTitle": "Family and profiles",
   "familyLede": "Tap a card to open a person's home album.",
   "familyEmpty": "No family members yet.",
@@ -40,6 +39,8 @@
   "profileCopyWishlistLink": "Copy wishlist link",
   "profileLinkCopied": "Wishlist link copied.",
   "settingsFamilyName": "Family name",
+  "settingsFamilySubtitle": "Family subtitle",
+  "settingsFamilySubtitleHint": "Shown under the family name on the main page",
   "settingsDataSource": "Data source",
   "settingsArchiveSource": "Family archive from the bundled demo files",
   "settingsReload": "Reload data",
@@ -62,6 +63,8 @@
   "settingsTabAccounts": "Accounts",
   "settingsTabBackups": "Backups",
   "settingsTabMedia": "Media library",
+  "settingsTabGeneral": "General settings",
+  "settingsGeneralHint": "Backups, interface language and album access.",
   "settingsMediaHint": "One place for every photo and video. Videos are converted to a supported format automatically. Descriptions and cropping are set individually for each member or event.",
   "mediaLibraryTitle": "Family media library",
   "mediaLibraryUpload": "Upload files",
@@ -328,7 +331,6 @@
     }
   },
   "@mediaPlaceholder": {"description": "Placeholder for a missing photo or video"},
-  "@familyEyebrow": {"description": "Small label above the family title"},
   "@familyTitle": {"description": "Family page title"},
   "@familyLede": {"description": "Family page description"},
   "@familyEmpty": {"description": "Shown when there are no family members"},
@@ -501,6 +503,8 @@
   "settingsLanguageSystem": "Same as system",
   "settingsLanguageRussian": "Russian",
   "settingsLanguageEnglish": "English",
+  "settingsLanguageBelarusian": "Беларуская",
+  "settingsLanguageUkrainian": "Українська",
   "@settingsTabLanguage": {
     "description": "Settings tab for the interface language"
   },
@@ -515,6 +519,24 @@
   },
   "@settingsLanguageRussian": {
     "description": "Russian language option"
+  },
+  "@settingsFamilySubtitle": {
+    "description": "Editable subtitle of the family page"
+  },
+  "@settingsFamilySubtitleHint": {
+    "description": "Explains where the subtitle is shown"
+  },
+  "@settingsTabGeneral": {
+    "description": "Settings tab that groups backups, language and accounts"
+  },
+  "@settingsGeneralHint": {
+    "description": "Intro of the general settings page"
+  },
+  "@settingsLanguageBelarusian": {
+    "description": "Belarusian language option"
+  },
+  "@settingsLanguageUkrainian": {
+    "description": "Ukrainian language option"
   },
   "@settingsLanguageEnglish": {
     "description": "English language option"
