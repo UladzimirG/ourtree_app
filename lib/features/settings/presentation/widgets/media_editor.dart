@@ -123,7 +123,7 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
   }
 
   Future<void> _pickFromLibrary() async {
-    final family = ref.read(familyDataProvider).valueOrNull;
+    final family = ref.read(familyDataProvider).value;
     final assets = family?.mediaLibrary ?? const <MediaAsset>[];
     if (assets.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -220,7 +220,7 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
 
         final hash = sha256.convert(mediaBytes).toString();
         final existing =
-            ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+            ref.read(familyDataProvider).value?.findDuplicateMedia(
                   hash: hash,
                   name: prepared.name,
                   size: mediaBytes.length,
@@ -264,7 +264,7 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
     final theme = Theme.of(context);
-    final family = ref.watch(familyDataProvider).valueOrNull;
+    final family = ref.watch(familyDataProvider).value;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

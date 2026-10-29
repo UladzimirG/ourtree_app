@@ -34,6 +34,34 @@ void main() {
     });
   });
 
+  group('English date format', () {
+    const en = 'en';
+
+    test('shows the month first and uses a slash', () {
+      expect(
+        formatDisplayDateFromIso('1984-04-11', localeName: en),
+        '04/11/1984',
+      );
+      expect(
+        formatDisplayDate(DateTime(2024, 1, 5), localeName: en),
+        '01/05/2024',
+      );
+    });
+
+    test('masks and parses input in the English order', () {
+      expect(maskDisplayDate('1', localeName: en), '1');
+      expect(maskDisplayDate('1104', localeName: en), '11/04');
+      expect(maskDisplayDate('11041984', localeName: en), '11/04/1984');
+      expect(isoFromDisplayDate('11/04/1984', localeName: en), '1984-11-04');
+      expect(isoFromDisplayDate('02/31/2024', localeName: en), '');
+    });
+
+    test('describes the input mask of the language', () {
+      expect(DisplayDatePattern.forLocale('ru').hint, 'DD.MM.YYYY');
+      expect(DisplayDatePattern.forLocale('en').hint, 'MM/DD/YYYY');
+    });
+  });
+
   group('annual birthday', () {
     test('matches month and day in any year', () {
       final birthday = DateTime(1986, 9, 3);

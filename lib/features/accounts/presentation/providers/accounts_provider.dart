@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'accounts_provider.g.dart';
 
 /// Ключи локального хранилища аккаунтов и текущей сессии.
 const String accountsStorageKey = 'accounts';
@@ -14,12 +16,8 @@ const String currentAccountStorageKey = 'current_account_id';
 /// Изменяемый список учётных записей семейного альбома.
 ///
 /// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
-final accountsNotifierProvider =
-    AsyncNotifierProvider<AccountsNotifier, List<Account>>(
-  AccountsNotifier.new,
-);
-
-class AccountsNotifier extends AsyncNotifier<List<Account>> {
+@Riverpod(keepAlive: true)
+class AccountsNotifier extends _$AccountsNotifier {
   @override
   Future<List<Account>> build() async => _load();
 
@@ -168,7 +166,7 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     _set(List<Account>.unmodifiable(accounts));
   }
 
-  List<Account> get _accounts => state.valueOrNull ?? const <Account>[];
+  List<Account> get _accounts => state.value ?? const <Account>[];
 
   void _set(List<Account> accounts) {
     final next = List<Account>.unmodifiable(accounts);
@@ -185,12 +183,8 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
 }
 
 /// Текущий пользователь; `null` — локальный администратор устройства.
-final currentAccountIdProvider =
-    NotifierProvider<CurrentAccountIdNotifier, String?>(
-  CurrentAccountIdNotifier.new,
-);
-
-class CurrentAccountIdNotifier extends Notifier<String?> {
+@Riverpod(keepAlive: true)
+class CurrentAccountId extends _$CurrentAccountId {
   @override
   String? build() => MediaStorage.instance.getString(currentAccountStorageKey);
 
@@ -209,30 +203,27 @@ class CurrentAccountIdNotifier extends Notifier<String?> {
 }
 
 /// Аккаунт, от имени которого сейчас работает интерфейс.
-final currentAccountProvider = Provider<Account?>((ref) {
+@Riverpod(keepAlive: true)
+Account? currentAccount(Ref ref) {
   final id = ref.watch(currentAccountIdProvider);
   if (id == null) return null;
   final accounts =
-      ref.watch(accountsNotifierProvider).valueOrNull ?? const <Account>[];
+      ref.watch(accountsProvider).value ?? const <Account>[];
   return _firstOrNull(accounts, (account) => account.id == id);
-});
+}
 
 /// Роль текущего пользователя. Локальный владелец устройства — админ.
-final currentRoleProvider = Provider<UserRole>((ref) {
-  return ref.watch(currentAccountProvider)?.role ?? UserRole.admin;
-});
+@Riverpod(keepAlive: true)
+UserRole currentRole(Ref ref) =>
+    ref.watch(currentAccountProvider)?.role ?? UserRole.admin;
 
-final canManageAccountsProvider = Provider<bool>((ref) {
-  return ref.watch(currentRoleProvider) == UserRole.admin;
-});
+/// Может ли текущий пользователь управлять аккаунтами.
+@Riverpod(keepAlive: true)
+bool canManageAccounts(Ref ref) => ref.watch(currentRoleProvider) == UserRole.admin;
 
 /// Гостевые ссылки, выпущенные для просмотра альбома без аккаунта.
-final guestLinksNotifierProvider =
-    AsyncNotifierProvider<GuestLinksNotifier, List<GuestLink>>(
-  GuestLinksNotifier.new,
-);
-
-class GuestLinksNotifier extends AsyncNotifier<List<GuestLink>> {
+@Riverpod(keepAlive: true)
+class GuestLinksNotifier extends _$GuestLinksNotifier {
   @override
   Future<List<GuestLink>> build() async => _load();
 
@@ -283,7 +274,7 @@ class GuestLinksNotifier extends AsyncNotifier<List<GuestLink>> {
     _set(List<GuestLink>.unmodifiable(links));
   }
 
-  List<GuestLink> get _links => state.valueOrNull ?? const <GuestLink>[];
+  List<GuestLink> get _links => state.value ?? const <GuestLink>[];
 
   void _set(List<GuestLink> links) {
     final next = List<GuestLink>.unmodifiable(links);

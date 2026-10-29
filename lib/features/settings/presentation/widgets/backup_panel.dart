@@ -53,7 +53,7 @@ class BackupPanel extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final export = await ref
-        .read(backupsNotifierProvider.notifier)
+        .read(backupsProvider.notifier)
         .createExport(includeMedia: includeMedia);
     if (!context.mounted) return;
     if (export == null) {
@@ -95,7 +95,7 @@ class BackupPanel extends ConsumerWidget {
 
     final bytes = await file.readAsBytes();
     final imported =
-        await ref.read(backupsNotifierProvider.notifier).importBytes(bytes);
+        await ref.read(backupsProvider.notifier).importBytes(bytes);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -132,7 +132,7 @@ class BackupPanel extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final restored =
-        await ref.read(backupsNotifierProvider.notifier).restore(entry.name);
+        await ref.read(backupsProvider.notifier).restore(entry.name);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -168,7 +168,7 @@ class BackupPanel extends ConsumerWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    await ref.read(backupsNotifierProvider.notifier).delete(entry.name);
+    await ref.read(backupsProvider.notifier).delete(entry.name);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.backupDeleted)),
@@ -179,7 +179,7 @@ class BackupPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final info = ref.watch(backupsNotifierProvider).valueOrNull ??
+    final info = ref.watch(backupsProvider).value ??
         const BackupList(kept: backupKeptLimit, throttleMs: backupThrottleMs);
     final dateTime = DateFormat.yMMMd(l10n.localeName).add_Hm();
 

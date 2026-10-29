@@ -12,13 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'OurTree App';
 
   @override
-  String get welcomeTitle => 'Welcome to OurTree';
-
-  @override
-  String get welcomeMessage =>
-      'This is a clean Flutter project with localizations for ru/en and Riverpod state management.';
-
-  @override
   String get homeFamilyLabel => 'Family';
 
   @override
@@ -179,7 +172,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsArchiveSource =>
-      'Family archive from assets/data/family.json';
+      'Family archive from the bundled demo files';
 
   @override
   String get settingsReload => 'Reload data';
@@ -718,7 +711,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Snapshots are stored locally and include copies of media files.';
 
   @override
-  String get dateFormatHint => 'DD.MM.YYYY';
+  String get dateFormatHint => 'MM/DD/YYYY';
 
   @override
   String get invalidDate => 'Enter an existing date: DD.MM.YYYY';
@@ -1025,4 +1018,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mediaUsed => 'The file is now shown in the selected profiles.';
+
+  @override
+  String get settingsTabLanguage => 'Language';
+
+  @override
+  String get settingsLanguage => 'Interface language';
+
+  @override
+  String get settingsLanguageHint => 'The choice is saved on this device.';
+
+  @override
+  String get settingsLanguageSystem => 'Same as system';
+
+  @override
+  String get settingsLanguageRussian => 'Russian';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
 }

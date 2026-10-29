@@ -18,6 +18,7 @@ import 'package:ourtree_app/features/media/presentation/widgets/media_library_pa
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/backup_provider.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/backup_panel.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/member_editor_card.dart';
@@ -25,7 +26,7 @@ import 'package:ourtree_app/features/settings/presentation/widgets/timeline_even
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 /// Разделы страницы настроек.
-enum _SettingsSection { family, members, events, media, accounts, backups }
+enum _SettingsSection { family, members, events, media, accounts, backups, language }
 
 /// Полноценная страница настроек семьи.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -42,6 +43,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _initialized = false;
   _SettingsSection _section = _SettingsSection.family;
 
+  /// Язык, для которого сейчас заполнена форма.
+  Locale? _locale;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -53,13 +57,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final l10n = AppLocalizations.of(context)!;
-    final notifier = ref.read(familySettingsNotifierProvider.notifier);
+    final notifier = ref.read(familySettingsProvider.notifier);
     notifier.updateFamilyName(_nameController.text.trim());
     notifier.updateFamilyPhoto(_photoController.text);
     await notifier.save();
     // Автоматический снимок перед следующей правкой — как делал сервер
     // старого проекта, но не чаще backupThrottleMs.
-    await ref.read(backupsNotifierProvider.notifier).create(automatic: true);
+    await ref.read(backupsProvider.notifier).create(automatic: true);
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -74,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (bytes.isEmpty) return;
     final hash = sha256.convert(bytes).toString();
     final existing =
-        ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+        ref.read(familyDataProvider).value?.findDuplicateMedia(
               hash: hash,
               name: file.name,
               size: bytes.length,
@@ -102,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     if (!mounted) return;
     _photoController.text = source;
-    ref.read(familySettingsNotifierProvider.notifier).updateFamilyPhoto(source);
+    ref.read(familySettingsProvider.notifier).updateFamilyPhoto(source);
     setState(() {});
   }
 
@@ -125,7 +129,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final account = ref.read(currentAccountProvider);
     if (account != null) {
       ref
-          .read(accountsNotifierProvider.notifier)
+          .read(accountsProvider.notifier)
           .grantMemberVisibility(account.id, memberId);
     }
     ScaffoldMessenger.of(context).showSnackBar(
@@ -210,7 +214,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final familyAsync = ref.watch(familyDataProvider);
-    final settingsAsync = ref.watch(familySettingsNotifierProvider);
+    final settingsAsync = ref.watch(familySettingsProvider);
+
+    // После смены языка архив другой, поэтому форму заполняем заново.
+    final locale = ref.watch(appLocaleProvider);
+    if (locale != _locale) {
+      _locale = locale;
+      _initialized = false;
+    }
     final role = ref.watch(currentRoleProvider);
     final isAdmin = role == UserRole.admin;
     final canEdit = role != UserRole.viewer;
@@ -225,6 +236,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _SettingsSection.accounts,
         _SettingsSection.backups,
       ],
+      // Язык — настройка устройства, а не семьи: доступна любой роли.
+      _SettingsSection.language,
     ];
     final section = sections.contains(_section)
         ? _section
@@ -236,7 +249,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         body: SafeArea(
           child: familyAsync.when(
             data: (family) {
-              final settings = settingsAsync.valueOrNull ?? family.settings;
+              final settings = settingsAsync.value ?? family.settings;
               final visible = ref.watch(visibleFamilyProvider) ?? family;
               if (!_initialized) {
                 _nameController.text = settings.familyName;
@@ -283,11 +296,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     photoController: _photoController,
                                     l10n: l10n,
                                     onNameChanged: (value) => ref
-                                        .read(familySettingsNotifierProvider
+                                        .read(familySettingsProvider
                                             .notifier)
                                         .updateFamilyName(value),
                                     onPhotoChanged: (value) => ref
-                                        .read(familySettingsNotifierProvider
+                                        .read(familySettingsProvider
                                             .notifier)
                                         .updateFamilyPhoto(value),
                                     onUploadPhoto: _pickFamilyPhoto,
@@ -295,17 +308,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       _photoController.clear();
                                       ref
                                           .read(
-                                            familySettingsNotifierProvider
+                                            familySettingsProvider
                                                 .notifier,
                                           )
                                           .updateFamilyPhoto('');
                                     },
                                     onShowFamilyPhotoChanged: (value) => ref
-                                        .read(familySettingsNotifierProvider
+                                        .read(familySettingsProvider
                                             .notifier)
                                         .updateShowFamilyPhotoInHeader(value),
                                     onShowEventPhotosChanged: (value) => ref
-                                        .read(familySettingsNotifierProvider
+                                        .read(familySettingsProvider
                                             .notifier)
                                         .updateShowEventPhotos(value),
                                     onSave: _save,
@@ -341,6 +354,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             _SettingsSection.media => const MediaLibraryPanel(),
                             _SettingsSection.accounts => const AccountsPanel(),
                             _SettingsSection.backups => const BackupPanel(),
+                            _SettingsSection.language => const _LanguageSection(),
                           },
                   ),
                 ],
@@ -352,7 +366,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               retryLabel: l10n.homeRetry,
               onRetry: () {
                 ref.invalidate(familyDataProvider);
-                ref.invalidate(familySettingsNotifierProvider);
+                ref.invalidate(familySettingsProvider);
               },
             ),
           ),
@@ -535,6 +549,108 @@ class _EventsSection extends StatelessWidget {
   }
 }
 
+/// Выбор языка интерфейса.
+///
+/// Это настройка конкретного устройства, поэтому она не зависит от роли
+/// аккаунта: выбор доступен и наблюдателю, и администратору.
+class _LanguageSection extends ConsumerWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final selectedCode =
+        ref.watch(localeControllerProvider)?.languageCode ?? systemLocaleCode;
+
+    void select(String code) {
+      ref.read(localeControllerProvider.notifier).select(
+            code == systemLocaleCode ? null : Locale(code),
+          );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
+      children: [
+        PaperCard(
+          tilt: -0.3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Caption(label: l10n.settingsLanguage),
+              const SizedBox(height: 8),
+              Text(l10n.settingsLanguageHint, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: 10),
+              _LanguageOption(
+                label: l10n.settingsLanguageSystem,
+                selected: selectedCode == systemLocaleCode,
+                onTap: () => select(systemLocaleCode),
+              ),
+              _LanguageOption(
+                label: l10n.settingsLanguageRussian,
+                selected: selectedCode == 'ru',
+                onTap: () => select('ru'),
+              ),
+              _LanguageOption(
+                label: l10n.settingsLanguageEnglish,
+                selected: selectedCode == 'en',
+                onTap: () => select('en'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Строка выбора языка.
+///
+/// Вместо `RadioListTile` используем иконки-«радио»: они не зависят от
+/// устаревшего API группы и одинаково ведут себя на любой ширине экрана.
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Icon(
+              selected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: selected ? AppColors.moss : AppColors.inkSoft,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected ? AppColors.ink : AppColors.inkSoft,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 String _settingsSectionLabel(_SettingsSection section, AppLocalizations l10n) {
   return switch (section) {
     _SettingsSection.family => l10n.settingsTabFamily,
@@ -543,6 +659,7 @@ String _settingsSectionLabel(_SettingsSection section, AppLocalizations l10n) {
     _SettingsSection.media => l10n.settingsTabMedia,
     _SettingsSection.accounts => l10n.settingsTabAccounts,
     _SettingsSection.backups => l10n.settingsTabBackups,
+    _SettingsSection.language => l10n.settingsTabLanguage,
   };
 }
 

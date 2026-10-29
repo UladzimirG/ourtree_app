@@ -26,9 +26,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final tab = ref.watch(homeTabProvider);
+    final tab = ref.watch(homeTabControllerProvider);
     final familyAsync = ref.watch(familyDataProvider);
-    final settingsAsync = ref.watch(familySettingsNotifierProvider);
+    final settingsAsync = ref.watch(familySettingsProvider);
 
     return KraftBackground(
       child: Scaffold(
@@ -37,7 +37,7 @@ class HomeScreen extends ConsumerWidget {
           bottom: false,
           child: familyAsync.when(
             data: (family) {
-              final settings = settingsAsync.valueOrNull ?? family.settings;
+              final settings = settingsAsync.value ?? family.settings;
               final visible = ref.watch(visibleFamilyProvider) ?? family;
 
               return Column(
@@ -99,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
                     calendarLabel: l10n.navCalendar,
                     familyLabel: l10n.navFamily,
                     onSelected: (value) =>
-                        ref.read(homeTabProvider.notifier).state = value,
+                        ref.read(homeTabControllerProvider.notifier).select(value),
                   ),
                 ),
               )
@@ -132,8 +132,8 @@ Future<void> _showEventDetails(
     final theme = Theme.of(sheetContext);
     final date = event.eventDate;
     final dateLabel = date == null
-        ? formatDisplayDateFromIso(event.date)
-        : formatDisplayDate(date);
+        ? formatDisplayDateFromIso(event.date, localeName: l10n.localeName)
+        : formatDisplayDate(date, localeName: l10n.localeName);
     final place = event.place?.trim();
     final text = stripRichText(event.text);
 

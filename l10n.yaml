@@ -1,3 +1,9 @@
 arb-dir: lib/l10n
 template-arb-file: app_en.arb
 output-class: AppLocalizations
+
+# Порядок фолбэка, если язык системы не поддерживается.
+# Основная аудитория — русскоязычная семья, поэтому `ru` идёт первым.
+preferred-supported-locales:
+  - ru
+  - en

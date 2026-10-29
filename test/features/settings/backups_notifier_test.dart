@@ -38,8 +38,8 @@ void main() {
 
   Future<BackupsNotifier> backups() async {
     await container.read(familyDataProvider.future);
-    await container.read(backupsNotifierProvider.future);
-    return container.read(backupsNotifierProvider.notifier);
+    await container.read(backupsProvider.future);
+    return container.read(backupsProvider.notifier);
   }
 
   FamilyMember member(String id) => FamilyMember(
@@ -59,7 +59,7 @@ void main() {
       expect(entry, isNotNull);
       expect(entry!.revision, 1);
       expect(entry.size, greaterThan(0));
-      final list = container.read(backupsNotifierProvider).value!;
+      final list = container.read(backupsProvider).value!;
       expect(list.backups, hasLength(1));
       expect(list.totalSize, entry.size);
       expect(list.dirExists, isTrue);
@@ -76,7 +76,7 @@ void main() {
       expect(second, isNull);
       expect(manual, isNotNull);
       expect(
-        container.read(backupsNotifierProvider).value!.backups,
+        container.read(backupsProvider).value!.backups,
         hasLength(2),
       );
     });
@@ -210,8 +210,8 @@ void main() {
 
     test('import restores accounts with a working password hash', () async {
       final notifier = await backups();
-      await container.read(accountsNotifierProvider.future);
-      final accounts = container.read(accountsNotifierProvider.notifier);
+      await container.read(accountsProvider.future);
+      final accounts = container.read(accountsProvider.notifier);
       accounts.create(
         const AccountInput(
           login: 'grandma',
@@ -223,10 +223,10 @@ void main() {
 
       final export = await notifier.createExport(includeMedia: false);
       accounts.replaceAll(const []);
-      expect(container.read(accountsNotifierProvider).value, isEmpty);
+      expect(container.read(accountsProvider).value, isEmpty);
 
       expect(await notifier.importBytes(export!.bytes), isTrue);
-      final restored = container.read(accountsNotifierProvider).value!.single;
+      final restored = container.read(accountsProvider).value!.single;
       expect(restored.login, 'grandma');
       expect(
         accounts.authenticate('grandma', 'secret')?.id,
@@ -241,7 +241,7 @@ void main() {
 
       await notifier.delete(first!.name);
 
-      final list = container.read(backupsNotifierProvider).value!;
+      final list = container.read(backupsProvider).value!;
       expect(list.backups, hasLength(1));
       expect(list.backups.single.name, second!.name);
       expect(list.totalSize, second.size);

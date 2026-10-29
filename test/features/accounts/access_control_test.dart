@@ -70,8 +70,8 @@ void main() {
 
   test('viewer sees only allowed members and events', () async {
     await seed();
-    await container.read(accountsNotifierProvider.future);
-    container.read(accountsNotifierProvider.notifier).replaceAll([
+    await container.read(accountsProvider.future);
+    container.read(accountsProvider.notifier).replaceAll([
       const Account(
         id: 'viewer',
         login: 'viewer',
@@ -110,8 +110,8 @@ void main() {
   });
 
   test('new member is granted to a restricted editor', () async {
-    await container.read(accountsNotifierProvider.future);
-    container.read(accountsNotifierProvider.notifier).replaceAll([
+    await container.read(accountsProvider.future);
+    container.read(accountsProvider.notifier).replaceAll([
       const Account(
         id: 'editor',
         login: 'editor',
@@ -122,11 +122,11 @@ void main() {
     ]);
 
     container
-        .read(accountsNotifierProvider.notifier)
+        .read(accountsProvider.notifier)
         .grantMemberVisibility('editor', 'new-member');
 
     final account =
-        container.read(accountsNotifierProvider).value!.single;
+        container.read(accountsProvider).value!.single;
     expect(account.visibleMemberIds, contains('new-member'));
   });
 }

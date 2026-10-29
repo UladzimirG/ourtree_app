@@ -18,8 +18,8 @@ void main() {
   });
 
   Future<AccountsNotifier> accounts() async {
-    await container.read(accountsNotifierProvider.future);
-    return container.read(accountsNotifierProvider.notifier);
+    await container.read(accountsProvider.future);
+    return container.read(accountsProvider.notifier);
   }
 
   group('AccountsNotifier', () {
@@ -36,7 +36,7 @@ void main() {
       );
 
       expect(error, AccountsError.badLogin);
-      expect(container.read(accountsNotifierProvider).value, isEmpty);
+      expect(container.read(accountsProvider).value, isEmpty);
     });
 
     test('accepts a two-letter login and a four-character password', () async {
@@ -53,7 +53,7 @@ void main() {
 
       expect(error, isNull);
       expect(
-        container.read(accountsNotifierProvider).value!.single.login,
+        container.read(accountsProvider).value!.single.login,
         'ab',
       );
     });
@@ -71,7 +71,7 @@ void main() {
       );
 
       expect(error, AccountsError.weakPassword);
-      expect(container.read(accountsNotifierProvider).value, isEmpty);
+      expect(container.read(accountsProvider).value, isEmpty);
     });
 
     test('creates an account and normalises its login', () async {
@@ -87,7 +87,7 @@ void main() {
       );
 
       expect(error, isNull);
-      final list = container.read(accountsNotifierProvider).value!;
+      final list = container.read(accountsProvider).value!;
       expect(list, hasLength(1));
       expect(list.single.login, 'grandma');
       expect(list.single.name, 'Бабушка');
@@ -116,7 +116,7 @@ void main() {
       );
 
       expect(error, AccountsError.loginTaken);
-      expect(container.read(accountsNotifierProvider).value, hasLength(1));
+      expect(container.read(accountsProvider).value, hasLength(1));
     });
 
     test('updates name and role but keeps the login', () async {
@@ -129,7 +129,7 @@ void main() {
           role: UserRole.viewer,
         ),
       );
-      final id = container.read(accountsNotifierProvider).value!.single.id;
+      final id = container.read(accountsProvider).value!.single.id;
 
       final error = notifier.updateAccount(
         id,
@@ -137,7 +137,7 @@ void main() {
       );
 
       expect(error, isNull);
-      final account = container.read(accountsNotifierProvider).value!.single;
+      final account = container.read(accountsProvider).value!.single;
       expect(account.login, 'grandma');
       expect(account.name, 'Бабушка');
       expect(account.role, UserRole.admin);
@@ -164,11 +164,11 @@ void main() {
           role: UserRole.viewer,
         ),
       );
-      final id = container.read(accountsNotifierProvider).value!.single.id;
+      final id = container.read(accountsProvider).value!.single.id;
 
       notifier.remove(id);
 
-      expect(container.read(accountsNotifierProvider).value, isEmpty);
+      expect(container.read(accountsProvider).value, isEmpty);
     });
 
     test('accounts, access rights and passwords survive a new container', () async {
@@ -181,7 +181,7 @@ void main() {
           role: UserRole.editor,
         ),
       );
-      final created = container.read(accountsNotifierProvider).value!.single;
+      final created = container.read(accountsProvider).value!.single;
       notifier.updateAccess(
         created.id,
         allMembersVisible: false,
@@ -191,20 +191,20 @@ void main() {
       final next = ProviderContainer();
       addTearDown(next.dispose);
       final restored =
-          await next.read(accountsNotifierProvider.future);
+          await next.read(accountsProvider.future);
 
       expect(restored.single.login, 'grandma');
       expect(restored.single.visibleMemberIds, ['papa']);
       expect(restored.single.allMembersVisible, isFalse);
       expect(
-        next.read(accountsNotifierProvider.notifier).authenticate(
+        next.read(accountsProvider.notifier).authenticate(
               'grandma',
               'secret',
             )?.id,
         restored.single.id,
       );
       expect(
-        next.read(accountsNotifierProvider.notifier).authenticate(
+        next.read(accountsProvider.notifier).authenticate(
               'grandma',
               'wrong',
             ),
@@ -214,14 +214,14 @@ void main() {
 
     test('guest links survive a new container', () async {
       final created =
-          container.read(guestLinksNotifierProvider.notifier).create(
+          container.read(guestLinksProvider.notifier).create(
                 const GuestLinkInput(label: 'Друг', days: 3),
               );
-      await container.read(guestLinksNotifierProvider.future);
+      await container.read(guestLinksProvider.future);
 
       final next = ProviderContainer();
       addTearDown(next.dispose);
-      final restored = await next.read(guestLinksNotifierProvider.future);
+      final restored = await next.read(guestLinksProvider.future);
 
       expect(restored.single.id, created.link.id);
       expect(restored.single.label, 'Друг');
@@ -230,8 +230,8 @@ void main() {
 
   group('GuestLinksNotifier', () {
     Future<GuestLinksNotifier> links() async {
-      await container.read(guestLinksNotifierProvider.future);
-      return container.read(guestLinksNotifierProvider.notifier);
+      await container.read(guestLinksProvider.future);
+      return container.read(guestLinksProvider.notifier);
     }
 
     test('creates an active link with a token and expiry', () async {
@@ -244,7 +244,7 @@ void main() {
       expect(created.link.label, 'Друг');
       expect(created.link.revoked, isFalse);
       expect(created.link.isActiveAt(DateTime.now()), isTrue);
-      final list = container.read(guestLinksNotifierProvider).value!;
+      final list = container.read(guestLinksProvider).value!;
       expect(list, hasLength(1));
     });
 
@@ -269,7 +269,7 @@ void main() {
 
       notifier.revoke(created.link.id);
 
-      final link = container.read(guestLinksNotifierProvider).value!.single;
+      final link = container.read(guestLinksProvider).value!.single;
       expect(link.revoked, isTrue);
       expect(link.isActiveAt(DateTime.now()), isFalse);
     });
@@ -282,7 +282,7 @@ void main() {
 
       notifier.remove(created.link.id);
 
-      expect(container.read(guestLinksNotifierProvider).value, isEmpty);
+      expect(container.read(guestLinksProvider).value, isEmpty);
     });
   });
 }

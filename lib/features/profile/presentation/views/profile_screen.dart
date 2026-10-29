@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final familyAsync = ref.watch(familyDataProvider);
-    final settingsAsync = ref.watch(familySettingsNotifierProvider);
+    final settingsAsync = ref.watch(familySettingsProvider);
 
     return KraftBackground(
       child: Scaffold(
@@ -44,7 +44,7 @@ class ProfileScreen extends ConsumerWidget {
               return Column(
                 children: [
                   _ProfileTopBar(
-                    title: settingsAsync.valueOrNull?.familyName ??
+                    title: settingsAsync.value?.familyName ??
                         family.familyName,
                     backTooltip: l10n.profileBack,
                   ),
@@ -124,8 +124,8 @@ class _ProfileBody extends StatelessWidget {
     final theme = Theme.of(context);
     final birthday = member.birthdayDate;
     final birthdayLabel = birthday == null
-        ? formatDisplayDateFromIso(member.birthday)
-        : formatDisplayDate(birthday);
+        ? formatDisplayDateFromIso(member.birthday, localeName: l10n.localeName)
+        : formatDisplayDate(birthday, localeName: l10n.localeName);
     final age = _age(member);
     final meta = age == null
         ? birthdayLabel
@@ -406,7 +406,10 @@ class _GalleryCard extends StatelessWidget {
                             context,
                             items: viewerItems,
                             initialIndex: viewerIndexFor(index),
-                            eyebrow: formatDisplayDateFromIso(member.birthday),
+                            eyebrow: formatDisplayDateFromIso(
+                              member.birthday,
+                              localeName: l10n.localeName,
+                            ),
                             title: member.name,
                             subtitle: l10n.profileGallery,
                           ),

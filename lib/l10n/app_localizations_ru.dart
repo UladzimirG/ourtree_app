@@ -12,13 +12,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'OurTree App';
 
   @override
-  String get welcomeTitle => 'Добро пожаловать в OurTree';
-
-  @override
-  String get welcomeMessage =>
-      'Это чистый Flutter-проект с локализацией для ru/en и управлением состоянием Riverpod.';
-
-  @override
   String get homeFamilyLabel => 'Семья';
 
   @override
@@ -188,7 +181,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsArchiveSource =>
-      'Семейный архив из assets/data/family.json';
+      'Семейный архив из демонстрационных файлов приложения';
 
   @override
   String get settingsReload => 'Обновить данные';
@@ -1043,4 +1036,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mediaUsed => 'Файл теперь показывается в выбранных профилях.';
+
+  @override
+  String get settingsTabLanguage => 'Язык';
+
+  @override
+  String get settingsLanguage => 'Язык интерфейса';
+
+  @override
+  String get settingsLanguageHint => 'Выбор сохраняется на этом устройстве.';
+
+  @override
+  String get settingsLanguageSystem => 'Как в системе';
+
+  @override
+  String get settingsLanguageRussian => 'Русский';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
 }

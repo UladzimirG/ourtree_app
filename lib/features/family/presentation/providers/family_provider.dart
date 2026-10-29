@@ -1,11 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/features/family/data/repositories/family_repository.dart';
-import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'family_provider.g.dart';
 
 /// Разделы нижней навигации.
 enum HomeTab {
@@ -15,24 +18,31 @@ enum HomeTab {
 }
 
 /// Текущий выбранный раздел главного экрана.
-final homeTabProvider = StateProvider<HomeTab>((ref) => HomeTab.timeline);
+@Riverpod(keepAlive: true)
+class HomeTabController extends _$HomeTabController {
+  @override
+  HomeTab build() => HomeTab.timeline;
+
+  void select(HomeTab tab) => state = tab;
+}
 
 /// Репозиторий, из которого читаются данные семьи.
-final familyRepositoryProvider = Provider<FamilyRepository>(
-  (ref) => const FamilyRepository(),
-);
+@Riverpod(keepAlive: true)
+FamilyRepository familyRepository(Ref ref) => const FamilyRepository();
 
 /// Изменяемое состояние семейного древа.
-final familyDataProvider =
-    AsyncNotifierProvider<FamilyDataNotifier, FamilyData>(
-  FamilyDataNotifier.new,
-);
+@Riverpod(keepAlive: true)
+class FamilyDataNotifier extends _$FamilyDataNotifier {
+  /// Язык интерфейса, для которого загружен архив.
+  String get _localeCode => ref.read(appLocaleProvider).languageCode;
 
-class FamilyDataNotifier extends AsyncNotifier<FamilyData> {
   @override
   Future<FamilyData> build() async {
-    final repository = ref.watch(familyRepositoryProvider);
-    return repository.loadFamilyData();
+    // Смена языка перезагружает архив этого языка.
+    final localeName = ref.watch(appLocaleProvider).languageCode;
+    return ref
+        .watch(familyRepositoryProvider)
+        .loadFamilyData(localeName: localeName);
   }
 
   void updateMember(
@@ -129,7 +139,7 @@ class FamilyDataNotifier extends AsyncNotifier<FamilyData> {
   }
 
   void _update(FamilyData Function(FamilyData) transform) {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
     final next = transform(current).normalizeMediaLibrary();
     state = AsyncData(next);
@@ -137,7 +147,9 @@ class FamilyDataNotifier extends AsyncNotifier<FamilyData> {
   }
 
   Future<void> _save(FamilyData data) {
-    return ref.read(familyRepositoryProvider).saveFamilyData(data);
+    return ref
+        .read(familyRepositoryProvider)
+        .saveFamilyData(data, localeName: _localeCode);
   }
 }
 

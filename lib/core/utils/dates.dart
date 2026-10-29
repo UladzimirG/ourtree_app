@@ -1,8 +1,13 @@
 /// Работа с датами семейного архива.
 ///
 /// В JSON даты хранятся в ISO-формате `YYYY-MM-DD`, а пользователь видит и
-/// вводит их как `ДД.ММ.ГГГГ`.
+/// вводит их в формате своего языка: `17.09.1980` для ru, `09/17/1980` для en.
 library;
+
+import 'package:intl/intl.dart';
+
+/// Язык по умолчанию, если формат запрошен без локали.
+const String defaultDateLocale = 'ru';
 
 /// Сколько полных лет, месяцев и дней прошло с даты.
 class Elapsed {
@@ -50,49 +55,148 @@ DateTime? parseIsoDate(String? value) {
   return date;
 }
 
-/// Форматирует дату как `ДД.ММ.ГГГГ`.
-String formatDisplayDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day.$month.${date.year}';
-}
+/// Числовой формат даты, привязанный к языку интерфейса.
+///
+/// Порядок компонентов и разделитель берутся из шаблона `DateFormat.yMd`
+/// пакета `intl`, а день и месяц всегда печатаются двумя цифрами. Благодаря
+/// этому отображение и маска ввода совпадают:
+///
+/// * ru — `17.09.1980`
+/// * en — `09/17/1980`
+class DisplayDatePattern {
+  const DisplayDatePattern({
+    required this.dayFirst,
+    required this.separator,
+  });
 
-/// Форматирует ISO-дату как `ДД.ММ.ГГГГ`; некорректную строку возвращает как есть.
-String formatDisplayDateFromIso(String? iso) {
-  final date = parseIsoDate(iso);
-  return date == null ? (iso?.trim() ?? '') : formatDisplayDate(date);
-}
-
-/// Маска ввода: оставляет только цифры и расставляет точки `ДД.ММ.ГГГГ`.
-String maskDisplayDate(String value) {
-  final digits = value.replaceAll(RegExp(r'\D'), '').split('').take(8).join();
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) {
-    return '${digits.substring(0, 2)}.${digits.substring(2)}';
+  /// Формат для языка [localeName]; неизвестный язык даёт русский порядок.
+  factory DisplayDatePattern.forLocale(String? localeName) {
+    final pattern = _patternFor(_normalize(localeName));
+    final dayIndex = pattern.indexOf('d');
+    final monthIndex = pattern.indexOf('M');
+    return DisplayDatePattern(
+      dayFirst: dayIndex >= 0 && (monthIndex < 0 || dayIndex < monthIndex),
+      separator: _separatorOf(pattern),
+    );
   }
-  return '${digits.substring(0, 2)}.${digits.substring(2, 4)}.'
-      '${digits.substring(4)}';
+
+  /// Сначала день (`17.09.1980`), иначе — сначала месяц (`09/17/1980`).
+  final bool dayFirst;
+
+  /// Разделитель компонентов: `.`, `/` и т.п.
+  final String separator;
+
+  /// `17.09.1980` или `09/17/1980`.
+  String format(DateTime date) {
+    final day = _twoDigits(date.day);
+    final month = _twoDigits(date.month);
+    final year = date.year.toString().padLeft(4, '0');
+    return dayFirst
+        ? '$day$separator$month$separator$year'
+        : '$month$separator$day$separator$year';
+  }
+
+  /// Подсказка для пустого поля: `DD.MM.YYYY` или `MM/DD/YYYY`.
+  String get hint => dayFirst
+      ? 'DD${separator}MM${separator}YYYY'
+      : 'MM${separator}DD${separator}YYYY';
+
+  /// Расставляет разделители по мере ввода, оставляя только цифры.
+  String mask(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '').split('').take(8).join();
+    final buffer = StringBuffer();
+    for (var index = 0; index < digits.length; index++) {
+      if (index == 2 || index == 4) buffer.write(separator);
+      buffer.write(digits[index]);
+    }
+    return buffer.toString();
+  }
+
+  /// `17.09.1980` → `1980-09-17`; некорректная дата → пустая строка.
+  String toIso(String value) {
+    final match =
+        RegExp(r'^(\d{2})\D(\d{2})\D(\d{4})$').firstMatch(value.trim());
+    if (match == null) return '';
+
+    final first = int.parse(match.group(1)!);
+    final second = int.parse(match.group(2)!);
+    final year = int.parse(match.group(3)!);
+    final day = dayFirst ? first : second;
+    final month = dayFirst ? second : first;
+
+    final date = DateTime(year, month, day);
+    if (date.year != year || date.month != month || date.day != day) {
+      return '';
+    }
+    return '$year-${_twoDigits(month)}-${_twoDigits(day)}';
+  }
+
+  /// ISO-дата → строка для отображения; некорректную строку возвращает как есть.
+  String fromIso(String? iso) {
+    final date = parseIsoDate(iso);
+    return date == null ? (iso?.trim() ?? '') : format(date);
+  }
+
+  static String _normalize(String? localeName) {
+    final value = localeName?.trim() ?? '';
+    return value.isEmpty ? defaultDateLocale : value;
+  }
+
+  /// Шаблоны для языков, которые поддерживает приложение.
+  ///
+  /// Держим их явно: `DateFormat` требует предварительной инициализации данных
+  /// локали, а формат даты нужен в том числе в чистых unit-тестах.
+  static const Map<String, String> _patterns = <String, String>{
+    'ru': 'dd.MM.yyyy',
+    'en': 'M/d/y',
+  };
+
+  static String _patternFor(String localeName) {
+    final known = _patterns[localeName];
+    if (known != null) return known;
+    try {
+      return DateFormat.yMd(localeName).pattern ?? _patterns[defaultDateLocale]!;
+    } catch (_) {
+      // Для языка без данных intl остаёмся на безопасном порядке «день.месяц».
+      return _patterns[defaultDateLocale]!;
+    }
+  }
+
+  static String _separatorOf(String pattern) {
+    final separators = pattern.replaceAll(RegExp('[dMy]'), '');
+    return separators.isEmpty ? '.' : separators[0];
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DisplayDatePattern &&
+          dayFirst == other.dayFirst &&
+          separator == other.separator;
+
+  @override
+  int get hashCode => Object.hash(dayFirst, separator);
 }
 
-/// Переводит введённую `ДД.ММ.ГГГГ` в ISO `YYYY-MM-DD`.
+String _twoDigits(int value) => value.toString().padLeft(2, '0');
+
+/// Форматирует дату в формате языка [localeName].
+String formatDisplayDate(DateTime date, {String? localeName}) =>
+    DisplayDatePattern.forLocale(localeName).format(date);
+
+/// Форматирует ISO-дату; некорректную строку возвращает как есть.
+String formatDisplayDateFromIso(String? iso, {String? localeName}) =>
+    DisplayDatePattern.forLocale(localeName).fromIso(iso);
+
+/// Маска ввода: оставляет только цифры и расставляет разделители языка.
+String maskDisplayDate(String value, {String? localeName}) =>
+    DisplayDatePattern.forLocale(localeName).mask(value);
+
+/// Переводит введённую дату в ISO `YYYY-MM-DD`.
 ///
 /// Возвращает пустую строку, если дата неполная или несуществующая.
-String isoFromDisplayDate(String value) {
-  final match = RegExp(r'^(\d{2})\.(\d{2})\.(\d{4})$').firstMatch(value.trim());
-  if (match == null) return '';
-
-  final day = int.parse(match.group(1)!);
-  final month = int.parse(match.group(2)!);
-  final year = int.parse(match.group(3)!);
-  final date = DateTime(year, month, day);
-  if (date.year != year || date.month != month || date.day != day) {
-    return '';
-  }
-
-  final isoMonth = month.toString().padLeft(2, '0');
-  final isoDay = day.toString().padLeft(2, '0');
-  return '$year-$isoMonth-$isoDay';
-}
+String isoFromDisplayDate(String value, {String? localeName}) =>
+    DisplayDatePattern.forLocale(localeName).toIso(value);
 
 /// Совпадают ли месяц и день — для ежегодных дней рождения.
 bool isSameMonthDay(DateTime? date, DateTime day) =>

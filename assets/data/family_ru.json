@@ -1,0 +1,286 @@
+{
+  "familyName": "Наше древо",
+  "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
+  "revision": 1,
+  "members": [
+    {
+      "id": "papa",
+      "role": "Папа",
+      "name": "Артём",
+      "nickname": "Медведь",
+      "birthday": "1985-04-12",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-023_portrait.jpg",
+      "about": "<em>Варит лучший кофе в семье, чинит всё, что сломалось, и точно знает, где лежит нужный провод.</em>",
+      "habits": ["Утренняя пробежка", "Воскресные блины"],
+      "quotes": ["Главное — не скорость, а направление"],
+      "wishlist": [
+        {
+          "title": "Чугунная сковорода",
+          "note": "Диаметр 26 см"
+        },
+        {
+          "title": "Набор отвёрток",
+          "url": "https://www.ozon.ru/"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "На даче",
+          "media": [
+            {
+              "id": "media-papa-1",
+              "source": "/photos/media-006_1.jpg",
+              "type": "image",
+              "name": "dacha.jpg",
+              "people": [
+                {
+                  "id": "masha"
+                },
+                {
+                  "id": "vanya"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#6b4f32"
+    },
+    {
+      "id": "mama",
+      "role": "Мама",
+      "name": "Ольга",
+      "nickname": "Ласточка",
+      "birthday": "1987-09-03",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/0b377b59-c45a-4e28-aac8-b52bdcf517c6.jpg",
+      "about": "<em>Собирает семейный альбом по крупицам, помнит все даты и умеет находить общий язык с кем угодно.</em>",
+      "habits": ["Йога по утрам", "Печёт хлеб"],
+      "quotes": ["Дом там, где все вместе"],
+      "wishlist": [
+        {
+          "title": "Керамическая ваза",
+          "note": "Высокая, светлая"
+        },
+        {
+          "title": "Книга о садоводстве"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Семейный ужин",
+          "media": [
+            {
+              "id": "media-mama-1",
+              "source": "/photos/media-030_image.jpg",
+              "type": "image",
+              "name": "dinner.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "masha"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#a44b2c"
+    },
+    {
+      "id": "masha",
+      "role": "Дочь",
+      "name": "Мария",
+      "nickname": "Маша",
+      "birthday": "2013-06-21",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-028_portrait.jpg",
+      "about": "<em>Рисует на всём, что лежит без дела, и знает наизусть всех динозавров.</em>",
+      "habits": ["Уроки рисования", "Плавание"],
+      "quotes": ["А можно я ещё пять минут?"],
+      "wishlist": [
+        {
+          "title": "Набор акварели",
+          "note": "24 цвета"
+        },
+        {
+          "title": "Плюшевый лисёнок"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Первый класс",
+          "media": [
+            {
+              "id": "media-masha-1",
+              "source": "/photos/media-016_image.jpg",
+              "type": "image",
+              "name": "school.jpg",
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#4e5c38"
+    },
+    {
+      "id": "vanya",
+      "role": "Сын",
+      "name": "Иван",
+      "nickname": "Ваня",
+      "birthday": "2016-11-08",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
+      "about": "<em>Собирает конструкторы быстрее, чем взрослые читают инструкцию.</em>",
+      "habits": ["Конструирование", "Футбол по субботам"],
+      "quotes": ["Я сам!"],
+      "wishlist": [
+        {
+          "title": "Большой конструктор",
+          "note": "Космическая станция"
+        },
+        {
+          "title": "Самокат"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Во дворе",
+          "media": [
+            {
+              "id": "media-vanya-1",
+              "source": "/photos/media-009_image.jpg",
+              "type": "image",
+              "name": "yard.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#2f4858"
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "meet",
+      "date": "2009-07-18",
+      "title": "Знакомство",
+      "text": "Встретились в маленьком кафе и проговорили до закрытия.",
+      "kind": "meeting",
+      "place": "Кафе на Тверской",
+      "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "wedding",
+      "date": "2011-08-20",
+      "title": "Свадьба",
+      "text": "Самый тёплый день лета и самый длинный стол во дворе.",
+      "kind": "wedding",
+      "place": "Подмосковье",
+      "photo": "/photos/media-024_image.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-masha",
+      "date": "2013-06-21",
+      "title": "Родилась Маша",
+      "text": "Наша жизнь стала громче и счастливее.",
+      "kind": "birth",
+      "memberId": "masha",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-sea",
+      "date": "2016-08-06",
+      "title": "Первое море",
+      "text": "Первая поездка на море всей семьёй.",
+      "kind": "trip",
+      "place": "Сочи",
+      "photo": "/photos/media-031_image.jpg",
+      "media": [
+        {
+          "id": "media-sea-1",
+          "source": "/photos/media-031_image.jpg",
+          "type": "image",
+          "name": "sea.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ],
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-vanya",
+      "date": "2016-11-08",
+      "title": "Родился Ваня",
+      "text": "Теперь в доме два маленьких исследователя.",
+      "kind": "birth",
+      "memberId": "vanya",
+      "showInCalendar": true
+    },
+    {
+      "id": "new-home",
+      "date": "2019-05-25",
+      "title": "Переехали в свою квартиру",
+      "text": "Первый вечер с чаем на полу, потому что мебель ещё не приехала.",
+      "kind": "milestone",
+      "place": "Москва",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-mountains",
+      "date": "2023-07-15",
+      "title": "Поход в горы",
+      "text": "Палатка, звёзды и каша на костре.",
+      "kind": "trip",
+      "place": "Кавказ",
+      "photo": "/photos/media-032_image.jpg",
+      "media": [
+        {
+          "id": "media-mountains-1",
+          "source": "/photos/media-032_image.jpg",
+          "type": "image",
+          "name": "mountains.jpg",
+          "people": [
+            {
+              "id": "masha"
+            },
+            {
+              "id": "vanya"
+            }
+          ]
+        },
+        {
+          "id": "media-mountains-2",
+          "source": "/photos/media-012_image.jpg",
+          "type": "image",
+          "name": "camp.jpg"
+        }
+      ]
+    }
+  ]
+}

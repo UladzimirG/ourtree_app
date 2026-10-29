@@ -60,7 +60,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
 
         final hash = sha256.convert(mediaBytes).toString();
         final existing =
-            ref.read(familyDataProvider).valueOrNull?.findDuplicateMedia(
+            ref.read(familyDataProvider).value?.findDuplicateMedia(
                   hash: hash,
                   name: prepared.name,
                   size: mediaBytes.length,
@@ -186,7 +186,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   }
 
   Future<void> _use(MediaAsset asset, AppLocalizations l10n) async {
-    final family = ref.read(familyDataProvider).valueOrNull;
+    final family = ref.read(familyDataProvider).value;
     if (family == null || family.members.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.mediaUseNoMembers)),
@@ -255,7 +255,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final family = ref.watch(familyDataProvider).valueOrNull;
+    final family = ref.watch(familyDataProvider).value;
     final allAssets = family?.mediaLibrary ?? const <MediaAsset>[];
     final unusedCount = family == null
         ? 0

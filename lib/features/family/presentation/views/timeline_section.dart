@@ -208,8 +208,8 @@ class _TimelineCardBody extends StatelessWidget {
     final theme = Theme.of(context);
     final date = event.eventDate;
     final dateLabel = date == null
-        ? formatDisplayDateFromIso(event.date)
-        : formatDisplayDate(date);
+        ? formatDisplayDateFromIso(event.date, localeName: l10n.localeName)
+        : formatDisplayDate(date, localeName: l10n.localeName);
     final elapsed = elapsedSince(event.date);
     final text = stripRichText(event.text);
     final place = event.place?.trim();
@@ -221,7 +221,8 @@ class _TimelineCardBody extends StatelessWidget {
           _EventMedia(
             media: family.mediaForEvent(event),
             placeholderLabel: l10n.mediaPlaceholder,
-            eyebrow: formatDisplayDateFromIso(event.date),
+            eyebrow:
+                formatDisplayDateFromIso(event.date, localeName: l10n.localeName),
             title: event.title,
             subtitle: event.place,
           ),

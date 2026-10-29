@@ -179,7 +179,7 @@ class _CalendarSectionState extends State<CalendarSection> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            formatDisplayDate(day),
+            formatDisplayDate(day, localeName: l10n.localeName),
             style: theme.textTheme.bodySmall?.copyWith(
               color: AppColors.inkSoft,
             ),

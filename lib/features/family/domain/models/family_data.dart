@@ -10,7 +10,7 @@ import 'package:ourtree_app/features/settings/domain/models/family_settings.dart
 
 /// Всё содержимое семейного альбома (`FamilyData` из `FamilyDataContext.tsx`).
 ///
-/// JSON плоский, как `data/family.json`: настройки лежат в корне рядом с
+/// JSON плоский, как `family_ru.json` / `family_en.json`: настройки лежат в корне рядом с
 /// массивами [members] и [timelineEvents].
 class FamilyData {
   const FamilyData({

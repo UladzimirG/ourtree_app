@@ -1,9 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'access_provider.g.dart';
 
 /// Видно ли событие аккаунту [account].
 bool isEventVisibleTo(Account account, TimelineEvent event) {
@@ -18,8 +20,9 @@ bool isEventVisibleTo(Account account, TimelineEvent event) {
 /// Локальный владелец устройства (`account == null`) и администраторы видят
 /// всё. Редакторы и наблюдатели получают только разрешённых участников и
 /// события, не скрытые через `hiddenFrom`.
-final visibleFamilyProvider = Provider<FamilyData?>((ref) {
-  final family = ref.watch(familyDataProvider).valueOrNull;
+@Riverpod(keepAlive: true)
+FamilyData? visibleFamily(Ref ref) {
+  final family = ref.watch(familyDataProvider).value;
   final account = ref.watch(currentAccountProvider);
   if (family == null) return null;
   if (account == null || account.isAdmin) return family;
@@ -34,4 +37,4 @@ final visibleFamilyProvider = Provider<FamilyData?>((ref) {
         if (isEventVisibleTo(account, event)) event,
     ],
   );
-});
+}

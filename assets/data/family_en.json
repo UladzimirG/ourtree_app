@@ -1,0 +1,286 @@
+{
+  "familyName": "Our Tree",
+  "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
+  "revision": 1,
+  "members": [
+    {
+      "id": "papa",
+      "role": "Dad",
+      "name": "Artem",
+      "nickname": "Bear",
+      "birthday": "1985-04-12",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-023_portrait.jpg",
+      "about": "<em>Brews the best coffee in the family, fixes anything that breaks and always knows where the cable is.</em>",
+      "habits": ["Morning run", "Sunday pancakes"],
+      "quotes": ["What matters is the direction, not the speed"],
+      "wishlist": [
+        {
+          "title": "Cast-iron skillet",
+          "note": "26 cm"
+        },
+        {
+          "title": "Screwdriver set",
+          "url": "https://www.amazon.com/"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "At the country house",
+          "media": [
+            {
+              "id": "media-papa-1",
+              "source": "/photos/media-006_1.jpg",
+              "type": "image",
+              "name": "dacha.jpg",
+              "people": [
+                {
+                  "id": "masha"
+                },
+                {
+                  "id": "vanya"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#6b4f32"
+    },
+    {
+      "id": "mama",
+      "role": "Mom",
+      "name": "Olga",
+      "nickname": "Swallow",
+      "birthday": "1987-09-03",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/0b377b59-c45a-4e28-aac8-b52bdcf517c6.jpg",
+      "about": "<em>Builds the family album piece by piece, remembers every date and can talk to anyone.</em>",
+      "habits": ["Morning yoga", "Bakes bread"],
+      "quotes": ["Home is wherever we are together"],
+      "wishlist": [
+        {
+          "title": "Ceramic vase",
+          "note": "Tall and light"
+        },
+        {
+          "title": "Gardening book"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "Family dinner",
+          "media": [
+            {
+              "id": "media-mama-1",
+              "source": "/photos/media-030_image.jpg",
+              "type": "image",
+              "name": "dinner.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                },
+                {
+                  "id": "masha"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#a44b2c"
+    },
+    {
+      "id": "masha",
+      "role": "Daughter",
+      "name": "Maria",
+      "nickname": "Masha",
+      "birthday": "2013-06-21",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/media-028_portrait.jpg",
+      "about": "<em>Draws on anything that stays still and knows every dinosaur by heart.</em>",
+      "habits": ["Art lessons", "Swimming"],
+      "quotes": ["Can I have five more minutes?"],
+      "wishlist": [
+        {
+          "title": "Watercolour set",
+          "note": "24 colours"
+        },
+        {
+          "title": "Plush fox"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "First grade",
+          "media": [
+            {
+              "id": "media-masha-1",
+              "source": "/photos/media-016_image.jpg",
+              "type": "image",
+              "name": "school.jpg",
+              "people": [
+                {
+                  "id": "mama"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#4e5c38"
+    },
+    {
+      "id": "vanya",
+      "role": "Son",
+      "name": "Ivan",
+      "nickname": "Vanya",
+      "birthday": "2016-11-08",
+      "showBirthdayOnTimeline": true,
+      "showInCalendar": true,
+      "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
+      "about": "<em>Builds construction sets faster than adults read the manual.</em>",
+      "habits": ["Building sets", "Saturday football"],
+      "quotes": ["I can do it myself!"],
+      "wishlist": [
+        {
+          "title": "Big construction set",
+          "note": "Space station"
+        },
+        {
+          "title": "Scooter"
+        }
+      ],
+      "gallery": [
+        {
+          "caption": "In the yard",
+          "media": [
+            {
+              "id": "media-vanya-1",
+              "source": "/photos/media-009_image.jpg",
+              "type": "image",
+              "name": "yard.jpg",
+              "people": [
+                {
+                  "id": "papa"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accent": "#2f4858"
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "meet",
+      "date": "2009-07-18",
+      "title": "We met",
+      "text": "We met in a tiny café and talked until it closed.",
+      "kind": "meeting",
+      "place": "A café on Tverskaya",
+      "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "wedding",
+      "date": "2011-08-20",
+      "title": "Wedding",
+      "text": "The warmest day of the summer and the longest table in the yard.",
+      "kind": "wedding",
+      "place": "Moscow region",
+      "photo": "/photos/media-024_image.jpg",
+      "showElapsed": true,
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-masha",
+      "date": "2013-06-21",
+      "title": "Maria is born",
+      "text": "Our life became louder and happier.",
+      "kind": "birth",
+      "memberId": "masha",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-sea",
+      "date": "2016-08-06",
+      "title": "Our first sea",
+      "text": "The first trip to the seaside with the whole family.",
+      "kind": "trip",
+      "place": "Sochi",
+      "photo": "/photos/media-031_image.jpg",
+      "media": [
+        {
+          "id": "media-sea-1",
+          "source": "/photos/media-031_image.jpg",
+          "type": "image",
+          "name": "sea.jpg",
+          "people": [
+            {
+              "id": "papa"
+            },
+            {
+              "id": "mama"
+            }
+          ]
+        }
+      ],
+      "showInCalendar": true
+    },
+    {
+      "id": "birth-vanya",
+      "date": "2016-11-08",
+      "title": "Ivan is born",
+      "text": "Two little explorers in the house now.",
+      "kind": "birth",
+      "memberId": "vanya",
+      "showInCalendar": true
+    },
+    {
+      "id": "new-home",
+      "date": "2019-05-25",
+      "title": "Moved into our own flat",
+      "text": "The first evening with tea on the floor because the furniture had not arrived yet.",
+      "kind": "milestone",
+      "place": "Moscow",
+      "showInCalendar": true
+    },
+    {
+      "id": "trip-mountains",
+      "date": "2023-07-15",
+      "title": "Hiking in the mountains",
+      "text": "A tent, the stars and porridge over the fire.",
+      "kind": "trip",
+      "place": "Caucasus",
+      "photo": "/photos/media-032_image.jpg",
+      "media": [
+        {
+          "id": "media-mountains-1",
+          "source": "/photos/media-032_image.jpg",
+          "type": "image",
+          "name": "mountains.jpg",
+          "people": [
+            {
+              "id": "masha"
+            },
+            {
+              "id": "vanya"
+            }
+          ]
+        },
+        {
+          "id": "media-mountains-2",
+          "source": "/photos/media-012_image.jpg",
+          "type": "image",
+          "name": "camp.jpg"
+        }
+      ]
+    }
+  ]
+}

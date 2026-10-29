@@ -49,7 +49,7 @@ class TimelineEventEditorCard extends StatelessWidget {
           style: theme.textTheme.titleMedium,
         ),
         subtitle: Text(
-          formatDisplayDateFromIso(event.date),
+          formatDisplayDateFromIso(event.date, localeName: l10n.localeName),
           style: theme.textTheme.bodySmall,
         ),
         children: [

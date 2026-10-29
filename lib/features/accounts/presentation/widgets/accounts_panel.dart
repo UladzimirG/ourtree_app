@@ -28,14 +28,14 @@ class AccountsPanel extends ConsumerWidget {
         ),
       );
     }
-    final accountsAsync = ref.watch(accountsNotifierProvider);
+    final accountsAsync = ref.watch(accountsProvider);
     if (accountsAsync.isLoading && !accountsAsync.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
-    final accounts = accountsAsync.valueOrNull ?? const <Account>[];
-    final links = ref.watch(guestLinksNotifierProvider).valueOrNull ??
+    final accounts = accountsAsync.value ?? const <Account>[];
+    final links = ref.watch(guestLinksProvider).value ??
         const <GuestLink>[];
-    final family = ref.watch(familyDataProvider).valueOrNull;
+    final family = ref.watch(familyDataProvider).value;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
@@ -103,7 +103,7 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
 
   void _submit() {
     final l10n = widget.l10n;
-    final error = ref.read(accountsNotifierProvider.notifier).create(
+    final error = ref.read(accountsProvider.notifier).create(
           AccountInput(
             login: _login.text,
             name: _name.text,
@@ -222,7 +222,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
   }
 
   void _save() {
-    final error = ref.read(accountsNotifierProvider.notifier).updateAccount(
+    final error = ref.read(accountsProvider.notifier).updateAccount(
           widget.account.id,
           AccountPatch(
             name: _name.text,
@@ -262,7 +262,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     );
     if (confirmed != true || !mounted) return;
 
-    ref.read(accountsNotifierProvider.notifier).remove(widget.account.id);
+    ref.read(accountsProvider.notifier).remove(widget.account.id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.accountDeleted)),
     );
@@ -272,7 +272,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     required bool allMembersVisible,
     required List<String> visibleMemberIds,
   }) {
-    ref.read(accountsNotifierProvider.notifier).updateAccess(
+    ref.read(accountsProvider.notifier).updateAccess(
           widget.account.id,
           allMembersVisible: allMembersVisible,
           visibleMemberIds: visibleMemberIds,
@@ -474,7 +474,7 @@ class _GuestLinksCardState extends ConsumerState<_GuestLinksCard> {
 
   void _create() {
     final days = int.tryParse(_days.text.trim()) ?? guestLinkDefaultTtlDays;
-    final created = ref.read(guestLinksNotifierProvider.notifier).create(
+    final created = ref.read(guestLinksProvider.notifier).create(
           GuestLinkInput(label: _label.text, days: days),
         );
     setState(() => _freshToken = created.token);
@@ -564,7 +564,7 @@ class _GuestLinksCardState extends ConsumerState<_GuestLinksCard> {
                     ? null
                     : TextButton(
                         onPressed: () => ref
-                            .read(guestLinksNotifierProvider.notifier)
+                            .read(guestLinksProvider.notifier)
                             .revoke(link.id),
                         child: Text(l10n.guestLinkRevoke),
                       ),
@@ -709,7 +709,7 @@ class AccountSessionBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final account = ref.watch(currentAccountProvider);
-    final accounts = ref.watch(accountsNotifierProvider).valueOrNull ??
+    final accounts = ref.watch(accountsProvider).value ??
         const <Account>[];
     final role = ref.watch(currentRoleProvider);
 
@@ -778,7 +778,7 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
   }
 
   void _submit() {
-    final account = ref.read(accountsNotifierProvider.notifier).authenticate(
+    final account = ref.read(accountsProvider.notifier).authenticate(
           _login.text,
           _password.text,
         );

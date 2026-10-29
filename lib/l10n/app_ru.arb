@@ -1,8 +1,6 @@
 {
   "@@locale": "ru",
   "appTitle": "OurTree App",
-  "welcomeTitle": "Добро пожаловать в OurTree",
-  "welcomeMessage": "Это чистый Flutter-проект с локализацией для ru/en и управлением состоянием Riverpod.",
   "homeFamilyLabel": "Семья",
   "homeSubtitle": "Место для семейных историй, фотографий и дат.",
   "homeOverviewTitle": "Обзор",
@@ -43,7 +41,7 @@
   "profileLinkCopied": "Ссылка на вишлист скопирована.",
   "settingsFamilyName": "Название семьи",
   "settingsDataSource": "Источник данных",
-  "settingsArchiveSource": "Семейный архив из assets/data/family.json",
+  "settingsArchiveSource": "Семейный архив из демонстрационных файлов приложения",
   "settingsReload": "Обновить данные",
   "settingsReloadStarted": "Данные семьи обновлены.",
   "settingsEditingSoon": "Редактирование появится на следующем шаге.",
@@ -279,12 +277,6 @@
   "@appTitle": {
     "description": "Название приложения"
   },
-  "@welcomeTitle": {
-    "description": "Заголовок приветствия"
-  },
-  "@welcomeMessage": {
-    "description": "Сообщение приветствия"
-  },
   "@homeFamilyLabel": {
     "description": "Подпись над названием семьи"
   },
@@ -502,5 +494,29 @@
   },
   "@mediaOnlyUnused": {
     "placeholders": {"count": {"type": "int"}}
+  },
+  "settingsTabLanguage": "Язык",
+  "settingsLanguage": "Язык интерфейса",
+  "settingsLanguageHint": "Выбор сохраняется на этом устройстве.",
+  "settingsLanguageSystem": "Как в системе",
+  "settingsLanguageRussian": "Русский",
+  "settingsLanguageEnglish": "English",
+  "@settingsTabLanguage": {
+    "description": "Вкладка настроек с выбором языка"
+  },
+  "@settingsLanguage": {
+    "description": "Подпись блока с выбором языка интерфейса"
+  },
+  "@settingsLanguageHint": {
+    "description": "Поясняет, что выбор языка хранится локально"
+  },
+  "@settingsLanguageSystem": {
+    "description": "Пункт «следовать языку устройства»"
+  },
+  "@settingsLanguageRussian": {
+    "description": "Пункт выбора русского языка"
+  },
+  "@settingsLanguageEnglish": {
+    "description": "Пункт выбора английского языка"
   }
 }

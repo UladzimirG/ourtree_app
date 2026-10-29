@@ -94,8 +94,8 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('ru')
+    Locale('ru'),
+    Locale('en')
   ];
 
   /// Application title
@@ -103,18 +103,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OurTree App'**
   String get appTitle;
-
-  /// Welcome screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to OurTree'**
-  String get welcomeTitle;
-
-  /// Welcome screen message
-  ///
-  /// In en, this message translates to:
-  /// **'This is a clean Flutter project with localizations for ru/en and Riverpod state management.'**
-  String get welcomeMessage;
 
   /// Small label above the family name
   ///
@@ -359,7 +347,7 @@ abstract class AppLocalizations {
   /// Description of the bundled family archive
   ///
   /// In en, this message translates to:
-  /// **'Family archive from assets/data/family.json'**
+  /// **'Family archive from the bundled demo files'**
   String get settingsArchiveSource;
 
   /// Button that reloads family data
@@ -1349,7 +1337,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateFormatHint.
   ///
   /// In en, this message translates to:
-  /// **'DD.MM.YYYY'**
+  /// **'MM/DD/YYYY'**
   String get dateFormatHint;
 
   /// No description provided for @invalidDate.
@@ -1867,6 +1855,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The file is now shown in the selected profiles.'**
   String get mediaUsed;
+
+  /// Settings tab for the interface language
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsTabLanguage;
+
+  /// Caption of the interface language block
+  ///
+  /// In en, this message translates to:
+  /// **'Interface language'**
+  String get settingsLanguage;
+
+  /// Explains that the language choice is stored locally
+  ///
+  /// In en, this message translates to:
+  /// **'The choice is saved on this device.'**
+  String get settingsLanguageHint;
+
+  /// Option that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'Same as system'**
+  String get settingsLanguageSystem;
+
+  /// Russian language option
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get settingsLanguageRussian;
+
+  /// English language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
 }
 
 class _AppLocalizationsDelegate

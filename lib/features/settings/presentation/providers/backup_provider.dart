@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
@@ -13,6 +12,9 @@ import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'backup_provider.g.dart';
 
 /// Сколько снимков хранится одновременно.
 const int backupKeptLimit = 30;
@@ -33,12 +35,8 @@ class BackupExport {
 /// Снимок — это полный JSON архива плюс копии всех локальных файлов медиатеки
 /// (Hive и ассетов). Поэтому после восстановления фотографии доступны, даже
 /// если оригиналы были удалены.
-final backupsNotifierProvider =
-    AsyncNotifierProvider<BackupsNotifier, BackupList>(
-  BackupsNotifier.new,
-);
-
-class BackupsNotifier extends AsyncNotifier<BackupList> {
+@Riverpod(keepAlive: true)
+class BackupsNotifier extends _$BackupsNotifier {
   MediaStorage get _storage => MediaStorage.instance;
 
   @override
@@ -52,7 +50,7 @@ class BackupsNotifier extends AsyncNotifier<BackupList> {
     return _list(entries);
   }
 
-  FamilyData? get _family => ref.read(familyDataProvider).valueOrNull;
+  FamilyData? get _family => ref.read(familyDataProvider).value;
 
   /// Делает снимок текущего состояния вместе с медиа.
   Future<BackupEntry?> create({
@@ -95,7 +93,7 @@ class BackupsNotifier extends AsyncNotifier<BackupList> {
     final family = _family;
     if (family == null) return null;
 
-    final current = state.valueOrNull ?? const BackupList();
+    final current = state.value ?? const BackupList();
     if (automatic && current.backups.isNotEmpty) {
       final elapsed = DateTime.now().millisecondsSinceEpoch -
           current.backups.first.savedAt;
@@ -154,8 +152,8 @@ class BackupsNotifier extends AsyncNotifier<BackupList> {
     }
 
     final accounts =
-        ref.read(accountsNotifierProvider).valueOrNull ?? const <Account>[];
-    final guestLinks = ref.read(guestLinksNotifierProvider).valueOrNull ??
+        ref.read(accountsProvider).value ?? const <Account>[];
+    final guestLinks = ref.read(guestLinksProvider).value ??
         const <GuestLink>[];
 
     return <String, dynamic>{
@@ -238,18 +236,18 @@ class BackupsNotifier extends AsyncNotifier<BackupList> {
 
     final family = FamilyData.fromJson(data);
     ref.read(familyDataProvider.notifier).replaceData(family);
-    ref.invalidate(familySettingsNotifierProvider);
+    ref.invalidate(familySettingsProvider);
 
     final accounts = bundle['accounts'];
     if (accounts is List) {
-      ref.read(accountsNotifierProvider.notifier).replaceAll([
+      ref.read(accountsProvider.notifier).replaceAll([
         for (final item in accounts)
           if (item is Map) Account.fromJson(item.cast<String, dynamic>()),
       ]);
     }
     final links = bundle['guestLinks'];
     if (links is List) {
-      ref.read(guestLinksNotifierProvider.notifier).replaceAll([
+      ref.read(guestLinksProvider.notifier).replaceAll([
         for (final item in links)
           if (item is Map) GuestLink.fromJson(item.cast<String, dynamic>()),
       ]);
@@ -259,7 +257,7 @@ class BackupsNotifier extends AsyncNotifier<BackupList> {
 
   Future<void> delete(String name) async {
     await _storage.deleteBackup(name);
-    final current = state.valueOrNull ?? const BackupList();
+    final current = state.value ?? const BackupList();
     _set(
       current.backups
           .where((entry) => entry.name != name)

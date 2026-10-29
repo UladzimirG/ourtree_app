@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/views/home_screen.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -13,12 +14,14 @@ Future<void> main() async {
   runApp(const ProviderScope(child: OurTreeApp()));
 }
 
-class OurTreeApp extends StatelessWidget {
+class OurTreeApp extends ConsumerWidget {
   const OurTreeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      // Итоговый язык: выбранный в настройках или язык системы.
+      locale: ref.watch(appLocaleProvider),
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

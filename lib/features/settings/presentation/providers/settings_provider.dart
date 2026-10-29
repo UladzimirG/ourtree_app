@@ -1,18 +1,19 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'settings_provider.g.dart';
 
 /// Редактируемые настройки семьи.
-final familySettingsNotifierProvider =
-    AsyncNotifierProvider<FamilySettingsNotifier, FamilySettings>(
-  FamilySettingsNotifier.new,
-);
-
-/// Хранит [FamilySettings], начиная с данных, загруженных репозиторием.
-class FamilySettingsNotifier extends AsyncNotifier<FamilySettings> {
+@Riverpod(keepAlive: true)
+class FamilySettingsNotifier extends _$FamilySettingsNotifier {
   @override
   Future<FamilySettings> build() async {
-    final family = await ref.read(familyDataProvider.future);
+    // Настройки — это «шапка» архива, поэтому они пересчитываются вместе с
+    // данными (например, при смене языка интерфейса).
+    final family = await ref.watch(familyDataProvider.future);
     return family.settings;
   }
 
@@ -40,7 +41,7 @@ class FamilySettingsNotifier extends AsyncNotifier<FamilySettings> {
   }
 
   Future<void> save() async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
 
     // Архив пока является read-only asset. Сохраняем изменения в состоянии
@@ -50,7 +51,7 @@ class FamilySettingsNotifier extends AsyncNotifier<FamilySettings> {
   }
 
   void _update(FamilySettings Function(FamilySettings) transform) {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
     state = AsyncData(transform(current));
   }

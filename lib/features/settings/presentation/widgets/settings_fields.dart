@@ -158,7 +158,7 @@ class SettingsPhotoField extends ConsumerWidget {
     final hash = sha256.convert(bytes).toString();
     final existing = ref
         .read(familyDataProvider)
-        .valueOrNull
+        .value
         ?.findDuplicateMedia(
           hash: hash,
           name: file.name,
@@ -388,23 +388,41 @@ class SettingsDateField extends StatefulWidget {
 }
 
 class _SettingsDateFieldState extends State<SettingsDateField> {
-  late final TextEditingController _controller;
+  late final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode();
   bool _invalid = false;
 
+  /// Формат даты текущего языка; пересчитывается при смене локали.
+  DisplayDatePattern _pattern =
+      DisplayDatePattern.forLocale(defaultDateLocale);
+  bool _patternApplied = false;
+
   @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(
-      text: formatDisplayDateFromIso(widget.value),
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = DisplayDatePattern.forLocale(
+      AppLocalizations.of(context)?.localeName,
     );
+    if (_patternApplied && next == _pattern) return;
+
+    if (_patternApplied && _focus.hasFocus) {
+      // Язык сменили прямо во время ввода: сохраняем уже введённые цифры.
+      final iso = _pattern.toIso(_controller.text);
+      _pattern = next;
+      if (iso.isNotEmpty) _controller.text = next.fromIso(iso);
+      return;
+    }
+
+    _pattern = next;
+    _patternApplied = true;
+    _controller.text = next.fromIso(widget.value);
   }
 
   @override
   void didUpdateWidget(covariant SettingsDateField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_focus.hasFocus && oldWidget.value != widget.value) {
-      _controller.text = formatDisplayDateFromIso(widget.value);
+      _controller.text = _pattern.fromIso(widget.value);
     }
   }
 
@@ -416,7 +434,7 @@ class _SettingsDateFieldState extends State<SettingsDateField> {
   }
 
   void _handleChanged(String raw) {
-    final masked = maskDisplayDate(raw);
+    final masked = _pattern.mask(raw);
     if (_controller.text != masked) {
       _controller.value = TextEditingValue(
         text: masked,
@@ -430,7 +448,7 @@ class _SettingsDateFieldState extends State<SettingsDateField> {
       return;
     }
 
-    final iso = isoFromDisplayDate(masked);
+    final iso = _pattern.toIso(masked);
     final complete = masked.length == 10;
     setState(() => _invalid = complete && iso.isEmpty);
     if (!complete) return;

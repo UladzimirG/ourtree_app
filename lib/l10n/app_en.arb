@@ -1,8 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "OurTree App",
-  "welcomeTitle": "Welcome to OurTree",
-  "welcomeMessage": "This is a clean Flutter project with localizations for ru/en and Riverpod state management.",
   "homeFamilyLabel": "Family",
   "homeSubtitle": "A place for your family stories, photos and dates.",
   "homeOverviewTitle": "Overview",
@@ -43,7 +41,7 @@
   "profileLinkCopied": "Wishlist link copied.",
   "settingsFamilyName": "Family name",
   "settingsDataSource": "Data source",
-  "settingsArchiveSource": "Family archive from assets/data/family.json",
+  "settingsArchiveSource": "Family archive from the bundled demo files",
   "settingsReload": "Reload data",
   "settingsReloadStarted": "Family data reloaded.",
   "settingsEditingSoon": "Editing will appear in the next step.",
@@ -208,7 +206,7 @@
   "backupSizeKb": "{size} KB",
   "backupSizeMb": "{size} MB",
   "backupLocalOnly": "Snapshots are stored locally and include copies of media files.",
-  "dateFormatHint": "DD.MM.YYYY",
+  "dateFormatHint": "MM/DD/YYYY",
   "invalidDate": "Enter an existing date: DD.MM.YYYY",
   "memberShowInCalendar": "Mark birthday in the family calendar",
   "memberBirthdayMedia": "Birthday photos and videos",
@@ -278,12 +276,6 @@
 
   "@appTitle": {
     "description": "Application title"
-  },
-  "@welcomeTitle": {
-    "description": "Welcome screen title"
-  },
-  "@welcomeMessage": {
-    "description": "Welcome screen message"
   },
   "@homeFamilyLabel": {
     "description": "Small label above the family name"
@@ -502,5 +494,29 @@
   },
   "@mediaOnlyUnused": {
     "placeholders": {"count": {"type": "int"}}
+  },
+  "settingsTabLanguage": "Language",
+  "settingsLanguage": "Interface language",
+  "settingsLanguageHint": "The choice is saved on this device.",
+  "settingsLanguageSystem": "Same as system",
+  "settingsLanguageRussian": "Russian",
+  "settingsLanguageEnglish": "English",
+  "@settingsTabLanguage": {
+    "description": "Settings tab for the interface language"
+  },
+  "@settingsLanguage": {
+    "description": "Caption of the interface language block"
+  },
+  "@settingsLanguageHint": {
+    "description": "Explains that the language choice is stored locally"
+  },
+  "@settingsLanguageSystem": {
+    "description": "Option that follows the device language"
+  },
+  "@settingsLanguageRussian": {
+    "description": "Russian language option"
+  },
+  "@settingsLanguageEnglish": {
+    "description": "English language option"
   }
 }
