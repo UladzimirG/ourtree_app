@@ -429,28 +429,26 @@ class _GalleryCard extends StatelessWidget {
 class _Polaroid extends StatelessWidget {
   const _Polaroid({required this.entry, required this.onTap});
 
+  /// Цвет «бумаги» поляроида. Тем же цветом заливаются поля вокруг снимка,
+  /// чтобы рамка выглядела цельной.
+  static const Color _paper = Color(0xFFFFFDF6);
+
   final _GalleryEntry entry;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fallback = Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[Color(0x2E8A5A2E), Color(0x1F6F4B2A)],
+    final fallback = ColoredBox(
+      color: const Color(0x1F6F4B2A),
+      child: Center(
+        child: Icon(
+          entry.type == MediaType.video
+              ? Icons.play_circle_outline
+              : Icons.photo_outlined,
+          color: AppColors.inkSoft,
+          size: 28,
         ),
-      ),
-      child: Icon(
-        entry.type == MediaType.video
-            ? Icons.play_circle_outline
-            : Icons.photo_outlined,
-        color: AppColors.inkSoft,
-        size: 28,
       ),
     );
     final content = entry.type == MediaType.video
@@ -466,20 +464,23 @@ class _Polaroid extends StatelessWidget {
           )
         : entry.source == null
             ? fallback
-            : FamilyPhoto(
-                source: entry.source,
-                fit: BoxFit.cover,
-                alignment: photoAlignment(entry.position),
-                zoom: entry.zoom ?? 1.4,
-                fallback: fallback,
+            : ColoredBox(
+                color: _paper,
+                child: FamilyPhoto(
+                  source: entry.source,
+                  // Кадр показывается целиком, а поля вокруг снимка
+                  // заливаются цветом бумаги поляроида.
+                  fit: BoxFit.contain,
+                  fallback: fallback,
+                ),
               );
     final caption = entry.caption?.trim();
 
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFDF6),
-        boxShadow: const <BoxShadow>[
+      decoration: const BoxDecoration(
+        color: _paper,
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.softShadow,
             blurRadius: 18,
