@@ -1,0 +1,98 @@
+rules_version = '2';
+
+// Модель доступа: анонимный Firebase Auth + членство в семье.
+//  1. Пользователь ничего не вводит: при создании локального аккаунта клиент
+//     выполняет signInAnonymously() и получает auth.uid.
+//  2. Связь "локальный пользователь -> auth.uid" хранится документом
+//     families/{familyId}/members/{userId} (поле authUid).
+//  3. На документе семьи денормализован список memberUids — по нему правила
+//     проверяют доступ одним чтением, без обхода подколлекций.
+//  4. Премиум-статус (families/*.premium) меняют ТОЛЬКО Cloud Functions
+//     через Admin SDK: клиент не может выдать себе Premium.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function familyDoc(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)).data;
+    }
+
+    function isMember(familyId) {
+      return signedIn() && request.auth.uid in familyDoc(familyId).memberUids;
+    }
+
+    function isOwner(familyId) {
+      return isMember(familyId)
+        && familyDoc(familyId).ownerAuthUid == request.auth.uid;
+    }
+
+    // Клиент пишет время как int (миллисекунды). Разрешаем небольшое
+    // расхождение с серверным временем, но не произвольные даты.
+    function freshTimestamp() {
+      return request.resource.data.updatedAt is int
+        && request.resource.data.updatedAt >= request.time.toMillis() - 300000
+        && request.resource.data.updatedAt <= request.time.toMillis() + 300000;
+    }
+
+    // Клиент не может менять поля, которые принадлежат серверу:
+    // premium, memberIds/memberUids, ownerUserId, revision, schemaVersion.
+    function serverOnlyFieldsUntouched() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'premium', 'memberIds', 'memberUids', 'ownerUserId', 'ownerAuthUid', 'schemaVersion'
+      ]);
+    }
+
+    // Документ пользователя: только владелец.
+    match /users/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Семья: читают участники, создаёт владелец, правит владелец.
+    // Клиент может менять только «шапку» (name, settings, updatedAt, revision).
+    match /families/{familyId} {
+      allow read: if isMember(familyId);
+
+      allow create: if signedIn()
+        && request.resource.data.ownerAuthUid == request.auth.uid
+        && request.auth.uid in request.resource.data.memberUids
+        && request.resource.data.premium.active == false;
+
+      allow update: if isOwner(familyId) && serverOnlyFieldsUntouched();
+
+      allow delete: if false;
+    }
+
+    // Содержимое семьи: people, events, media, members, invites, audit.
+    match /families/{familyId}/{collection}/{document} {
+      allow read: if isMember(familyId);
+
+      allow create, update: if isMember(familyId) && freshTimestamp();
+
+      allow delete: if isOwner(familyId);
+    }
+
+    // Реестр платежей и сессии Telegram: пишет только сервер.
+    match /purchases/{purchaseId} {
+      allow read, write: if false;
+    }
+
+    match /telegramSessions/{sessionId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Публичная конфигурация (цены, минимальная версия приложения).
+    match /config/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Всё остальное закрыто.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

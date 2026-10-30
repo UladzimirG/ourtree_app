@@ -1,4 +1,4 @@
-package com.example.ourtree_app
+package com.ourtree.family
 
 import io.flutter.embedding.android.FlutterActivity
 

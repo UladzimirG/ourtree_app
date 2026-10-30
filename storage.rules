@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// Доступ к медиафайлам семьи.
+// Право на файл = активное членство в семье. Проверка идёт по документу
+// участника families/{familyId}/members/{auth.uid}, поэтому «знание» UUID
+// семьи или ссылки на файл ничего не даёт.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isActiveMember(familyId) {
+      return request.auth != null
+        && firestore.get(
+             /databases/(default)/documents/families/$(familyId)/members/$(request.auth.uid)
+           ).data.status == 'active';
+    }
+
+    match /families/{familyId}/{allPaths=**} {
+      allow read: if isActiveMember(familyId);
+      allow write: if isActiveMember(familyId)
+        && request.resource.size < 300 * 1024 * 1024;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

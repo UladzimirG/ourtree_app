@@ -86,6 +86,10 @@ class MediaStorage {
     return value is String ? value : null;
   }
 
+  /// Все ключи бокса `app_state` — для миграций и диагностики.
+  List<String> appKeys() =>
+      _appBox?.keys.whereType<String>().toList() ?? _memoryApp.keys.toList();
+
   Future<void> removeString(String key) async {
     if (_appBox != null) {
       await _appBox!.delete(key);

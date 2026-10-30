@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:ourtree_app/core/firebase/firebase_bootstrap.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
+import 'package:ourtree_app/core/storage/app_migrations.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/views/home_screen.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
@@ -10,6 +12,10 @@ import 'package:ourtree_app/l10n/app_localizations.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await MediaStorage.instance.init();
+  // Миграция локальной схемы: `account-<micros>` → UUID v4 и перенос ссылок.
+  await AppMigrations().run();
+  // Firebase необязателен для старта: при сбое приложение работает офлайн.
+  await FirebaseBootstrap.init();
   await initializeDateFormatting();
   runApp(const ProviderScope(child: OurTreeApp()));
 }

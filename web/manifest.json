@@ -1,11 +1,11 @@
 {
-    "name": "ourtree_app",
-    "short_name": "ourtree_app",
+    "name": "OurTree",
+    "short_name": "OurTree",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "OurTree family album: photos, stories and memorable dates.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

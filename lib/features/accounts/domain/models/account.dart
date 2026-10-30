@@ -14,11 +14,16 @@ class Account {
     this.visibleMemberIds = const <String>[],
     this.passwordHash,
     this.passwordSalt,
+    this.legacyId,
   });
 
   final String id;
   final String login;
   final String name;
+
+  /// Прежний идентификатор `account-<micros>`; нужен, чтобы после миграции
+  /// можно было сопоставить старые ссылки (`hiddenFrom`, бэкапы).
+  final String? legacyId;
 
   /// Роль доступа; неизвестное значение сервера трактуется как `viewer`.
   final UserRole role;
@@ -56,6 +61,7 @@ class Account {
       visibleMemberIds: readStringList(json['visibleMemberIds']),
       passwordHash: readNullableString(json['passwordHash']),
       passwordSalt: readNullableString(json['passwordSalt']),
+      legacyId: readNullableString(json['legacyId']),
     );
   }
 
@@ -70,6 +76,7 @@ class Account {
           'visibleMemberIds': visibleMemberIds,
         if (passwordHash != null) 'passwordHash': passwordHash,
         if (passwordSalt != null) 'passwordSalt': passwordSalt,
+        if (legacyId != null) 'legacyId': legacyId,
       };
 
   Account copyWith({
@@ -82,6 +89,7 @@ class Account {
     List<String>? visibleMemberIds,
     String? passwordHash,
     String? passwordSalt,
+    String? legacyId,
   }) =>
       Account(
         id: id ?? this.id,
@@ -93,6 +101,7 @@ class Account {
         visibleMemberIds: visibleMemberIds ?? this.visibleMemberIds,
         passwordHash: passwordHash ?? this.passwordHash,
         passwordSalt: passwordSalt ?? this.passwordSalt,
+        legacyId: legacyId ?? this.legacyId,
       );
 
   @override
@@ -107,7 +116,8 @@ class Account {
           allMembersVisible == other.allMembersVisible &&
           listsEqual(visibleMemberIds, other.visibleMemberIds) &&
           passwordHash == other.passwordHash &&
-          passwordSalt == other.passwordSalt;
+          passwordSalt == other.passwordSalt &&
+          legacyId == other.legacyId;
 
   @override
   int get hashCode => Object.hash(
@@ -120,6 +130,7 @@ class Account {
         Object.hashAll(visibleMemberIds),
         passwordHash,
         passwordSalt,
+        legacyId,
       );
 }
 

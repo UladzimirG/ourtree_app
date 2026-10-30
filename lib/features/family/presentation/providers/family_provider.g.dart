@@ -136,7 +136,7 @@ final class FamilyDataNotifierProvider
 }
 
 String _$familyDataNotifierHash() =>
-    r'7b566fed03c82d929879c2963a9db75536a52220';
+    r'eb2cb6a1022f5eeb6f8240b8d902e4fe835f1ff9';
 
 /// Изменяемое состояние семейного древа.
 

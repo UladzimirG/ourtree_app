@@ -3,7 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  cloud_firestore
   ffmpeg_kit_flutter_new_min_gpl
+  firebase_app_check
+  firebase_auth
+  firebase_core
+  firebase_storage
   url_launcher_windows
 )
 
