@@ -1,6 +1,6 @@
 {
   "familyName": "Our Tree",
-  "familySubtitle": "Seven branches of one tree",
+  "familySubtitle": "Four branches of one tree",
   "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
   "revision": 1,
   "members": [
@@ -18,35 +18,15 @@
       "quotes": ["What matters is the direction, not the speed"],
       "wishlist": [
         {
-          "title": "Cast-iron skillet",
-          "note": "26 cm"
+          "title": "New bicycle",
+          "note": "MTB"
         },
         {
           "title": "Screwdriver set",
           "url": "https://www.amazon.com/"
         }
       ],
-      "gallery": [
-        {
-          "caption": "At the country house",
-          "media": [
-            {
-              "id": "media-papa-1",
-              "source": "/photos/media-006_1.jpg",
-              "type": "image",
-              "name": "dacha.jpg",
-              "people": [
-                {
-                  "id": "masha"
-                },
-                {
-                  "id": "vanya"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#6b4f32"
     },
     {
@@ -70,27 +50,7 @@
           "title": "Gardening book"
         }
       ],
-      "gallery": [
-        {
-          "caption": "Family dinner",
-          "media": [
-            {
-              "id": "media-mama-1",
-              "source": "/photos/media-030_image.jpg",
-              "type": "image",
-              "name": "dinner.jpg",
-              "people": [
-                {
-                  "id": "papa"
-                },
-                {
-                  "id": "masha"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#a44b2c"
     },
     {
@@ -114,24 +74,7 @@
           "title": "Plush fox"
         }
       ],
-      "gallery": [
-        {
-          "caption": "First grade",
-          "media": [
-            {
-              "id": "media-masha-1",
-              "source": "/photos/media-016_image.jpg",
-              "type": "image",
-              "name": "school.jpg",
-              "people": [
-                {
-                  "id": "mama"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#4e5c38"
     },
     {
@@ -139,7 +82,7 @@
       "role": "Son",
       "name": "John",
       "nickname": "Johnny",
-      "birthday": "2016-11-08",
+      "birthday": "2015-11-08",
       "showBirthdayOnTimeline": true,
       "showInCalendar": true,
       "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
@@ -155,24 +98,7 @@
           "title": "Scooter"
         }
       ],
-      "gallery": [
-        {
-          "caption": "In the yard",
-          "media": [
-            {
-              "id": "media-vanya-1",
-              "source": "/photos/media-009_image.jpg",
-              "type": "image",
-              "name": "yard.jpg",
-              "people": [
-                {
-                  "id": "papa"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#2f4858"
     }
   ],
@@ -192,9 +118,9 @@
       "id": "wedding",
       "date": "2011-08-20",
       "title": "Wedding",
-      "text": "The warmest day of the summer and the longest table in the yard.",
+      "text": "The warmest day of the summer and the longest table.",
       "kind": "wedding",
-      "place": "The countryside",
+      "place": "Country estate",
       "photo": "/photos/media-024_image.jpg",
       "showElapsed": true,
       "showInCalendar": true
@@ -206,13 +132,14 @@
       "text": "Our life became louder and happier.",
       "kind": "birth",
       "memberId": "masha",
-      "showInCalendar": true
+      "showInCalendar": true,
+      "photo": "/photos/Birth1.jpg"
     },
     {
       "id": "trip-sea",
       "date": "2016-08-06",
       "title": "Our first sea",
-      "text": "The first trip to the seaside with the whole family.",
+      "text": "The first trip to the ocean with the whole family.",
       "kind": "trip",
       "place": "Sochi",
       "photo": "/photos/media-031_image.jpg",
@@ -236,12 +163,13 @@
     },
     {
       "id": "birth-vanya",
-      "date": "2016-11-08",
+      "date": "2015-11-08",
       "title": "John is born",
       "text": "Two little explorers in the house now.",
       "kind": "birth",
       "memberId": "vanya",
-      "showInCalendar": true
+      "showInCalendar": true,
+      "photo": "/photos/Birth2.jpg"
     },
     {
       "id": "new-home",
@@ -249,8 +177,9 @@
       "title": "Moved into our own flat",
       "text": "The first evening with tea on the floor because the furniture had not arrived yet.",
       "kind": "milestone",
-      "place": "Moscow",
-      "showInCalendar": true
+      "place": "Cozy family nest",
+      "showInCalendar": true,
+      "photo": "/photos/kvart1.jpg"
     },
     {
       "id": "trip-mountains",
@@ -258,7 +187,7 @@
       "title": "Hiking in the mountains",
       "text": "A tent, the stars and porridge over the fire.",
       "kind": "trip",
-      "place": "The Caucasus",
+      "place": "Big Pine Lakes",
       "photo": "/photos/media-032_image.jpg",
       "media": [
         {

@@ -4,12 +4,12 @@ import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
-import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
@@ -149,7 +149,8 @@ class SettingsPhotoField extends ConsumerWidget {
   final ValueChanged<double>? onZoomChange;
   final AppLocalizations? l10n;
 
-  Future<void> _pickImage(WidgetRef ref) async {
+  Future<void> _pickImage(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final file = await FilePicker.pickFile(type: FileType.image);
     if (file == null) return;
     final bytes = await file.readAsBytes();
@@ -169,21 +170,16 @@ class SettingsPhotoField extends ConsumerWidget {
       return;
     }
 
-    final storedId = await MediaStorage.instance.saveBytes(
-      bytes,
-      name: file.name,
-    );
-    ref.read(familyDataProvider.notifier).upsertMediaAsset(
-          MediaAsset(
-            id: 'asset-$storedId',
-            source: 'hive://$storedId',
-            name: file.name,
-            createdAt: DateTime.now().millisecondsSinceEpoch,
-            size: bytes.length,
-            hash: hash,
-          ),
+    final asset = await ref.read(mediaUploadServiceProvider.notifier).store(
+          bytes: bytes,
+          name: file.name,
+          hash: hash,
         );
-    onChanged('hive://$storedId');
+    ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
+    if (!ref.read(mediaUploadServiceProvider) && context.mounted) {
+      showLocalOnlyNotice(context, l10n);
+    }
+    onChanged(asset.source);
   }
 
   @override
@@ -241,7 +237,7 @@ class SettingsPhotoField extends ConsumerWidget {
           children: [
             if (uploadLabel != null)
               TextButton.icon(
-                onPressed: () => _pickImage(ref),
+                onPressed: () => _pickImage(context, ref),
                 icon: const Icon(Icons.upload_file),
                 label: Text(uploadLabel!),
               ),

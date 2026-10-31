@@ -29,6 +29,9 @@ dependencies:
   cloud_firestore: ^7.1.0
   firebase_storage: ^14.0.1
   firebase_app_check: ^0.5.1
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+  connectivity_plus: ^7.0.0
   ffmpeg_kit_flutter_new_min_gpl: ^2.6.7
 
 dev_dependencies:

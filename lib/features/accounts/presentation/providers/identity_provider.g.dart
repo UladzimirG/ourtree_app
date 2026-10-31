@@ -194,7 +194,7 @@ final class IdentityControllerProvider
 }
 
 String _$identityControllerHash() =>
-    r'43802b773cfc34e1359206da47ec08399eec9d04';
+    r'a832dc9a63c40e8e02f614f25e62a788e098b67d';
 
 /// Личность пользователя: локальный id + анонимный `auth.uid` + профиль в облаке.
 ///

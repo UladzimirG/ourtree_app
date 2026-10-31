@@ -10,12 +10,16 @@ class FamilyHeader extends StatelessWidget {
     required this.familyPhoto,
     required this.settingsTooltip,
     required this.onSettingsTap,
+    this.trailing,
   });
 
   final String familyName;
   final String? familyPhoto;
   final String settingsTooltip;
   final VoidCallback onSettingsTap;
+
+  /// Необязательный виджет слева от кнопки настроек (например, статус синка).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,10 @@ class FamilyHeader extends StatelessWidget {
             style: theme.textTheme.headlineSmall,
           ),
         ),
+        if (trailing != null) ...[
+          trailing!,
+          const SizedBox(width: 6),
+        ],
         _HeaderSettingsButton(
           tooltip: settingsTooltip,
           onTap: onSettingsTap,

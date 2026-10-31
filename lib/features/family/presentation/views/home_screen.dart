@@ -11,6 +11,7 @@ import 'package:ourtree_app/features/family/presentation/views/timeline_section.
 import 'package:ourtree_app/features/family/presentation/widgets/card_sheet.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_bottom_nav.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_header.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/sync_status_badge.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
@@ -51,6 +52,7 @@ class HomeScreen extends ConsumerWidget {
                           : null,
                       settingsTooltip: l10n.settingsTitle,
                       onSettingsTap: () => _openSettings(context),
+                      trailing: const SyncStatusBadge(),
                     ),
                   ),
                   Expanded(

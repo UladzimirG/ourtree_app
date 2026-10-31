@@ -1069,4 +1069,161 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get settingsLanguageUkrainian => 'Українська';
+
+  @override
+  String get familyCloudTitle => 'Сям\'я ў воблаку';
+
+  @override
+  String get familyCloudHint =>
+      'Стварыце сям\'ю, каб сінхранізаваць альбомы паміж прыладамі, або далучыцеся па кодзе запрашэння.';
+
+  @override
+  String get familyCloudCreateTitle => 'Стварыць сям\'ю';
+
+  @override
+  String get familyCloudNameLabel => 'Назва сям\'і';
+
+  @override
+  String get familyCloudNameHint => 'Напрыклад: Наша вялікая сям\'я';
+
+  @override
+  String get familyCloudCreateAction => 'Стварыць і падключыць';
+
+  @override
+  String get familyCloudJoinTitle => 'Далучыцца па кодзе';
+
+  @override
+  String get familyCloudCodeLabel => 'Код запрашэння';
+
+  @override
+  String get familyCloudCodeHint => '8 сімвалаў, напрыклад AB2CD3EF';
+
+  @override
+  String get familyCloudJoinAction => 'Далучыцца';
+
+  @override
+  String get familyCloudInvalidCode =>
+      'Код павінен складацца з 8 літар або лічбаў.';
+
+  @override
+  String get familyCloudJoinNotFound =>
+      'Код запрашэння не знойдзены або скончыўся.';
+
+  @override
+  String get familyCloudCreated => 'Сям\'я створана.';
+
+  @override
+  String get familyCloudJoined => 'Вы далучыліся да сям\'і.';
+
+  @override
+  String get familyCloudError =>
+      'Не ўдалося выканаць запыт. Праверце злучэнне і паспрабуйце зноў.';
+
+  @override
+  String get familyCloudRetry => 'Паспрабаваць зноў';
+
+  @override
+  String get familyCloudOwnerBadge => 'Уладальнік';
+
+  @override
+  String get familyCloudPremiumActive => 'Прэміум актыўны';
+
+  @override
+  String get familyCloudPremiumFree => 'Бясплатны план';
+
+  @override
+  String get familyCloudInviteTitle => 'Запрашэнне ў сям\'ю';
+
+  @override
+  String get familyCloudInviteHint =>
+      'Падзяліцеся кодам: яго можна выкарыстаць адзін раз на чалавека.';
+
+  @override
+  String get familyCloudInviteCreate => 'Стварыць код запрашэння';
+
+  @override
+  String get familyCloudInviteCopied => 'Код запрашэння скапіраваны.';
+
+  @override
+  String get familyCloudNameRequired => 'Назва сям\'і не можа быць пустой.';
+
+  @override
+  String familyCloudId(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String get familyCloudPrivacyTitle => 'Даныя і прыватнасць';
+
+  @override
+  String get familyCloudPrivacyHint =>
+      'Вашыя фота застаюцца на прыладзе. Выдаленне даных сям\'і сцірае файлы і запісы з воблака для ўсіх удзельнікаў.';
+
+  @override
+  String get familyCloudDisconnect => 'Адключыць гэтую прыладу';
+
+  @override
+  String get familyCloudDisconnectConfirm =>
+      'Адключыць прыладу ад сям\'і? Лакальны архіў застанецца, даныя ў воблаку не выдаляцца.';
+
+  @override
+  String get familyCloudDisconnected => 'Прылада адключана ад сям\'і.';
+
+  @override
+  String get familyCloudDisconnectOwnerBlocked =>
+      'Вы ўладальнік, і ў сям\'і яшчэ ёсць іншыя ўдзельнікі. Адключэнне недаступнае — выдаліце даныя сям\'і або пакіньце прыладу падключанай.';
+
+  @override
+  String get familyCloudDeleteCloud => 'Выдаліць даныя сям\'і з воблака';
+
+  @override
+  String get familyCloudDeleteCloudConfirm =>
+      'Усе файлы, падзеі і ўдзельнікі сям\'і будуць беззваротна выдаленыя з воблака. Адмяніць гэта нельга. Лакальны архіў застанецца на прыладзе.';
+
+  @override
+  String get familyCloudDeleteCloudDone => 'Даныя сям\'і выдаленыя з воблака.';
+
+  @override
+  String get commonDelete => 'Выдаліць';
+
+  @override
+  String get mediaLocalOnlyNotice =>
+      'Захавана толькі на гэтай прыладзе: хмарная сям\'я не падключана. Падключыце яе ў Наладах → «Сям\'я ў воблаку», каб фота сінхранізаваліся.';
+
+  @override
+  String mediaUploadAllLocal(int count) {
+    return 'Загрузіць усё лакальнае ($count)';
+  }
+
+  @override
+  String mediaUploadAllProgress(int done, int total) {
+    return 'Загрузка $done з $total…';
+  }
+
+  @override
+  String mediaUploadAllDone(int count) {
+    return 'Загружана ў воблака: $count';
+  }
+
+  @override
+  String mediaUploadAllFailed(int count) {
+    return 'Не ўдалося загрузіць: $count';
+  }
+
+  @override
+  String mediaOutboxRetry(int count) {
+    return 'У чарзе: $count — адправіць';
+  }
+
+  @override
+  String get syncStatusLoading => 'Сінхранізацыя…';
+
+  @override
+  String get syncStatusSaving => 'Захаванне…';
+
+  @override
+  String get syncStatusSaved => 'Захавана';
+
+  @override
+  String get syncStatusError => 'Няма сувязі';
 }

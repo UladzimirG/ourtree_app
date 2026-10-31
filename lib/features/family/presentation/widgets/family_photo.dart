@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:ourtree_app/core/media/media_cache.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
@@ -64,12 +66,19 @@ class FamilyPhoto extends StatelessWidget {
       );
     } else if (value != null &&
         (value.startsWith('http://') || value.startsWith('https://'))) {
-      image = Image.network(
-        value,
+      // Сетевые файлы кэшируются на диск: первый показ — загрузка,
+      // все следующие — мгновенно из кэша.
+      image = CachedNetworkImage(
+        imageUrl: value,
+        cacheManager: MediaCache.instance,
+        cacheKey: value,
         fit: fit,
         alignment: alignment,
-        filterQuality: FilterQuality.medium,
-        errorBuilder: _errorBuilder,
+        fadeInDuration: const Duration(milliseconds: 150),
+        placeholder: (context, url) =>
+            fallback ?? const SizedBox.shrink(),
+        errorWidget: (context, url, error) =>
+            fallback ?? const SizedBox.shrink(),
       );
     }
 

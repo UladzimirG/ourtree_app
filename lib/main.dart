@@ -5,6 +5,8 @@ import 'package:ourtree_app/core/firebase/firebase_bootstrap.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/storage/app_migrations.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_sync_provider.dart';
 import 'package:ourtree_app/features/family/presentation/views/home_screen.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
@@ -25,6 +27,12 @@ class OurTreeApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Анонимный вход выполняется при старте: без auth.uid не работают
+    // Security Rules. Ошибка сети не блокирует офлайн-режим приложения.
+    ref.watch(identityControllerProvider);
+    // Синхронизация текстов архива: включается только при подключённой семье.
+    ref.watch(familySyncControllerProvider);
+
     return MaterialApp(
       // Итоговый язык: выбранный в настройках или язык системы.
       locale: ref.watch(appLocaleProvider),

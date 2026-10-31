@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/utils/ids.dart';
 import 'package:ourtree_app/features/accounts/data/gateways/identity_gateway.dart';
@@ -60,13 +61,26 @@ class IdentityController extends _$IdentityController {
     final authUid = gateway.currentAuthUid ?? await gateway.signInAnonymously();
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    final existing = await store.find(userId);
+    final existing = await store.find(authUid);
     final user = (existing ?? UserModel(id: userId, createdAt: now)).copyWith(
       authUid: authUid,
       lastSeenAt: now,
     );
 
     await store.upsert(user);
+
+    // Диагностика: видно в консоли `flutter run`. Проверяем, что документ
+    // реально дошёл до сервера, а не остался в локальной очереди.
+    try {
+      final confirmed = await store.find(authUid, fromServer: true);
+      debugPrint(
+        'CloudIdentity: authUid=$authUid localUserId=$userId '
+        'persisted=${confirmed != null}',
+      );
+    } catch (error) {
+      debugPrint('CloudIdentity: Firestore недоступен с устройства: $error');
+    }
+
     return IdentityState(user: user, authUid: authUid);
   }
 
@@ -79,7 +93,9 @@ class IdentityController extends _$IdentityController {
     state = AsyncData(IdentityState(user: user, authUid: current.authUid));
 
     try {
-      await ref.read(userStoreProvider).setActiveFamily(user.id, familyId);
+      await ref
+          .read(userStoreProvider)
+          .setActiveFamily(current.authUid, familyId);
     } catch (_) {
       // Офлайн не должен мешать локальной работе: значение уже сохранено
       // в состоянии и уйдёт в облако при следующем успешном входе.

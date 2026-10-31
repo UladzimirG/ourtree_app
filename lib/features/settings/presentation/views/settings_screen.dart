@@ -2,7 +2,6 @@ import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
@@ -10,10 +9,12 @@ import 'package:ourtree_app/features/accounts/presentation/widgets/accounts_pane
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/family_cloud_panel.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
-import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_library_panel.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
@@ -79,6 +80,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _pickFamilyPhoto() async {
+    final l10n = AppLocalizations.of(context)!;
     final file = await FilePicker.pickFile(type: FileType.image);
     if (file == null) return;
     final bytes = await file.readAsBytes();
@@ -95,21 +97,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (existing != null) {
       source = existing.source;
     } else {
-      final storedId = await MediaStorage.instance.saveBytes(
-        bytes,
-        name: file.name,
-      );
-      ref.read(familyDataProvider.notifier).upsertMediaAsset(
-            MediaAsset(
-              id: 'asset-$storedId',
-              source: 'hive://$storedId',
-              name: file.name,
-              createdAt: DateTime.now().millisecondsSinceEpoch,
-              size: bytes.length,
-              hash: hash,
-            ),
+      final asset = await ref.read(mediaUploadServiceProvider.notifier).store(
+            bytes: bytes,
+            name: file.name,
+            hash: hash,
           );
-      source = 'hive://$storedId';
+      ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
+      source = asset.source;
+      if (!ref.read(mediaUploadServiceProvider) && mounted) {
+        showLocalOnlyNotice(context, l10n);
+      }
     }
     if (!mounted) return;
     _photoController.text = source;
@@ -573,6 +570,13 @@ class _GeneralSection extends ConsumerWidget {
       children: [
         Text(l10n.settingsGeneralHint, style: theme.textTheme.bodyMedium),
         const SizedBox(height: 14),
+        _SettingsLink(
+          icon: Icons.cloud_outlined,
+          title: l10n.familyCloudTitle,
+          subtitle: l10n.familyCloudHint,
+          page: (_) => const FamilyCloudPanel(),
+        ),
+        const SizedBox(height: 10),
         _SettingsLink(
           icon: Icons.translate,
           title: l10n.settingsTabLanguage,

@@ -4,6 +4,10 @@ import { onRequest } from 'firebase-functions/v2/https';
 /** Регион всех функций — совпадает с регионом Firestore/Storage. */
 export const FUNCTIONS_REGION = 'europe-west3';
 
+// Ежедневная уборка «мусора» в облаке: брошенные файлы, пустые и мёртвые семьи,
+// просроченные коды приглашений. Подробности — в `cleanup.ts`.
+export { scheduledCleanup } from './cleanup';
+
 /**
  * Проверка живости деплоя: GET /health → { ok: true }.
  *

@@ -46,3 +46,14 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Локальные резервные копии семьи (содержат base64 медиа)
+ourtree-backup-*.json
+
+# Временная папка для новых демо-фото (tools/swap_demo_media.ps1)
+new_media/*
+!new_media/.gitkeep
+
+# Рабочая таблица правок демо-текстов (tools/export_texts.js)
+demo_texts.tsv
+.tmp_import_report.txt

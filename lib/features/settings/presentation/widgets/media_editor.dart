@@ -2,11 +2,12 @@ import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_upload_preparer.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
@@ -230,19 +231,12 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
           error = l10n.mediaDuplicateAttached;
           continue;
         }
-        final storedId = await MediaStorage.instance.saveBytes(
-          mediaBytes,
-          name: prepared.name,
-        );
-        final asset = MediaAsset(
-          id: 'asset-$storedId',
-          source: 'hive://$storedId',
-          type: prepared.type,
-          name: prepared.name,
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-          size: mediaBytes.length,
-          hash: hash,
-        );
+        final asset = await ref.read(mediaUploadServiceProvider.notifier).store(
+              bytes: mediaBytes,
+              name: prepared.name,
+              hash: hash,
+              type: prepared.type,
+            );
         ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
         added.add(_linkFromAsset(asset));
       }
@@ -253,6 +247,9 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
     }
 
     if (added.isNotEmpty) widget.onChanged([...widget.value, ...added]);
+    if (added.isNotEmpty && !ref.read(mediaUploadServiceProvider) && mounted) {
+      showLocalOnlyNotice(context, widget.l10n);
+    }
     if (error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error)),

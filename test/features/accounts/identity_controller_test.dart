@@ -36,18 +36,19 @@ class _MemoryUserStore implements UserStore {
   final List<String?> activeFamilyUpdates = <String?>[];
 
   @override
-  Future<UserModel?> find(String userId) async => users[userId];
+  Future<UserModel?> find(String authUid, {bool fromServer = false}) async =>
+      users[authUid];
 
   @override
-  Future<void> upsert(UserModel user) async => users[user.id] = user;
+  Future<void> upsert(UserModel user) async => users[user.authUid] = user;
 
   @override
-  Future<void> setActiveFamily(String userId, String? familyId) async {
+  Future<void> setActiveFamily(String authUid, String? familyId) async {
     activeFamilyUpdates.add(familyId);
     // Firestore делает merge — фейк ведёт себя так же.
-    final existing = users[userId];
+    final existing = users[authUid];
     if (existing != null) {
-      users[userId] = existing.copyWith(activeFamilyId: () => familyId);
+      users[authUid] = existing.copyWith(activeFamilyId: () => familyId);
     }
   }
 }
@@ -84,7 +85,7 @@ void main() {
       expect(identity.user.id, matches(_uuidV4));
       expect(gateway.signInCalls, 1);
 
-      final saved = store.users[identity.user.id];
+      final saved = store.users[identity.authUid];
       expect(saved, isNotNull);
       expect(saved!.authUid, 'auth-1');
       expect(saved.createdAt, greaterThan(0));

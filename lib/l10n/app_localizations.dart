@@ -1925,6 +1925,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Українська'**
   String get settingsLanguageUkrainian;
+
+  /// No description provided for @familyCloudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud family'**
+  String get familyCloudTitle;
+
+  /// No description provided for @familyCloudHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a family to sync albums between devices, or join an existing one with an invite code.'**
+  String get familyCloudHint;
+
+  /// No description provided for @familyCloudCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a family'**
+  String get familyCloudCreateTitle;
+
+  /// No description provided for @familyCloudNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name'**
+  String get familyCloudNameLabel;
+
+  /// No description provided for @familyCloudNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: Our big family'**
+  String get familyCloudNameHint;
+
+  /// No description provided for @familyCloudCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and connect'**
+  String get familyCloudCreateAction;
+
+  /// No description provided for @familyCloudJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with a code'**
+  String get familyCloudJoinTitle;
+
+  /// No description provided for @familyCloudCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get familyCloudCodeLabel;
+
+  /// No description provided for @familyCloudCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'8 characters, for example AB2CD3EF'**
+  String get familyCloudCodeHint;
+
+  /// No description provided for @familyCloudJoinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get familyCloudJoinAction;
+
+  /// No description provided for @familyCloudInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'The code must contain 8 letters or digits.'**
+  String get familyCloudInvalidCode;
+
+  /// No description provided for @familyCloudJoinNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite code was not found or has expired.'**
+  String get familyCloudJoinNotFound;
+
+  /// No description provided for @familyCloudCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family created.'**
+  String get familyCloudCreated;
+
+  /// No description provided for @familyCloudJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined the family.'**
+  String get familyCloudJoined;
+
+  /// No description provided for @familyCloudError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete the request. Check your connection and try again.'**
+  String get familyCloudError;
+
+  /// No description provided for @familyCloudRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get familyCloudRetry;
+
+  /// No description provided for @familyCloudOwnerBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get familyCloudOwnerBadge;
+
+  /// No description provided for @familyCloudPremiumActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium is active'**
+  String get familyCloudPremiumActive;
+
+  /// No description provided for @familyCloudPremiumFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan'**
+  String get familyCloudPremiumFree;
+
+  /// No description provided for @familyCloudInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to the family'**
+  String get familyCloudInviteTitle;
+
+  /// No description provided for @familyCloudInviteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code: each person can use it once.'**
+  String get familyCloudInviteHint;
+
+  /// No description provided for @familyCloudInviteCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create invite code'**
+  String get familyCloudInviteCreate;
+
+  /// No description provided for @familyCloudInviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code copied.'**
+  String get familyCloudInviteCopied;
+
+  /// No description provided for @familyCloudNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name cannot be empty.'**
+  String get familyCloudNameRequired;
+
+  /// Technical family document id shown for support
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {id}'**
+  String familyCloudId(String id);
+
+  /// No description provided for @familyCloudPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and privacy'**
+  String get familyCloudPrivacyTitle;
+
+  /// No description provided for @familyCloudPrivacyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photos stay on this device. Deleting family data removes files and records from the cloud for every member.'**
+  String get familyCloudPrivacyHint;
+
+  /// No description provided for @familyCloudDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect this device'**
+  String get familyCloudDisconnect;
+
+  /// No description provided for @familyCloudDisconnectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect this device from the family? The local archive stays, cloud data is not deleted.'**
+  String get familyCloudDisconnectConfirm;
+
+  /// No description provided for @familyCloudDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Device disconnected from the family.'**
+  String get familyCloudDisconnected;
+
+  /// No description provided for @familyCloudDisconnectOwnerBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You are the owner, and other members are still in the family. Disconnect is unavailable — delete the family data or keep this device connected.'**
+  String get familyCloudDisconnectOwnerBlocked;
+
+  /// No description provided for @familyCloudDeleteCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete family data from cloud'**
+  String get familyCloudDeleteCloud;
+
+  /// No description provided for @familyCloudDeleteCloudConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'All family files, events and members will be permanently deleted from the cloud. This cannot be undone. Your local archive stays on this device.'**
+  String get familyCloudDeleteCloudConfirm;
+
+  /// No description provided for @familyCloudDeleteCloudDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Family data deleted from the cloud.'**
+  String get familyCloudDeleteCloudDone;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @mediaLocalOnlyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device only: no cloud family is connected. Set it up in Settings → Cloud family to sync your photos.'**
+  String get mediaLocalOnlyNotice;
+
+  /// No description provided for @mediaUploadAllLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload all local files ({count})'**
+  String mediaUploadAllLocal(int count);
+
+  /// No description provided for @mediaUploadAllProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading {done} of {total}…'**
+  String mediaUploadAllProgress(int done, int total);
+
+  /// No description provided for @mediaUploadAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded to cloud: {count}'**
+  String mediaUploadAllDone(int count);
+
+  /// No description provided for @mediaUploadAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload: {count}'**
+  String mediaUploadAllFailed(int count);
+
+  /// No description provided for @mediaOutboxRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued: {count} — retry'**
+  String mediaOutboxRetry(int count);
+
+  /// No description provided for @syncStatusLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncStatusLoading;
+
+  /// No description provided for @syncStatusSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get syncStatusSaving;
+
+  /// No description provided for @syncStatusSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get syncStatusSaved;
+
+  /// No description provided for @syncStatusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get syncStatusError;
 }
 
 class _AppLocalizationsDelegate

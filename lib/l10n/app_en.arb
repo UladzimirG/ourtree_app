@@ -540,5 +540,96 @@
   },
   "@settingsLanguageEnglish": {
     "description": "English language option"
+  },
+  "familyCloudTitle": "Cloud family",
+  "familyCloudHint": "Create a family to sync albums between devices, or join an existing one with an invite code.",
+  "familyCloudCreateTitle": "Create a family",
+  "familyCloudNameLabel": "Family name",
+  "familyCloudNameHint": "For example: Our big family",
+  "familyCloudCreateAction": "Create and connect",
+  "familyCloudJoinTitle": "Join with a code",
+  "familyCloudCodeLabel": "Invite code",
+  "familyCloudCodeHint": "8 characters, for example AB2CD3EF",
+  "familyCloudJoinAction": "Join",
+  "familyCloudInvalidCode": "The code must contain 8 letters or digits.",
+  "familyCloudJoinNotFound": "This invite code was not found or has expired.",
+  "familyCloudCreated": "Family created.",
+  "familyCloudJoined": "You joined the family.",
+  "familyCloudError": "Could not complete the request. Check your connection and try again.",
+  "familyCloudRetry": "Try again",
+  "familyCloudOwnerBadge": "Owner",
+  "familyCloudPremiumActive": "Premium is active",
+  "familyCloudPremiumFree": "Free plan",
+  "familyCloudInviteTitle": "Invite to the family",
+  "familyCloudInviteHint": "Share this code: each person can use it once.",
+  "familyCloudInviteCreate": "Create invite code",
+  "familyCloudInviteCopied": "Invite code copied.",
+  "familyCloudNameRequired": "Family name cannot be empty.",
+  "familyCloudId": "ID: {id}",
+  "familyCloudPrivacyTitle": "Data and privacy",
+  "familyCloudPrivacyHint": "Your photos stay on this device. Deleting family data removes files and records from the cloud for every member.",
+  "familyCloudDisconnect": "Disconnect this device",
+  "familyCloudDisconnectConfirm": "Disconnect this device from the family? The local archive stays, cloud data is not deleted.",
+  "familyCloudDisconnected": "Device disconnected from the family.",
+  "familyCloudDisconnectOwnerBlocked": "You are the owner, and other members are still in the family. Disconnect is unavailable — delete the family data or keep this device connected.",
+  "familyCloudDeleteCloud": "Delete family data from cloud",
+  "familyCloudDeleteCloudConfirm": "All family files, events and members will be permanently deleted from the cloud. This cannot be undone. Your local archive stays on this device.",
+  "familyCloudDeleteCloudDone": "Family data deleted from the cloud.",
+  "commonDelete": "Delete",
+  "mediaLocalOnlyNotice": "Saved on this device only: no cloud family is connected. Set it up in Settings → Cloud family to sync your photos.",
+  "mediaUploadAllLocal": "Upload all local files ({count})",
+  "@mediaUploadAllLocal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaUploadAllProgress": "Uploading {done} of {total}…",
+  "@mediaUploadAllProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaUploadAllDone": "Uploaded to cloud: {count}",
+  "@mediaUploadAllDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaUploadAllFailed": "Failed to upload: {count}",
+  "mediaOutboxRetry": "Queued: {count} — retry",
+  "syncStatusLoading": "Syncing…",
+  "syncStatusSaving": "Saving…",
+  "syncStatusSaved": "Saved",
+  "syncStatusError": "Offline",
+  "@mediaOutboxRetry": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@mediaUploadAllFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@familyCloudId": {
+    "description": "Technical family document id shown for support",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

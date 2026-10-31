@@ -7,7 +7,14 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/media_pending.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/presentation/providers/bulk_upload_provider.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_outbox_provider.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_progress_provider.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_provider.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_upload_preparer.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
@@ -31,6 +38,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _busy = true);
     String? error;
+    var localOnly = false;
 
     try {
       final files = await FilePicker.pickFiles(type: FileType.media);
@@ -69,21 +77,15 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           error = l10n.mediaDuplicateFound;
           continue;
         }
-        final storedId = await MediaStorage.instance.saveBytes(
-          mediaBytes,
+        final uploadService = ref.read(mediaUploadServiceProvider.notifier);
+        final asset = await uploadService.store(
+          bytes: mediaBytes,
           name: prepared.name,
+          hash: hash,
+          type: prepared.type,
         );
-        ref.read(familyDataProvider.notifier).upsertMediaAsset(
-              MediaAsset(
-                id: 'asset-$storedId',
-                source: 'hive://$storedId',
-                type: prepared.type,
-                name: prepared.name,
-                createdAt: DateTime.now().millisecondsSinceEpoch,
-                size: mediaBytes.length,
-                hash: hash,
-              ),
-            );
+        ref.read(familyDataProvider.notifier).upsertMediaAsset(asset);
+        if (!uploadService.isCloudEnabled) localOnly = true;
       }
     } catch (_) {
       error = l10n.mediaUploadFailed;
@@ -94,6 +96,31 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     if (error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error)),
+      );
+    }
+    if (localOnly && mounted) {
+      showLocalOnlyNotice(context, l10n);
+    }
+  }
+
+  Future<void> _uploadAll() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!ref.read(mediaUploadServiceProvider)) {
+      showLocalOnlyNotice(context, l10n);
+      return;
+    }
+
+    final result =
+        await ref.read(bulkUploadControllerProvider.notifier).uploadPending();
+    if (!mounted) return;
+
+    if (result.failed > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.mediaUploadAllFailed(result.failed))),
+      );
+    } else if (result.done > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.mediaUploadAllDone(result.done))),
       );
     }
   }
@@ -173,6 +200,15 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
       ),
     );
     if (confirmed != true || !mounted) return;
+
+    // Сначала удаляем объект из облака и локальную копию, иначе останется мусор.
+    if ((asset.storagePath ?? '').isNotEmpty) {
+      try {
+        await ref.read(mediaRepositoryProvider).deleteAsset(asset);
+      } catch (_) {
+        // Облако могло быть недоступно — запись всё равно убираем из архива.
+      }
+    }
 
     final storedId = asset.storedId;
     if (storedId != null) {
@@ -268,6 +304,12 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
             .toList(growable: false)
         : allAssets;
 
+    final bulkState = ref.watch(bulkUploadControllerProvider);
+    final outboxCount = ref.watch(mediaOutboxControllerProvider).length;
+    final pendingCount =
+        family == null ? 0 : pendingCloudUploads(allAssets).length;
+    final cloudEnabled = ref.watch(mediaUploadServiceProvider);
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
       children: [
@@ -289,6 +331,30 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
               icon: const Icon(Icons.add_link),
               label: Text(l10n.mediaLibraryAddLink),
             ),
+            if (bulkState.running)
+              OutlinedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.cloud_upload_outlined),
+                label: Text(
+                  l10n.mediaUploadAllProgress(bulkState.done, bulkState.total),
+                ),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: (pendingCount == 0 || _busy || !cloudEnabled)
+                    ? null
+                    : _uploadAll,
+                icon: const Icon(Icons.cloud_upload_outlined),
+                label: Text(l10n.mediaUploadAllLocal(pendingCount)),
+              ),
+            if (outboxCount > 0)
+              OutlinedButton.icon(
+                onPressed: () => ref
+                    .read(mediaOutboxControllerProvider.notifier)
+                    .processQueue(),
+                icon: const Icon(Icons.cloud_sync_outlined),
+                label: Text(l10n.mediaOutboxRetry(outboxCount)),
+              ),
           ],
         ),
         const SizedBox(height: 10),
@@ -355,6 +421,7 @@ class _MediaAssetCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final usages = mediaUsageLabels(family, asset, l10n);
     final unused = usages.isEmpty;
+    final progress = ref.watch(mediaUploadProgressProvider)[asset.id];
 
     return Card(
       margin: EdgeInsets.zero,
@@ -405,6 +472,16 @@ class _MediaAssetCard extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (progress != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 3,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -422,6 +499,7 @@ class _MediaAssetCard extends ConsumerWidget {
             if (asset.isStored) l10n.mediaStoredLocally,
             if (asset.size != null) _formatSize(asset.size!, l10n),
             if (unused) l10n.mediaUnused,
+            if (progress != null) '${(progress * 100).round()}%',
           ].join(' · '),
           style: theme.textTheme.bodySmall,
         ),

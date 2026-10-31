@@ -1,12 +1,13 @@
 rules_version = '2';
 
 // Модель доступа: анонимный Firebase Auth + членство в семье.
-//  1. Пользователь ничего не вводит: при создании локального аккаунта клиент
-//     выполняет signInAnonymously() и получает auth.uid.
-//  2. Связь "локальный пользователь -> auth.uid" хранится документом
-//     families/{familyId}/members/{userId} (поле authUid).
-//  3. На документе семьи денормализован список memberUids — по нему правила
-//     проверяют доступ одним чтением, без обхода подколлекций.
+//  1. Пользователь ничего не вводит: при старте клиент выполняет
+//     signInAnonymously() и получает auth.uid.
+//  2. Членство — это документ families/{familyId}/members/{auth.uid}.
+//     Он же определяет роль (owner/editor/viewer) и статус (active/removed).
+//  3. Первого участника (владельца) создаёт сам клиент при создании семьи;
+//     остальные могут создать документ только по действующему коду
+//     приглашения (inviteCodes/{code}).
 //  4. Премиум-статус (families/*.premium) меняют ТОЛЬКО Cloud Functions
 //     через Admin SDK: клиент не может выдать себе Premium.
 service cloud.firestore {
@@ -20,13 +21,27 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/families/$(familyId)).data;
     }
 
+    // Членство определяется документом участника, а не массивом в семье:
+    // так вход по коду не требует правки документа семьи (её меняет владелец).
     function isMember(familyId) {
-      return signedIn() && request.auth.uid in familyDoc(familyId).memberUids;
+      return signedIn()
+        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.status == 'active';
     }
 
     function isOwner(familyId) {
       return isMember(familyId)
         && familyDoc(familyId).ownerAuthUid == request.auth.uid;
+    }
+
+    // Код действителен, если существует, не отозван и не истёк.
+    function inviteIsValid(familyId, code) {
+      return code is string
+        && code.size() == 8
+        && exists(/databases/$(database)/documents/inviteCodes/$(code))
+        && get(/databases/$(database)/documents/inviteCodes/$(code)).data.familyId == familyId
+        && get(/databases/$(database)/documents/inviteCodes/$(code)).data.revoked == false
+        && get(/databases/$(database)/documents/inviteCodes/$(code)).data.expiresAt > request.time.toMillis();
     }
 
     // Клиент пишет время как int (миллисекунды). Разрешаем небольшое
@@ -45,9 +60,10 @@ service cloud.firestore {
       ]);
     }
 
-    // Документ пользователя: только владелец.
-    match /users/{userId} {
-      allow read, write: if signedIn() && request.auth.uid == userId;
+    // Документ пользователя: ключ — auth.uid, поэтому владелец совпадает
+    // с путём документа.
+    match /users/{authUid} {
+      allow read, write: if signedIn() && request.auth.uid == authUid;
     }
 
     // Семья: читают участники, создаёт владелец, правит владелец.
@@ -62,16 +78,65 @@ service cloud.firestore {
 
       allow update: if isOwner(familyId) && serverOnlyFieldsUntouched();
 
-      allow delete: if false;
+      // Удаление семьи — только владелец. Клиент стирает файлы Storage,
+      // содержимое и участников до этого шага (см. FamilyCleanupService).
+      allow delete: if isOwner(familyId);
     }
 
-    // Содержимое семьи: people, events, media, members, invites, audit.
+    // Участники семьи: документ ключуется по auth.uid (по нему же проверяют
+    // доступ Storage Rules). Владелец добавляет себя при создании семьи,
+    // остальные — только по действующему коду приглашения.
+    match /families/{familyId}/members/{memberUid} {
+      allow read: if isMember(familyId);
+
+      allow create: if signedIn()
+        && request.auth.uid == memberUid
+        && request.resource.data.authUid == memberUid
+        && request.resource.data.userId is string
+        && freshTimestamp()
+        && (
+             familyDoc(familyId).ownerAuthUid == request.auth.uid
+             || inviteIsValid(familyId, request.resource.data.inviteCode)
+           );
+
+      allow update: if isOwner(familyId);
+
+      // Выход из семьи: участник может удалить свой документ, но не чужой.
+      // Порядок ветвей важен: к моменту самоудаления документ семьи уже может
+      // быть удалён, и `isOwner` вернул бы ошибку (exists проверяет это).
+      allow delete: if request.auth.uid == memberUid
+        || (
+             exists(/databases/$(database)/documents/families/$(familyId))
+             && isOwner(familyId)
+           );
+    }
+
+    // Содержимое семьи: people, events, media, audit.
     match /families/{familyId}/{collection}/{document} {
       allow read: if isMember(familyId);
 
       allow create, update: if isMember(familyId) && freshTimestamp();
 
       allow delete: if isOwner(familyId);
+    }
+
+    // Коды приглашений: читать может любой авторизованный (нужно для входа),
+    // создаёт только владелец семьи, изменить — только Cloud Function.
+    // Удалять может автор кода или владелец семьи (нужно при удалении данных).
+    match /inviteCodes/{code} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.createdByAuthUid == request.auth.uid
+        && isOwner(request.resource.data.familyId);
+
+      allow update: if false;
+
+      allow delete: if signedIn()
+        && (
+             request.auth.uid == resource.data.createdByAuthUid
+             || isOwner(resource.data.familyId)
+           );
     }
 
     // Реестр платежей и сессии Telegram: пишет только сервер.

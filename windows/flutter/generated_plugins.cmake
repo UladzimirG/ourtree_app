@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
+  connectivity_plus
   ffmpeg_kit_flutter_new_min_gpl
   firebase_app_check
   firebase_auth

@@ -1,6 +1,6 @@
 {
   "familyName": "Наше дерево",
-  "familySubtitle": "Сім гілок одного дерева",
+  "familySubtitle": "Чотири гілки одного дерева",
   "familyPhoto": "/photos/b694562f-d59f-4da5-89f7-dc74cc7d6b16.jpg",
   "revision": 1,
   "members": [
@@ -18,35 +18,15 @@
       "quotes": ["Головне — не швидкість, а напрямок"],
       "wishlist": [
         {
-          "title": "Чавунна сковорода",
-          "note": "Діаметр 26 см"
+          "title": "Новий велосипед",
+          "note": "Гірський велосипед"
         },
         {
           "title": "Набір викруток",
-          "url": "https://www.ozon.ru/"
+          "url": "https://prom.ua/"
         }
       ],
-      "gallery": [
-        {
-          "caption": "На дачі",
-          "media": [
-            {
-              "id": "media-papa-1",
-              "source": "/photos/media-006_1.jpg",
-              "type": "image",
-              "name": "dacha.jpg",
-              "people": [
-                {
-                  "id": "masha"
-                },
-                {
-                  "id": "vanya"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#6b4f32"
     },
     {
@@ -70,27 +50,7 @@
           "title": "Книга про садівництво"
         }
       ],
-      "gallery": [
-        {
-          "caption": "Сімейна вечеря",
-          "media": [
-            {
-              "id": "media-mama-1",
-              "source": "/photos/media-030_image.jpg",
-              "type": "image",
-              "name": "dinner.jpg",
-              "people": [
-                {
-                  "id": "papa"
-                },
-                {
-                  "id": "masha"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#a44b2c"
     },
     {
@@ -114,24 +74,7 @@
           "title": "Плюшеве лисеня"
         }
       ],
-      "gallery": [
-        {
-          "caption": "Перший клас",
-          "media": [
-            {
-              "id": "media-masha-1",
-              "source": "/photos/media-016_image.jpg",
-              "type": "image",
-              "name": "school.jpg",
-              "people": [
-                {
-                  "id": "mama"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#4e5c38"
     },
     {
@@ -139,7 +82,7 @@
       "role": "Син",
       "name": "Іван",
       "nickname": "Ваня",
-      "birthday": "2016-11-08",
+      "birthday": "2015-11-08",
       "showBirthdayOnTimeline": true,
       "showInCalendar": true,
       "photo": "/photos/dc5ef67a-1523-44d0-98d9-8aacf551dc29.jpg",
@@ -155,24 +98,7 @@
           "title": "Самокат"
         }
       ],
-      "gallery": [
-        {
-          "caption": "У дворі",
-          "media": [
-            {
-              "id": "media-vanya-1",
-              "source": "/photos/media-009_image.jpg",
-              "type": "image",
-              "name": "yard.jpg",
-              "people": [
-                {
-                  "id": "papa"
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "gallery": [],
       "accent": "#2f4858"
     }
   ],
@@ -183,7 +109,7 @@
       "title": "Знайомство",
       "text": "Зустрілися в маленькій кав'ярні й проговорили до закриття.",
       "kind": "meeting",
-      "place": "Кав'ярня на Тверській",
+      "place": "Кав'ярня біля Золотих воріт",
       "photo": "/photos/media-025_geminigeneratedimage161y3k161y3k.jpg",
       "showElapsed": true,
       "showInCalendar": true
@@ -192,9 +118,9 @@
       "id": "wedding",
       "date": "2011-08-20",
       "title": "Весілля",
-      "text": "Найтепліший день літа і найдовший стіл у дворі.",
+      "text": "Найтепліший день літа і найдовший стіл.",
       "kind": "wedding",
-      "place": "Підмосков'я",
+      "place": "Садиба за містом",
       "photo": "/photos/media-024_image.jpg",
       "showElapsed": true,
       "showInCalendar": true
@@ -206,7 +132,8 @@
       "text": "Наше життя стало гучнішим і щасливішим.",
       "kind": "birth",
       "memberId": "masha",
-      "showInCalendar": true
+      "showInCalendar": true,
+      "photo": "/photos/Birth1.jpg"
     },
     {
       "id": "trip-sea",
@@ -214,7 +141,7 @@
       "title": "Перше море",
       "text": "Перша поїздка на море всією родиною.",
       "kind": "trip",
-      "place": "Сочі",
+      "place": "Чорне море",
       "photo": "/photos/media-031_image.jpg",
       "media": [
         {
@@ -236,12 +163,13 @@
     },
     {
       "id": "birth-vanya",
-      "date": "2016-11-08",
+      "date": "2015-11-08",
       "title": "Народився Іван",
       "text": "Тепер у домі два маленькі дослідники.",
       "kind": "birth",
       "memberId": "vanya",
-      "showInCalendar": true
+      "showInCalendar": true,
+      "photo": "/photos/Birth2.jpg"
     },
     {
       "id": "new-home",
@@ -249,8 +177,9 @@
       "title": "Переїхали у власну квартиру",
       "text": "Перший вечір із чаєм на підлозі, бо меблі ще не приїхали.",
       "kind": "milestone",
-      "place": "Київ",
-      "showInCalendar": true
+      "place": "Сімейне гніздечко",
+      "showInCalendar": true,
+      "photo": "/photos/kvart1.jpg"
     },
     {
       "id": "trip-mountains",

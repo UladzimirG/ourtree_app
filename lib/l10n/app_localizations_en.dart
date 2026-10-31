@@ -1053,4 +1053,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageUkrainian => 'Українська';
+
+  @override
+  String get familyCloudTitle => 'Cloud family';
+
+  @override
+  String get familyCloudHint =>
+      'Create a family to sync albums between devices, or join an existing one with an invite code.';
+
+  @override
+  String get familyCloudCreateTitle => 'Create a family';
+
+  @override
+  String get familyCloudNameLabel => 'Family name';
+
+  @override
+  String get familyCloudNameHint => 'For example: Our big family';
+
+  @override
+  String get familyCloudCreateAction => 'Create and connect';
+
+  @override
+  String get familyCloudJoinTitle => 'Join with a code';
+
+  @override
+  String get familyCloudCodeLabel => 'Invite code';
+
+  @override
+  String get familyCloudCodeHint => '8 characters, for example AB2CD3EF';
+
+  @override
+  String get familyCloudJoinAction => 'Join';
+
+  @override
+  String get familyCloudInvalidCode =>
+      'The code must contain 8 letters or digits.';
+
+  @override
+  String get familyCloudJoinNotFound =>
+      'This invite code was not found or has expired.';
+
+  @override
+  String get familyCloudCreated => 'Family created.';
+
+  @override
+  String get familyCloudJoined => 'You joined the family.';
+
+  @override
+  String get familyCloudError =>
+      'Could not complete the request. Check your connection and try again.';
+
+  @override
+  String get familyCloudRetry => 'Try again';
+
+  @override
+  String get familyCloudOwnerBadge => 'Owner';
+
+  @override
+  String get familyCloudPremiumActive => 'Premium is active';
+
+  @override
+  String get familyCloudPremiumFree => 'Free plan';
+
+  @override
+  String get familyCloudInviteTitle => 'Invite to the family';
+
+  @override
+  String get familyCloudInviteHint =>
+      'Share this code: each person can use it once.';
+
+  @override
+  String get familyCloudInviteCreate => 'Create invite code';
+
+  @override
+  String get familyCloudInviteCopied => 'Invite code copied.';
+
+  @override
+  String get familyCloudNameRequired => 'Family name cannot be empty.';
+
+  @override
+  String familyCloudId(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String get familyCloudPrivacyTitle => 'Data and privacy';
+
+  @override
+  String get familyCloudPrivacyHint =>
+      'Your photos stay on this device. Deleting family data removes files and records from the cloud for every member.';
+
+  @override
+  String get familyCloudDisconnect => 'Disconnect this device';
+
+  @override
+  String get familyCloudDisconnectConfirm =>
+      'Disconnect this device from the family? The local archive stays, cloud data is not deleted.';
+
+  @override
+  String get familyCloudDisconnected => 'Device disconnected from the family.';
+
+  @override
+  String get familyCloudDisconnectOwnerBlocked =>
+      'You are the owner, and other members are still in the family. Disconnect is unavailable — delete the family data or keep this device connected.';
+
+  @override
+  String get familyCloudDeleteCloud => 'Delete family data from cloud';
+
+  @override
+  String get familyCloudDeleteCloudConfirm =>
+      'All family files, events and members will be permanently deleted from the cloud. This cannot be undone. Your local archive stays on this device.';
+
+  @override
+  String get familyCloudDeleteCloudDone =>
+      'Family data deleted from the cloud.';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get mediaLocalOnlyNotice =>
+      'Saved on this device only: no cloud family is connected. Set it up in Settings → Cloud family to sync your photos.';
+
+  @override
+  String mediaUploadAllLocal(int count) {
+    return 'Upload all local files ($count)';
+  }
+
+  @override
+  String mediaUploadAllProgress(int done, int total) {
+    return 'Uploading $done of $total…';
+  }
+
+  @override
+  String mediaUploadAllDone(int count) {
+    return 'Uploaded to cloud: $count';
+  }
+
+  @override
+  String mediaUploadAllFailed(int count) {
+    return 'Failed to upload: $count';
+  }
+
+  @override
+  String mediaOutboxRetry(int count) {
+    return 'Queued: $count — retry';
+  }
+
+  @override
+  String get syncStatusLoading => 'Syncing…';
+
+  @override
+  String get syncStatusSaving => 'Saving…';
+
+  @override
+  String get syncStatusSaved => 'Saved';
+
+  @override
+  String get syncStatusError => 'Offline';
 }
