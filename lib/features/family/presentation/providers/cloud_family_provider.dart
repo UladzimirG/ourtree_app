@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/family/data/repositories/cloud_family_store.dart';
 import 'package:ourtree_app/features/family/data/repositories/family_cleanup_service.dart';
@@ -125,25 +126,44 @@ class ActiveFamilyController extends _$ActiveFamilyController {
       throw const InvalidInviteCodeException();
     }
 
-    final invite = await ref.read(inviteStoreProvider).find(code);
+    final invite = await ref
+        .read(inviteStoreProvider)
+        .find(code)
+        .timeout(const Duration(seconds: 15));
     final now = DateTime.now();
     if (invite == null || invite.familyId.isEmpty || !invite.isValidAt(now)) {
       throw const InviteNotFoundException();
     }
 
     final identity = await ref.read(identityControllerProvider.future);
-    final family = await ref.read(cloudFamilyStoreProvider).joinWithInvite(
+    final family = await ref
+        .read(cloudFamilyStoreProvider)
+        .joinWithInvite(
           familyId: invite.familyId,
           userId: identity.userId,
           authUid: identity.authUid,
           inviteCode: code,
-        );
+        )
+        // Чтобы кнопка «Присоединиться» не оставалась неактивной навсегда.
+        .timeout(const Duration(seconds: 25));
 
     await ref
         .read(identityControllerProvider.notifier)
         .setActiveFamily(family.id);
 
     state = AsyncData(family);
+
+    // Сразу применяем архив семьи: если ждать фонового `pull`, он может
+    // выполниться до загрузки локального архива, и демо-данные останутся
+    // в семье (а затем «заштампуются» как локальные правки).
+    try {
+      await ref
+          .read(familySyncControllerProvider.notifier)
+          .adoptFamilyArchive(family.id)
+          .timeout(const Duration(seconds: 25));
+    } catch (error) {
+      debugPrint('Семья: не удалось применить архив при подключении: $error');
+    }
     return family;
   }
 

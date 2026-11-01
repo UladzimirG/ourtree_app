@@ -350,8 +350,9 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
     try {
-      await action();
-    } catch (_) {
+      await action().timeout(const Duration(seconds: 60));
+    } catch (error) {
+      debugPrint('Семья: действие не выполнено: $error');
       if (mounted) _showMessage(_l10n.familyCloudError);
     } finally {
       if (mounted) setState(() => _busy = false);

@@ -84,7 +84,10 @@ class FirestoreCloudFamilyStore implements CloudFamilyStore {
 
     // Подтверждаем запись чтением с сервера: при офлайне Firestore молча
     // ставит операцию в очередь, и без этой проверки UI соврал бы об успехе.
-    final persisted = await find(familyId, fromServer: true);
+    // Таймаут обязателен: иначе кнопка создания «залипает» в неактивном виде.
+    final persisted = await find(familyId, fromServer: true).timeout(
+      const Duration(seconds: 20),
+    );
     if (persisted == null) {
       throw StateError('Семья не сохранилась в облаке: $familyId');
     }
@@ -133,7 +136,10 @@ class FirestoreCloudFamilyStore implements CloudFamilyStore {
       'inviteCode': inviteCode,
     });
 
-    final family = await find(familyId, fromServer: true);
+    // Читаем без `fromServer`: запись только что обновила локальный кэш, а
+    // принудительный запрос к серверу в браузере/офлайне может висеть минутами
+    // и оставлять кнопку «Присоединиться» навсегда неактивной.
+    final family = await find(familyId);
     if (family == null) {
       throw StateError('Семья не найдена после присоединения: $familyId');
     }

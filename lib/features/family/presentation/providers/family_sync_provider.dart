@@ -120,7 +120,16 @@ class FamilySyncController extends _$FamilySyncController {
     try {
       final remote =
           await ref.read(cloudFamilyStateStoreProvider).pull(familyId);
-      final local = localBefore;
+      var local = localBefore;
+      if (local == null) {
+        // Архив ещё грузится из Hive: без ожидания слияние пропускалось бы,
+        // а демо-данные оставались в подключённой семье.
+        try {
+          local = await ref.read(familyDataProvider.future);
+        } catch (_) {
+          local = null;
+        }
+      }
 
       if (remote == null) {
         // В облаке ещё нет содержимого. Владелец новой семьи отдаёт свой
@@ -153,6 +162,12 @@ class FamilySyncController extends _$FamilySyncController {
         _tombstoneRemoteOnly(local, remote, now);
       }
 
+      final remoteHasContent = remote.stamps.isNotEmpty ||
+          remote.tombstones.isNotEmpty ||
+          remote.data.members.isNotEmpty ||
+          remote.data.timelineEvents.isNotEmpty ||
+          remote.data.mediaLibrary.isNotEmpty;
+
       final merged = mergeSyncPayloads(
         local: local,
         localStamps: _stamps,
@@ -160,8 +175,7 @@ class FamilySyncController extends _$FamilySyncController {
         remote: remote,
         // Сущности без локальной отметки — демо-архив или архив другой семьи:
         // при подключении по коду их место занимает серверная копия.
-        dropUnstampedLocal:
-            remote.stamps.isNotEmpty || remote.tombstones.isNotEmpty,
+        dropUnstampedLocal: remoteHasContent && _stamps.isEmpty,
       );
 
       // Пока шёл запрос, архив мог измениться (восстановление из бэкапа,
@@ -187,6 +201,40 @@ class FamilySyncController extends _$FamilySyncController {
       state = SyncStatus.error;
     }
   }
+
+  /// Применяет архив семьи при подключении по коду.
+  ///
+  /// Не сливает демо-архив: если у устройства ещё нет отметок синхронизации
+  /// для этой семьи, локальные люди, события и файлы считаются демо-контентом
+  /// и заменяются серверной копией целиком. Если архив восстановлен из
+  /// бэкапа (есть маркер [restoredArchiveKey]), выполняется обычное слияние.
+  Future<void> adoptFamilyArchive(String familyId) async {
+    if (_suspended) return;
+
+    if (_hasRestoredMarker()) {
+      await pull(familyId);
+      return;
+    }
+
+    final remote =
+        await ref.read(cloudFamilyStateStoreProvider).pull(familyId);
+    if (remote == null) return;
+
+    _debounce?.cancel();
+    _familyId = familyId;
+    _stamps = Map<String, int>.of(remote.stamps);
+    _tombstones = Map<String, int>.of(remote.tombstones);
+    _fingerprints = entityFingerprints(remote.data);
+
+    // Серверная копия уже объединена: не помечаем её как локальную правку.
+    _silentChange = remote.data;
+    ref.read(familyDataProvider.notifier).replaceData(remote.data);
+    await _saveMeta(familyId);
+    state = SyncStatus.saved;
+  }
+
+  bool _hasRestoredMarker() =>
+      MediaStorage.instance.getString(restoredArchiveKey) != null;
 
   /// Загружает локальный архив в только что созданную семью.
   ///
