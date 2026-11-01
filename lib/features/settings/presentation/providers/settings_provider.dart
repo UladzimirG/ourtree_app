@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/profile/domain/models/photo_position.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -47,6 +48,18 @@ class FamilySettingsNotifier extends _$FamilySettingsNotifier {
         familyPhoto: () => value.isEmpty ? null : value,
       ),
     );
+  }
+
+  /// Точка фокуса общего фото семьи.
+  void updateFamilyPhotoPosition(PhotoPosition position) {
+    _update(
+      (settings) => settings.copyWith(familyPhotoPosition: () => position),
+    );
+  }
+
+  /// Масштаб общего фото семьи.
+  void updateFamilyPhotoZoom(double zoom) {
+    _update((settings) => settings.copyWith(familyPhotoZoom: () => zoom));
   }
 
   void updateShowFamilyPhotoInHeader(bool value) {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
@@ -7,8 +8,11 @@ import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 /// Репозиторий семейного древа.
 ///
 /// Демо-архив выбирается по языку интерфейса: `family_ru.json` или
-/// `family_en.json`. Правки сохраняются в Hive отдельно для каждого языка,
-/// поэтому после переключения языка показываются данные на нужном языке.
+/// `family_en.json`. Но сохранённый архив один на все языки: данные семьи
+/// (люди, события, фото, кадрирование) не должны зависеть от того, на каком
+/// языке сейчас открыт интерфейс, — иначе после смены языка пользователь
+/// видел бы демо-архив вместо своих правок, а восстановленная из бэкапа копия
+/// «пропадала».
 ///
 /// Формат JSON тот же, что использовал React-проект (`familyName`, `members`,
 /// `timelineEvents` и т.д.), поэтому парсинг выполняют наши доменные модели.
@@ -29,12 +33,18 @@ class FamilyRepository {
   /// открывается на английском вместе с английским содержимым семьи.
   static const String fallbackLocale = 'en';
 
+  /// Единый ключ сохранённого архива (не зависит от языка интерфейса).
+  static const String storageKey = 'family_data';
+
   /// Путь к демо-архиву для языка [localeName].
   static String assetFor(String? localeName) =>
       demoArchives[_supported(localeName)]!;
 
-  /// Ключ сохранённого состояния для языка [localeName].
-  static String storageKeyFor(String? localeName) =>
+  /// Прежний ключ архива для языка [localeName].
+  ///
+  /// Остаётся для миграции: до версии схемы 2 архив хранился отдельно для
+  /// каждого языка.
+  static String legacyStorageKeyFor(String? localeName) =>
       'family_data_${_supported(localeName)}';
 
   /// Поддерживаемый язык: `en`, `ru` или [fallbackLocale].
@@ -45,7 +55,7 @@ class FamilyRepository {
 
   Future<FamilyData> loadFamilyData({String? localeName}) async {
     final demo = await _loadDemoArchive(_supported(localeName));
-    final saved = MediaStorage.instance.getString(storageKeyFor(localeName));
+    final saved = _readSaved(localeName);
     if (saved == null || saved.trim().isEmpty) {
       return demo.normalizeMediaLibrary();
     }
@@ -57,6 +67,31 @@ class FamilyRepository {
       FamilyData.fromJson(decoded.cast<String, dynamic>()),
       demo,
     ).normalizeMediaLibrary();
+  }
+
+  /// Читает сохранённый архив: сначала единый ключ, затем — прежние языковые.
+  ///
+  /// Старые ключи читаются «лениво»: миграция схемы обычно переносит данные
+  /// раньше, но если её пропустили (например, архив восстановили вручную),
+  /// пользовательские правки всё равно не потеряются.
+  String? _readSaved(String? localeName) {
+    final storage = MediaStorage.instance;
+    final current = storage.getString(storageKey);
+    if (current != null && current.trim().isNotEmpty) return current;
+
+    final preferred = _supported(localeName);
+    final ordered = <String>[
+      preferred,
+      ...demoArchives.keys.where((code) => code != preferred),
+    ];
+    for (final code in ordered) {
+      final legacy = storage.getString(legacyStorageKeyFor(code));
+      if (legacy != null && legacy.trim().isNotEmpty) {
+        unawaited(storage.putString(storageKey, legacy));
+        return legacy;
+      }
+    }
+    return null;
   }
 
   /// Читает демо-архив языка из ассетов.
@@ -95,14 +130,24 @@ class FamilyRepository {
   }
 
   /// Удаляет локально сохранённый архив, чтобы вернуться к демо-данным.
-  Future<void> clearSaved({String? localeName}) {
-    return MediaStorage.instance.removeString(storageKeyFor(localeName));
+  ///
+  /// Чистим и прежние языковые ключи: иначе после отката они снова попали бы
+  /// в единый ключ при чтении.
+  Future<void> clearSaved({String? localeName}) async {
+    final storage = MediaStorage.instance;
+    await storage.removeString(storageKey);
+    for (final code in demoArchives.keys) {
+      await storage.removeString(legacyStorageKeyFor(code));
+    }
   }
 
   /// Сохраняет архив локально, чтобы правки и медиатека пережили перезапуск.
+  ///
+  /// [localeName] больше не участвует в ключе: параметр оставлен, чтобы не
+  /// менять вызовы в провайдерах и тестах.
   Future<void> saveFamilyData(FamilyData data, {String? localeName}) {
     return MediaStorage.instance.putString(
-      storageKeyFor(localeName),
+      storageKey,
       jsonEncode(data.toJson()),
     );
   }

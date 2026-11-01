@@ -5,6 +5,7 @@ import 'package:ourtree_app/features/family/data/repositories/invite_store.dart'
 import 'package:ourtree_app/features/family/domain/models/family_join_exception.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_sync_provider.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'cloud_family_provider.g.dart';
@@ -60,7 +61,58 @@ class ActiveFamilyController extends _$ActiveFamilyController {
         .setActiveFamily(family.id);
 
     state = AsyncData(family);
+    // Название из формы — в «шапку» архива: иначе интерфейс показывает
+    // название демо-архива, а при смене языка подменяет его переводом.
+    await ref.read(familySettingsProvider.future);
+    final settings = ref.read(familySettingsProvider.notifier);
+    settings.updateFamilyName(family.name);
+    await settings.save();
+    // Сразу отдаём локальный архив в облако: иначе документ состояния семьи
+    // пуст и второе устройство после подключения видит только демо-архив.
+    await ref
+        .read(familySyncControllerProvider.notifier)
+        .seedFamily(family.id);
     return family;
+  }
+
+  /// Меняет название семьи: документ семьи в облаке + «шапка» локального архива.
+  ///
+  /// Правила Firestore разрешают менять `name` только владельцу, поэтому
+  /// проверяем права до запроса, а ошибку облака не «глотаем»: иначе интерфейс
+  /// показал бы новое имя, а другие устройства остались бы со старым.
+  Future<FamilyModel> rename(String name) async {
+    final current = state.value;
+    if (current == null) {
+      throw StateError('Семья не подключена');
+    }
+
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw StateError('Название семьи не может быть пустым');
+    }
+
+    final identity = await ref.read(identityControllerProvider.future);
+    if (current.ownerAuthUid != identity.authUid) {
+      throw StateError('Переименовать семью может только владелец');
+    }
+
+    final updated = await ref.read(cloudFamilyStoreProvider).rename(
+          familyId: current.id,
+          name: trimmed,
+          ownerAuthUid: identity.authUid,
+        );
+
+    state = AsyncData(updated);
+
+    // Локальная «шапка» архива: без неё интерфейс показывал бы старое имя,
+    // а при смене языка демо-название могло бы перебить новое.
+    await ref.read(familySettingsProvider.future);
+    final settings = ref.read(familySettingsProvider.notifier);
+    settings.updateFamilyName(updated.name);
+    await settings.save();
+    await ref.read(familySyncControllerProvider.notifier).pushNow();
+
+    return updated;
   }
 
   /// Присоединяется к семье по коду приглашения.

@@ -8,6 +8,7 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
@@ -200,7 +201,8 @@ class SettingsPhotoField extends ConsumerWidget {
           InteractivePhotoCrop(
             source: value,
             position: position ?? PhotoPosition.center,
-            zoom: zoom ?? 1.4,
+            zoom: photoZoomOrDefault(zoom),
+            showExpand: true,
             onChanged: (nextPosition, nextZoom) {
               onPositionChange!(nextPosition);
               onZoomChange?.call(nextZoom);
@@ -215,7 +217,7 @@ class SettingsPhotoField extends ConsumerWidget {
                 source: value,
                 fit: BoxFit.cover,
                 alignment: photoAlignment(position),
-                zoom: zoom ?? 1,
+                zoom: photoZoomOrDefault(zoom),
                 fallback: Container(
                   color: AppColors.kraftWash,
                   child: Center(

@@ -1,11 +1,19 @@
 # Инструменты разработки
 
-Два PowerShell-скрипта для работы с демо-архивом. Запускать из корня проекта:
+PowerShell-скрипты для демо-архива и иконок. Запускать из корня проекта:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\validate_family_data.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\swap_demo_media.ps1 -DryRun
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\generate_icons.ps1
 ```
+
+## generate_icons.ps1
+
+Собирает все иконки из мастера design/app_icon_master.jpg: Android (legacy +
+adaptive, foreground, круглые), iOS, macOS, Windows .ico, web/PWA и
+design/app_icon_1024.png для магазинов. Фон adaptive-иконки определяется по
+углу мастера. Повторный запуск полностью перезаписывает файлы иконок.
 
 ## validate_family_data.ps1
 

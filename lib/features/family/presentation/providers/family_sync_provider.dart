@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:ourtree_app/core/media/media_storage.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/family/data/repositories/cloud_family_state_store.dart';
 import 'package:ourtree_app/features/family/domain/family_sync_merge.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
@@ -28,9 +29,25 @@ class FamilySyncController extends _$FamilySyncController {
   static const Duration pushDebounce = Duration(seconds: 2);
   static const String _metaPrefix = 'family_sync_stamps_';
 
+  /// Ключ-маркер «локальный архив восстановлен из бэкапа».
+  ///
+  /// Пока семья не подключена, отметок времени у сущностей нет. Без маркера
+  /// восстановленный архив при подключении по коду считался бы демо-архивом
+  /// и был бы заменён серверной копией.
+  static const String restoredArchiveKey = 'family_archive_restored';
+
   Timer? _debounce;
   String? _familyId;
-  bool _skipNextChange = false;
+
+  /// Данные, которые контроллер только что записал сам (результат серверного
+  /// слияния). Их нельзя помечать как локальные правки, иначе следующий push
+  /// объявит серверные сущности «своими» и перетрёт чужие изменения.
+  ///
+  /// Флаг-булево здесь не работает: если записанные данные совпали с уже
+  /// имевшимися, слушатель не вызывается и флаг остаётся висеть — тогда
+  /// следующее настоящее изменение (например, восстановление из бэкапа)
+  /// пропускалось.
+  FamilyData? _silentChange;
 
   /// Отметки времени живущих сущностей (ключ → мс эпохи).
   Map<String, int> _stamps = <String, int>{};
@@ -40,6 +57,17 @@ class FamilySyncController extends _$FamilySyncController {
 
   /// Отпечатки содержимого: по ним определяем, что именно изменилось.
   Map<String, String> _fingerprints = <String, String>{};
+
+  /// Счётчик локальных записей архива.
+  ///
+  /// `pull` запоминает его перед сетевым запросом: если за время запроса архив
+  /// менялся (восстановление из бэкапа, правка), серверную копию не применяем —
+  /// иначе ответ, прочитанный до этих изменений, перетрёт их.
+  int _archiveVersion = 0;
+
+  /// Пауза серверного слияния на время восстановления из бэкапа: применять
+  /// серверную копию в этот момент нельзя — она перетрёт снимок.
+  bool _suspended = false;
 
   @override
   SyncStatus build() {
@@ -63,10 +91,14 @@ class FamilySyncController extends _$FamilySyncController {
       final data = next.value;
       if (data == null) return;
       if (previous?.value == data) return;
-      if (_skipNextChange) {
-        _skipNextChange = false;
-        return;
-      }
+
+      _archiveVersion++;
+
+      // Свежее серверное слияние не является правкой пользователя.
+      final silent = _silentChange;
+      _silentChange = null;
+      if (silent != null && silent == data) return;
+
       _markChanges(data);
       _schedulePush(family.id, data);
     });
@@ -76,13 +108,49 @@ class FamilySyncController extends _$FamilySyncController {
 
   Future<void> pull(String familyId) async {
     state = SyncStatus.loading;
+    // Пока идёт восстановление из бэкапа, серверную копию не применяем.
+    if (_suspended) {
+      state = SyncStatus.saved;
+      return;
+    }
+    final version = _archiveVersion;
+    // Локальный архив запоминаем ДО запроса: если за время запроса он
+    // изменится, ответ уже неактуален.
+    final localBefore = ref.read(familyDataProvider).value;
     try {
       final remote =
           await ref.read(cloudFamilyStateStoreProvider).pull(familyId);
-      final local = ref.read(familyDataProvider).value;
-      if (remote == null || local == null) {
+      final local = localBefore;
+
+      if (remote == null) {
+        // В облаке ещё нет содержимого. Владелец новой семьи отдаёт свой
+        // локальный архив, иначе второму устройству нечего забирать и оно
+        // остаётся с демо-архивом.
+        if (await _isOwnerOfActiveFamily()) {
+          await seedFamily(familyId);
+        } else {
+          state = SyncStatus.saved;
+        }
+        return;
+      }
+
+      if (local == null) {
         state = SyncStatus.saved;
         return;
+      }
+
+      // Архив восстановлен из бэкапа, пока семья не была подключена: считаем
+      // его содержимое правками этого устройства, иначе слияние отбросит его
+      // как «демо» и серверная копия победит.
+      final restoredLocally = _takeRestoredMarker();
+      if (restoredLocally) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        for (final key in entityFingerprints(local).keys) {
+          _stamps[key] = now;
+        }
+        // Снимок — источник истины: записи, которых в нём нет (например,
+        // демо-люди, попавшие в облако старой версией), помечаем удалёнными.
+        _tombstoneRemoteOnly(local, remote, now);
       }
 
       final merged = mergeSyncPayloads(
@@ -90,17 +158,173 @@ class FamilySyncController extends _$FamilySyncController {
         localStamps: _stamps,
         localTombstones: _tombstones,
         remote: remote,
+        // Сущности без локальной отметки — демо-архив или архив другой семьи:
+        // при подключении по коду их место занимает серверная копия.
+        dropUnstampedLocal:
+            remote.stamps.isNotEmpty || remote.tombstones.isNotEmpty,
       );
 
-      _skipNextChange = true;
+      // Пока шёл запрос, архив мог измениться (восстановление из бэкапа,
+      // правка): серверную копию не применяем, чтобы не потерять данные.
+      final current = ref.read(familyDataProvider).value;
+      if (_archiveVersion != version ||
+          (current != null && current != local)) {
+        state = SyncStatus.saved;
+        return;
+      }
+
+      _silentChange = merged.data;
       ref.read(familyDataProvider.notifier).replaceData(merged.data);
       _stamps = merged.stamps;
       _tombstones = merged.tombstones;
       _fingerprints = entityFingerprints(merged.data);
       await _saveMeta(familyId);
+      // Архив из бэкапа только что получил отметки — выгружаем его сразу,
+      // иначе он остался бы только на этом устройстве.
+      if (restoredLocally) await _push(familyId, merged.data);
       state = SyncStatus.saved;
     } catch (_) {
       state = SyncStatus.error;
+    }
+  }
+
+  /// Загружает локальный архив в только что созданную семью.
+  ///
+  /// Пока документ `families/{fid}/state/current` не создан, семья в облаке
+  /// пуста: второе устройство после подключения по коду показывает свой
+  /// демо-архив. Все сущности получают отметку «сейчас» — чтобы более старая
+  /// копия с другого устройства не перетёрла их при слиянии.
+  Future<void> seedFamily(String familyId) async {
+    FamilyData? data;
+    try {
+      data = await ref.read(familyDataProvider.future);
+    } catch (_) {
+      return;
+    }
+    if (data == null) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final fresh = entityFingerprints(data);
+
+    _debounce?.cancel();
+    _familyId = familyId;
+    _stamps = {for (final key in fresh.keys) key: now};
+    _tombstones = <String, int>{};
+    _fingerprints = fresh;
+    await _clearRestoredMarker();
+    await _saveMeta(familyId);
+    await _push(familyId, data);
+  }
+
+  /// Снимает и возвращает маркер «архив восстановлен вне семьи».
+  bool _takeRestoredMarker() {
+    final storage = MediaStorage.instance;
+    if (storage.getString(restoredArchiveKey) == null) return false;
+    unawaited(storage.removeString(restoredArchiveKey));
+    return true;
+  }
+
+  Future<void> _clearRestoredMarker() =>
+      MediaStorage.instance.removeString(restoredArchiveKey);
+
+  /// Приостанавливает применение серверной копии на время замены архива.
+  void beginReplace() => _suspended = true;
+
+  /// Возвращает синхронизацию в обычный режим.
+  void endReplace() => _suspended = false;
+
+  /// Помечает весь текущий архив как локальные правки и отправляет его в облако.
+  ///
+  /// Нужно после восстановления из бэкапа: сущности из снимка не имеют отметок
+  /// времени, поэтому без этого они считались бы «чужими» и следующий `pull`
+  /// заменил бы их серверной копией (а на других устройствах остался бы
+  /// демо-архив).
+  Future<void> adoptLocalArchive() async {
+    FamilyModel? family;
+    try {
+      family = await ref.read(activeFamilyControllerProvider.future);
+    } catch (_) {
+      return;
+    }
+    if (family == null) return;
+
+    // Снимок — источник истины. Всё, что есть в облаке, но отсутствует в нём
+    // (демо-люди, события и файлы, попавшие туда старой версией), помечаем
+    // удалённым: иначе следующий pull вернёт их обратно и архивы смешаются.
+    try {
+      final remote =
+          await ref.read(cloudFamilyStateStoreProvider).pull(family.id);
+      final data = await ref.read(familyDataProvider.future);
+      if (remote != null) {
+        _tombstoneRemoteOnly(
+          data,
+          remote,
+          DateTime.now().millisecondsSinceEpoch,
+        );
+      }
+    } catch (_) {
+      // Без сети обойдёмся отметками: локальный архив всё равно победит.
+    }
+
+    await _stampCurrentArchive(family.id);
+  }
+
+  /// Помечает текущий архив своими правками и выгружает его, сохраняя
+  /// надгробия: сущности, исчезнувшие при восстановлении снимка, должны
+  /// удалиться и на остальных устройствах.
+  Future<void> _stampCurrentArchive(String familyId) async {
+    FamilyData? data;
+    try {
+      data = await ref.read(familyDataProvider.future);
+    } catch (_) {
+      return;
+    }
+    if (data == null) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final fresh = entityFingerprints(data);
+
+    _debounce?.cancel();
+    _familyId = familyId;
+    _stamps = {for (final key in fresh.keys) key: now};
+    _fingerprints = fresh;
+    // Архив уже отдан семье — маркер «восстановлен вне семьи» больше не нужен.
+    await _clearRestoredMarker();
+    await _saveMeta(familyId);
+    await _push(familyId, data);
+  }
+
+  /// Помечает удалёнными серверные сущности, которых нет в локальном архиве.
+  void _tombstoneRemoteOnly(
+    FamilyData local,
+    FamilySyncPayload remote,
+    int now,
+  ) {
+    final localKeys = entityFingerprints(local).keys.toSet();
+    final remoteKeys = <String>{
+      for (final member in remote.data.members) memberKey(member.id),
+      for (final event in remote.data.timelineEvents) eventKey(event.id),
+      for (final asset in remote.data.mediaLibrary) mediaKey(asset.id),
+    };
+    for (final key in remoteKeys) {
+      if (!localKeys.contains(key)) _tombstones[key] = now;
+    }
+  }
+
+  /// Владелец ли этот (анонимный) пользователь для активной семьи.
+  Future<bool> _isOwnerOfActiveFamily() async {
+    FamilyModel? family;
+    try {
+      family = await ref.read(activeFamilyControllerProvider.future);
+    } catch (_) {
+      return false;
+    }
+    if (family == null) return false;
+    try {
+      final identity = await ref.read(identityControllerProvider.future);
+      return family.ownerAuthUid == identity.authUid;
+    } catch (_) {
+      return false;
     }
   }
 

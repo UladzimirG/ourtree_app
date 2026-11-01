@@ -28,6 +28,13 @@ abstract class CloudFamilyStore {
     required String inviteCode,
     FamilyRole role,
   });
+
+  /// Меняет название семьи. Правила Firestore разрешают это только владельцу.
+  Future<FamilyModel> rename({
+    required String familyId,
+    required String name,
+    required String ownerAuthUid,
+  });
 }
 
 /// Реализация поверх Cloud Firestore.
@@ -131,6 +138,48 @@ class FirestoreCloudFamilyStore implements CloudFamilyStore {
       throw StateError('Семья не найдена после присоединения: $familyId');
     }
     return family;
+  }
+
+  @override
+  Future<FamilyModel> rename({
+    required String familyId,
+    required String name,
+    required String ownerAuthUid,
+  }) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw StateError('Название семьи не может быть пустым');
+    }
+
+    final familyRef = _families.doc(familyId);
+    final snapshot = await familyRef.get(
+      const GetOptions(source: Source.server),
+    );
+    final current = _toFamily(familyId, snapshot.data());
+    if (current == null) {
+      throw StateError('Семья не найдена: $familyId');
+    }
+    if (current.ownerAuthUid != ownerAuthUid) {
+      throw StateError('Переименовать семью может только владелец');
+    }
+
+    // `name` — имя документа семьи (его видят приглашённые), а
+    // `settings.familyName` — «шапка» архива, которая синхронизируется
+    // в state/current. Меняем оба, чтобы устройства не разошлись.
+    await familyRef.update(<String, dynamic>{
+      'name': trimmed,
+      'settings': current.settings
+          .copyWith(familyName: trimmed, nameIsCustom: true)
+          .toJson(),
+      'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      'revision': current.revision + 1,
+    });
+
+    final updated = await find(familyId, fromServer: true);
+    if (updated == null) {
+      throw StateError('Семья не найдена после переименования: $familyId');
+    }
+    return updated;
   }
 
   FamilyModel? _toFamily(String familyId, Map<String, dynamic>? data) {

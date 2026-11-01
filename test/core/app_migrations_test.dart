@@ -13,7 +13,8 @@ final RegExp _uuidV4 = RegExp(
 
 void main() {
   final storage = MediaStorage.instance;
-  final familyKey = FamilyRepository.storageKeyFor('ru');
+  /// До версии схемы 2 архив лежал в языковом ключе — его и проверяет v1.
+  final legacyFamilyKey = FamilyRepository.legacyStorageKeyFor('ru');
 
   setUp(() async {
     await storage.clearForTests();
@@ -31,7 +32,7 @@ void main() {
   }
 
   Map<String, dynamic> readFamily() {
-    final raw = storage.getString(familyKey);
+    final raw = storage.getString(FamilyRepository.storageKey);
     return (jsonDecode(raw!) as Map).cast<String, dynamic>();
   }
 
@@ -59,7 +60,7 @@ void main() {
       'account-1712345678901999',
     );
     await storage.putString(
-      familyKey,
+      legacyFamilyKey,
       jsonEncode({
         'familyName': 'Семья',
         'members': <dynamic>[],
@@ -155,6 +156,24 @@ void main() {
         storage.getString(storageSchemaVersionKey),
         '$currentStorageSchemaVersion',
       );
+    });
+  });
+
+  group('AppMigrations v1 to v2', () {
+    test('переносит архив в единый ключ и удаляет языковые', () async {
+      await seedLegacyData();
+
+      await AppMigrations().run();
+
+      expect(storage.getString(FamilyRepository.storageKey), isNotNull);
+      for (final localeName in FamilyRepository.demoArchives.keys) {
+        expect(
+          storage.getString(
+            FamilyRepository.legacyStorageKeyFor(localeName),
+          ),
+          isNull,
+        );
+      }
     });
   });
 }

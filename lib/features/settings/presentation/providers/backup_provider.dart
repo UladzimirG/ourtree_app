@@ -9,7 +9,9 @@ import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_sync_provider.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -235,8 +237,42 @@ class BackupsNotifier extends _$BackupsNotifier {
     }
 
     final family = FamilyData.fromJson(data);
-    ref.read(familyDataProvider.notifier).replaceData(family);
-    ref.invalidate(familySettingsProvider);
+    // Тексты из снимка — это выбор пользователя: помечаем их «своими», иначе
+    // при следующем запуске или после смены языка их подменит демо-архив.
+    // Участники, медиатека и кадрирование переносятся как есть: это часть
+    // снимка, а не производные от языка данные.
+    final restored = family.copyWith(
+      settings: family.settings.copyWith(
+        nameIsCustom: true,
+        subtitleIsCustom: true,
+      ),
+    );
+    final sync = ref.read(familySyncControllerProvider.notifier);
+    // Пока заменяем архив, серверная копия не должна применяться.
+    sync.beginReplace();
+    try {
+      ref.read(familyDataProvider.notifier).replaceData(restored);
+      ref.invalidate(familySettingsProvider);
+      // Восстановленный архив принадлежит этому устройству: ставим отметки
+      // времени и выгружаем в облако, чтобы данные не пропали при следующем
+      // `pull` и доехали до других устройств.
+      await sync.adoptLocalArchive();
+    } finally {
+      sync.endReplace();
+    }
+
+    // Если семья ещё не подключена, отметок поставить некуда. Маркер запомнит,
+    // что этот локальный архив — пользовательский, а не демо: при подключении
+    // по коду его содержимое получит приоритет и уедет в облако.
+    FamilyModel? activeFamily;
+    try {
+      activeFamily = await ref.read(activeFamilyControllerProvider.future);
+    } catch (_) {
+      activeFamily = null;
+    }
+    if (activeFamily == null) {
+      await _storage.putString(FamilySyncController.restoredArchiveKey, '1');
+    }
 
     final accounts = bundle['accounts'];
     if (accounts is List) {

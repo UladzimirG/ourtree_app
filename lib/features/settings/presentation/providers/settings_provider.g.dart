@@ -37,7 +37,7 @@ final class FamilySettingsNotifierProvider
 }
 
 String _$familySettingsNotifierHash() =>
-    r'86e4358b26a0139585d32d7ccd57325a472829b2';
+    r'747cf76a50656968c760751d075ce4859ba01c21';
 
 /// Редактируемые настройки семьи.
 

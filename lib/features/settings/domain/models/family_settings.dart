@@ -1,4 +1,5 @@
 import 'package:ourtree_app/core/utils/json_reader.dart';
+import 'package:ourtree_app/features/profile/domain/models/photo_position.dart';
 
 /// Настройки семьи, которые лежат в корне `family.json`.
 ///
@@ -9,6 +10,8 @@ class FamilySettings {
     required this.familyName,
     this.familySubtitle = '',
     this.familyPhoto,
+    this.familyPhotoPosition,
+    this.familyPhotoZoom,
     this.showFamilyPhotoInHeader = true,
     this.showEventPhotos = true,
     this.revision,
@@ -40,6 +43,12 @@ class FamilySettings {
   /// Путь к общему фото семьи.
   final String? familyPhoto;
 
+  /// Точка фокуса общего фото (шапка и предпросмотр в настройках).
+  final PhotoPosition? familyPhotoPosition;
+
+  /// Масштаб общего фото; `null` — значение по умолчанию.
+  final double? familyPhotoZoom;
+
   /// Показывать ли общее фото семьи в шапке приложения.
   final bool showFamilyPhotoInHeader;
 
@@ -49,23 +58,32 @@ class FamilySettings {
   /// Метка сервера, защищающая от одновременной перезаписи с двух устройств.
   final int? revision;
 
-  factory FamilySettings.fromJson(Map<String, dynamic> json) => FamilySettings(
-        familyName: readString(json['familyName'], fallback: fallbackName),
-        familySubtitle: readString(json['familySubtitle']),
-        familyPhoto: readNullableString(json['familyPhoto']),
-        showFamilyPhotoInHeader:
-            readBool(json['showFamilyPhotoInHeader']) ?? true,
-        showEventPhotos: readBool(json['showEventPhotos']) ?? true,
-        revision: readInt(json['revision']),
-        nameIsCustom: readBool(json['nameIsCustom']) ?? false,
-        subtitleIsCustom: readBool(json['subtitleIsCustom']) ?? false,
-      );
+  factory FamilySettings.fromJson(Map<String, dynamic> json) {
+    final position = readMap(json['familyPhotoPosition']);
+    return FamilySettings(
+      familyName: readString(json['familyName'], fallback: fallbackName),
+      familySubtitle: readString(json['familySubtitle']),
+      familyPhoto: readNullableString(json['familyPhoto']),
+      familyPhotoPosition:
+          position == null ? null : PhotoPosition.fromJson(position),
+      familyPhotoZoom: readDouble(json['familyPhotoZoom']),
+      showFamilyPhotoInHeader:
+          readBool(json['showFamilyPhotoInHeader']) ?? true,
+      showEventPhotos: readBool(json['showEventPhotos']) ?? true,
+      revision: readInt(json['revision']),
+      nameIsCustom: readBool(json['nameIsCustom']) ?? false,
+      subtitleIsCustom: readBool(json['subtitleIsCustom']) ?? false,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'familyName': familyName,
         if (familySubtitle.trim().isNotEmpty) 'familySubtitle': familySubtitle,
         if (familyPhoto != null && familyPhoto!.isNotEmpty)
           'familyPhoto': familyPhoto,
+        if (familyPhotoPosition != null)
+          'familyPhotoPosition': familyPhotoPosition!.toJson(),
+        if (familyPhotoZoom != null) 'familyPhotoZoom': familyPhotoZoom,
         'showFamilyPhotoInHeader': showFamilyPhotoInHeader,
         'showEventPhotos': showEventPhotos,
         if (revision != null) 'revision': revision,
@@ -81,6 +99,8 @@ class FamilySettings {
     String? familyName,
     String? familySubtitle,
     String? Function()? familyPhoto,
+    PhotoPosition? Function()? familyPhotoPosition,
+    double? Function()? familyPhotoZoom,
     bool? showFamilyPhotoInHeader,
     bool? showEventPhotos,
     int? Function()? revision,
@@ -91,6 +111,11 @@ class FamilySettings {
         familyName: familyName ?? this.familyName,
         familySubtitle: familySubtitle ?? this.familySubtitle,
         familyPhoto: familyPhoto == null ? this.familyPhoto : familyPhoto(),
+        familyPhotoPosition: familyPhotoPosition == null
+            ? this.familyPhotoPosition
+            : familyPhotoPosition(),
+        familyPhotoZoom:
+            familyPhotoZoom == null ? this.familyPhotoZoom : familyPhotoZoom(),
         showFamilyPhotoInHeader:
             showFamilyPhotoInHeader ?? this.showFamilyPhotoInHeader,
         showEventPhotos: showEventPhotos ?? this.showEventPhotos,
@@ -106,6 +131,8 @@ class FamilySettings {
           familyName == other.familyName &&
           familySubtitle == other.familySubtitle &&
           familyPhoto == other.familyPhoto &&
+          familyPhotoPosition == other.familyPhotoPosition &&
+          familyPhotoZoom == other.familyPhotoZoom &&
           showFamilyPhotoInHeader == other.showFamilyPhotoInHeader &&
           showEventPhotos == other.showEventPhotos &&
           revision == other.revision &&
@@ -117,6 +144,8 @@ class FamilySettings {
         familyName,
         familySubtitle,
         familyPhoto,
+        familyPhotoPosition,
+        familyPhotoZoom,
         showFamilyPhotoInHeader,
         showEventPhotos,
         revision,

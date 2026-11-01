@@ -50,6 +50,8 @@ class HomeScreen extends ConsumerWidget {
                       familyPhoto: settings.showFamilyPhotoInHeader
                           ? settings.familyPhoto
                           : null,
+                      familyPhotoPosition: settings.familyPhotoPosition,
+                      familyPhotoZoom: settings.familyPhotoZoom,
                       settingsTooltip: l10n.settingsTitle,
                       onSettingsTap: () => _openSettings(context),
                       trailing: const SyncStatusBadge(),

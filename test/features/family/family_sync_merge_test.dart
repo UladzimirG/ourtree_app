@@ -258,4 +258,70 @@ void main() {
     expect(payload.stamps['member:papa'], now);
     expect(payload.tombstones['member:mama'], now);
   });
+
+  // Подключение по коду: демо-архив устройства не должен просачиваться в семью.
+  test('Unstamped demo entities are dropped when joining a family', () {
+    final merged = mergeSyncPayloads(
+      local: data(
+        familyName: 'Демо-имя',
+        members: [member('papa', 'Демо-папа'), member('mama', 'Демо-мама')],
+        events: [event('demo-event', '2001-01-01', 'Демо-событие')],
+        assets: [asset('demo-asset')],
+      ),
+      localStamps: const {},
+      remote: FamilySyncPayload(
+        data: data(
+          familyName: 'Наша семья',
+          members: [member('papa', 'Папа')],
+          events: [event('real-event', '2024-02-02', 'Настоящее событие')],
+        ),
+        stamps: {
+          'settings': now - 3000,
+          'member:papa': now - 3000,
+          'event:real-event': now - 3000,
+        },
+      ),
+      dropUnstampedLocal: true,
+    );
+
+    // Демо-архив заменён серверной копией целиком: ни «мамы», ни демо-события
+    // и ни одного демо-файла в семье не остаётся.
+    expect(merged.data.members.map((m) => m.id), ['papa']);
+    expect(merged.data.members.single.name, 'Папа');
+    expect(merged.data.timelineEvents.map((e) => e.id), ['real-event']);
+    expect(merged.data.mediaLibrary, isEmpty);
+    expect(merged.data.settings.familyName, 'Наша семья');
+  });
+
+  test('Local edits with stamps survive while unstamped demo is dropped', () {
+    final merged = mergeSyncPayloads(
+      local: data(
+        members: [member('papa', 'Папа (правка телефона)'), member('mama', 'Демо')],
+        events: [event('local-event', '2023-03-03', 'Своё событие')],
+      ),
+      localStamps: {'member:papa': now - 1000, 'event:local-event': now - 1000},
+      remote: FamilySyncPayload(
+        data: data(
+          members: [member('papa', 'Папа (сервер)'), member('son', 'Сын')],
+          events: [event('real-event', '2024-02-02', 'Настоящее событие')],
+        ),
+        stamps: {
+          'settings': now - 5000,
+          'member:papa': now - 5000,
+          'member:son': now - 5000,
+          'event:real-event': now - 5000,
+        },
+      ),
+      dropUnstampedLocal: true,
+    );
+
+    final names = {for (final m in merged.data.members) m.id: m.name};
+    expect(names['papa'], 'Папа (правка телефона)');
+    expect(names['son'], 'Сын');
+    expect(names.containsKey('mama'), isFalse);
+    expect(
+      merged.data.timelineEvents.map((e) => e.id),
+      containsAll(<String>['local-event', 'real-event']),
+    );
+  });
 }

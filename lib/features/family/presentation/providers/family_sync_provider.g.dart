@@ -109,7 +109,7 @@ final class FamilySyncControllerProvider
 }
 
 String _$familySyncControllerHash() =>
-    r'00ecc081cdab31bed4b3f3197bd27f4a867b21e6';
+    r'3e656e30b2ca93d0a24b9ebc55a338dcc47b895b';
 
 /// Синхронизация архива с Firestore по сущностям.
 ///

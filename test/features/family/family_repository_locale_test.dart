@@ -20,12 +20,14 @@ void main() {
     expect(FamilyRepository.assetFor('de'), 'assets/data/family_en.json');
   });
 
-  test('правки хранятся отдельно для каждого языка', () {
-    expect(FamilyRepository.storageKeyFor('ru'), 'family_data_ru');
-    expect(FamilyRepository.storageKeyFor('be'), 'family_data_be');
-    expect(FamilyRepository.storageKeyFor('uk'), 'family_data_uk');
-    expect(FamilyRepository.storageKeyFor('en'), 'family_data_en');
-    expect(FamilyRepository.storageKeyFor('de'), 'family_data_en');
+  test('архив хранится в одном ключе независимо от языка', () {
+    expect(FamilyRepository.storageKey, 'family_data');
+
+    // Прежние языковые ключи остались только для миграции.
+    expect(FamilyRepository.legacyStorageKeyFor('ru'), 'family_data_ru');
+    expect(FamilyRepository.legacyStorageKeyFor('uk'), 'family_data_uk');
+    expect(FamilyRepository.legacyStorageKeyFor('de'), 'family_data_en');
+    expect(FamilyRepository.legacyStorageKeyFor(null), 'family_data_en');
   });
 
   test('все демо-версии описывают одну семью из четырёх человек', () {

@@ -10,8 +10,14 @@ abstract final class AppColors {
   static const Color kraftDark = Color(0xFF6F4B2A);
   static const Color moss = Color(0xFF4E5C38);
   static const Color terracotta = Color(0xFFA44B2C);
-  static const Color background = Color(0xFFB98B5C);
-  static const Color shadow = Color(0x522A180A);
+  /// Базовый тон фона: светлый крафт вместо прежнего насыщенного коричневого.
+  static const Color background = Color(0xFFDCC7A6);
+
+  /// Оттенки для мягких разводов фактуры: тёплый, глубокий и «облачный».
+  static const Color backgroundWarm = Color(0xFFEBD9BC);
+  static const Color backgroundDeep = Color(0xFFC9AE87);
+  static const Color backgroundCloud = Color(0xFFFFF7E8);
+  static const Color shadow = Color(0x5A2A180A);
   static const Color softShadow = Color(0x332A180A);
   static const Color tape = Color(0xB8E8D6A0);
   static const Color activeWash = Color(0x1FB45B38);

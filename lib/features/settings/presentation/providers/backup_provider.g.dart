@@ -48,7 +48,7 @@ final class BackupsNotifierProvider
   BackupsNotifier create() => BackupsNotifier();
 }
 
-String _$backupsNotifierHash() => r'2144c67229d1fd4fd4e5d5c964ab9e8ebeec2592';
+String _$backupsNotifierHash() => r'7b5ccdfdd9792cf3b7460b73b7de3f38e9b16216';
 
 /// Локальные резервные копии семейного архива.
 ///

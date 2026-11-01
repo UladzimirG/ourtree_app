@@ -74,11 +74,17 @@ Map<String, String> entityFingerprints(FamilyData data) => {
 /// последней правки, сущность исчезает из объединённого архива. Так удаление
 /// на одном устройстве доезжает до остальных, а правки разных людей и событий
 /// не перетирают друг друга.
+/// [dropUnstampedLocal] нужен при подключении к семье: сущность без локальной
+/// отметки времени не является правкой этого устройства — это демо-архив или
+/// архив другой семьи. Такие записи не переносим в семью, иначе после
+/// присоединения по коду в общем альбоме появлялись бы демо-люди, события и
+/// фотографии (и уезжали бы обратно в облако при первой же правке).
 FamilySyncPayload mergeSyncPayloads({
   required FamilyData local,
   required Map<String, int> localStamps,
   required FamilySyncPayload remote,
   Map<String, int> localTombstones = const <String, int>{},
+  bool dropUnstampedLocal = false,
 }) {
   final stamps = _mergeMaps(localStamps, remote.stamps);
   final tombstones = _mergeMaps(localTombstones, remote.tombstones);
@@ -95,10 +101,19 @@ FamilySyncPayload mergeSyncPayloads({
   bool remoteWins(String key) =>
       (remote.stamps[key] ?? 0) > (localStamps[key] ?? 0);
 
-  final settings = remoteWins(settingsKey) ? remote.data.settings : local.settings;
+  /// Принадлежит ли локальная сущность этой семье.
+  bool belongsToFamily(String key) =>
+      !dropUnstampedLocal || localStamps.containsKey(key);
+
+  final settings =
+      (dropUnstampedLocal && !localStamps.containsKey(settingsKey)) ||
+              remoteWins(settingsKey)
+          ? remote.data.settings
+          : local.settings;
 
   final members = <String, FamilyMember>{
-    for (final member in local.members) member.id: member,
+    for (final member in local.members)
+      if (belongsToFamily(memberKey(member.id))) member.id: member,
   };
   for (final member in remote.data.members) {
     if (remoteWins(memberKey(member.id)) || !members.containsKey(member.id)) {
@@ -108,7 +123,8 @@ FamilySyncPayload mergeSyncPayloads({
   members.removeWhere((id, _) => isDeleted(memberKey(id)));
 
   final events = <String, TimelineEvent>{
-    for (final event in local.timelineEvents) event.id: event,
+    for (final event in local.timelineEvents)
+      if (belongsToFamily(eventKey(event.id))) event.id: event,
   };
   for (final event in remote.data.timelineEvents) {
     if (remoteWins(eventKey(event.id)) || !events.containsKey(event.id)) {
@@ -118,7 +134,8 @@ FamilySyncPayload mergeSyncPayloads({
   events.removeWhere((id, _) => isDeleted(eventKey(id)));
 
   final assets = <String, MediaAsset>{
-    for (final asset in local.mediaLibrary) asset.id: asset,
+    for (final asset in local.mediaLibrary)
+      if (belongsToFamily(mediaKey(asset.id))) asset.id: asset,
   };
   for (final asset in remote.data.mediaLibrary) {
     if (remoteWins(mediaKey(asset.id)) || !assets.containsKey(asset.id)) {

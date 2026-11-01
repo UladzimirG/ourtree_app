@@ -11,6 +11,7 @@ import 'package:ourtree_app/features/family/presentation/widgets/family_photo.da
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
 import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
@@ -464,15 +465,15 @@ class _Polaroid extends StatelessWidget {
           )
         : entry.source == null
             ? fallback
-            : ColoredBox(
-                color: _paper,
-                child: FamilyPhoto(
-                  source: entry.source,
-                  // Кадр показывается целиком, а поля вокруг снимка
-                  // заливаются цветом бумаги поляроида.
-                  fit: BoxFit.contain,
-                  fallback: fallback,
-                ),
+            : FamilyPhoto(
+                source: entry.source,
+                // Та же точка фокуса и масштаб, что заданы в настройках:
+                // раньше галерея показывала кадр целиком и кадрирование
+                // здесь просто не работало.
+                fit: BoxFit.cover,
+                alignment: photoAlignment(entry.position),
+                zoom: photoZoomOrDefault(entry.zoom),
+                fallback: fallback,
               );
     final caption = entry.caption?.trim();
 

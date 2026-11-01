@@ -9,7 +9,10 @@ import 'package:uuid/uuid.dart';
 const String storageSchemaVersionKey = 'storage_schema_version';
 
 /// Текущая версия локальной схемы.
-const int currentStorageSchemaVersion = 1;
+const int currentStorageSchemaVersion = 2;
+
+/// Ключ выбранного языка интерфейса (ppLocaleStorageKey в locale_provider).
+const String _appLocaleKey = 'app_locale';
 
 /// Пошаговые миграции локального хранилища.
 ///
@@ -34,6 +37,7 @@ class AppMigrations {
 
     await _backupBefore(version);
     if (version < 1) await _migrateToV1();
+    if (version < 2) await _migrateToV2();
 
     await _storage.putString(
       storageSchemaVersionKey,
@@ -49,9 +53,10 @@ class AppMigrations {
       'createdAt': DateTime.now().toIso8601String(),
       'accounts': _storage.getString(accountsStorageKey),
       'currentAccountId': _storage.getString(currentAccountStorageKey),
+      FamilyRepository.storageKey: _storage.getString(FamilyRepository.storageKey),
       for (final localeName in FamilyRepository.demoArchives.keys)
-        FamilyRepository.storageKeyFor(localeName):
-            _storage.getString(FamilyRepository.storageKeyFor(localeName)),
+        FamilyRepository.legacyStorageKeyFor(localeName):
+            _storage.getString(FamilyRepository.legacyStorageKeyFor(localeName)),
     };
     await _storage.putBackup(
       'schema-v$version-${DateTime.now().millisecondsSinceEpoch}',
@@ -91,12 +96,54 @@ class AppMigrations {
 
     // `TimelineEvent.hiddenFrom` хранит id аккаунтов, а не людей.
     for (final localeName in FamilyRepository.demoArchives.keys) {
-      final key = FamilyRepository.storageKeyFor(localeName);
+      final key = FamilyRepository.legacyStorageKeyFor(localeName);
       final data = _storage.getString(key);
       if (data == null || data.trim().isEmpty) continue;
       final remapped = _remapFamilyArchive(data, idMap);
       if (remapped != null) await _storage.putString(key, remapped);
     }
+  }
+
+  /// v2: архив семьи переехал из ключей по языку в единый `family_data`.
+  ///
+  /// До этой версии правки хранились отдельно для каждого языка: после смены
+  /// языка пользователь видел демо-архив, а восстановленная из бэкапа копия
+  /// «пропадала». Переносим первый непустой архив (приоритет — выбранный язык
+  /// интерфейса) и удаляем старые ключи, чтобы они не «воскрешали» устаревшие
+  /// копии.
+  Future<void> _migrateToV2() async {
+    final existing = _storage.getString(FamilyRepository.storageKey);
+    final preferred = _localeFromStorage();
+    final ordered = <String>[
+      preferred,
+      ...FamilyRepository.demoArchives.keys.where((code) => code != preferred),
+    ];
+
+    if (existing == null || existing.trim().isEmpty) {
+      for (final code in ordered) {
+        final legacy =
+            _storage.getString(FamilyRepository.legacyStorageKeyFor(code));
+        if (legacy != null && legacy.trim().isNotEmpty) {
+          await _storage.putString(FamilyRepository.storageKey, legacy);
+          break;
+        }
+      }
+    }
+
+    for (final code in FamilyRepository.demoArchives.keys) {
+      await _storage.removeString(FamilyRepository.legacyStorageKeyFor(code));
+    }
+  }
+
+  /// Выбранный язык интерфейса из локального хранилища.
+  ///
+  /// Ключ продублирован, чтобы миграции не зависели от Riverpod-провайдеров.
+  String _localeFromStorage() {
+    final saved = _storage.getString(_appLocaleKey);
+    if (saved == null || saved.isEmpty || saved == 'system') {
+      return FamilyRepository.fallbackLocale;
+    }
+    return saved;
   }
 
   List<Map<String, dynamic>> _decodeAccounts(String? raw) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_video_player.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
@@ -353,6 +354,8 @@ class _MediaThumbnail extends StatelessWidget {
                 )
               : FamilyPhoto(
                   source: item.source,
+                  alignment: photoAlignment(item.position),
+                  zoom: photoZoomOrDefault(item.zoom),
                   fallback: const ColoredBox(
                     color: AppColors.kraftWash,
                     child: Icon(Icons.image_outlined, size: 20),

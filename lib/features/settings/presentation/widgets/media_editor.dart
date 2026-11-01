@@ -6,6 +6,7 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_upload_preparer.dart';
@@ -473,7 +474,7 @@ class _MediaTileState extends State<_MediaTile> {
                 : FamilyPhoto(
                     source: media.source,
                     alignment: photoAlignment(media.position),
-                    zoom: media.zoom ?? 1,
+                    zoom: photoZoomOrDefault(media.zoom),
                     fallback: const ColoredBox(
                       color: AppColors.paper,
                       child: Icon(Icons.image_outlined),
@@ -513,7 +514,7 @@ class _MediaTileState extends State<_MediaTile> {
             child: FamilyPhoto(
               source: media.source,
               alignment: photoAlignment(media.position),
-              zoom: media.zoom ?? 1,
+              zoom: photoZoomOrDefault(media.zoom),
               fallback: const ColoredBox(
                 color: AppColors.paper,
                 child: Icon(Icons.broken_image_outlined),
@@ -583,7 +584,8 @@ class _MediaTileState extends State<_MediaTile> {
         InteractivePhotoCrop(
           source: widget.media.source,
           position: widget.media.position ?? PhotoPosition.center,
-          zoom: widget.media.zoom ?? 1.4,
+          zoom: photoZoomOrDefault(widget.media.zoom),
+          showExpand: true,
           onChanged: (position, zoom) => widget.onChanged(
             widget.media.copyWith(
               position: () => position,

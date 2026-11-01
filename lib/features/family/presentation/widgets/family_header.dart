@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
+import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 
 /// Верхняя панель приложения: круглый «дом», название семьи и настройки.
 class FamilyHeader extends StatelessWidget {
@@ -8,6 +10,8 @@ class FamilyHeader extends StatelessWidget {
     super.key,
     required this.familyName,
     required this.familyPhoto,
+    this.familyPhotoPosition,
+    this.familyPhotoZoom,
     required this.settingsTooltip,
     required this.onSettingsTap,
     this.trailing,
@@ -15,6 +19,13 @@ class FamilyHeader extends StatelessWidget {
 
   final String familyName;
   final String? familyPhoto;
+
+  /// Точка фокуса общего фото (та же, что в настройках).
+  final PhotoPosition? familyPhotoPosition;
+
+  /// Масштаб общего фото.
+  final double? familyPhotoZoom;
+
   final String settingsTooltip;
   final VoidCallback onSettingsTap;
 
@@ -45,6 +56,8 @@ class FamilyHeader extends StatelessWidget {
             child: FamilyPhoto(
               source: familyPhoto,
               fit: BoxFit.cover,
+              alignment: photoAlignment(familyPhotoPosition),
+              zoom: photoZoomOrDefault(familyPhotoZoom),
               fallback: const Icon(
                 Icons.home_outlined,
                 size: 30,

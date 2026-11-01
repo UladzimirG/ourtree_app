@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 
 /// Круглый аватар члена семьи: фото из ассетов или инициал на акцентном фоне.
@@ -46,7 +47,7 @@ class MemberAvatar extends StatelessWidget {
           source: member.photo,
           fit: BoxFit.cover,
           alignment: photoAlignment(member.photoPosition),
-          zoom: member.photoZoom ?? 1.4,
+          zoom: photoZoomOrDefault(member.photoZoom),
           fallback: Center(
             child: Text(
               initial.toUpperCase(),

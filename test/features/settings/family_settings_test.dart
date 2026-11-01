@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ourtree_app/features/profile/domain/models/photo_position.dart';
 import 'package:ourtree_app/features/settings/domain/models/family_settings.dart';
 
 void main() {
@@ -27,6 +28,22 @@ void main() {
     final restored = FamilySettings.fromJson(json);
     expect(restored.nameIsCustom, isTrue);
     expect(restored.subtitleIsCustom, isTrue);
+    expect(restored, settings);
+  });
+
+  test('кадр общего фото переживает JSON', () {
+    const settings = FamilySettings(
+      familyName: 'My family',
+      familyPhoto: '/photos/family.jpg',
+      familyPhotoPosition: PhotoPosition(x: 12, y: 88),
+      familyPhotoZoom: 2.5,
+    );
+
+    final json = settings.toJson();
+    final restored = FamilySettings.fromJson(json);
+
+    expect(restored.familyPhotoPosition, const PhotoPosition(x: 12, y: 88));
+    expect(restored.familyPhotoZoom, 2.5);
     expect(restored, settings);
   });
 

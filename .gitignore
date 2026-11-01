@@ -33,6 +33,12 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Готовые сборки для установки на устройства (APK, архивы web-версии)
+/dist/
+
+# Служебный кеш Firebase CLI
+/.firebase/
+
 # Symbolication related
 app.*.symbols
 

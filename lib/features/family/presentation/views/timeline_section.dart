@@ -6,6 +6,7 @@ import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/page_hero.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
@@ -382,7 +383,7 @@ class _EventMediaFrame extends StatelessWidget {
             source: entry.source,
             fit: BoxFit.cover,
             alignment: photoAlignment(entry.position),
-            zoom: entry.zoom ?? 1.4,
+            zoom: photoZoomOrDefault(entry.zoom),
             fallback: fallback,
           );
     final caption = entry.caption?.trim();
