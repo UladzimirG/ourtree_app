@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/data/gateways/accounts_api.dart';
 import 'package:ourtree_app/features/accounts/data/gateways/identity_gateway.dart';
@@ -26,6 +27,10 @@ enum ServerSignInStatus {
 
   /// Сервер недоступен (нет сети или функции не задеплоены).
   unavailable,
+
+  /// Сервер ответил, но завершить вход не удалось (например, Firebase Auth
+  /// отклонил custom token). Причина пишется в консоль.
+  serverError,
 }
 
 class ServerSignInResult {
@@ -69,10 +74,11 @@ class ServerAuth extends _$ServerAuth {
       );
     } on AccountsApiException catch (error) {
       return ServerSignInResult(_statusFor(error));
-    } catch (_) {
-      // Токен получен, но Firebase Auth не принял его — считаем сервер
-      // недоступным и пробуем локальную копию.
-      return const ServerSignInResult(ServerSignInStatus.unavailable);
+    } catch (error) {
+      // Сервер ответил, но Firebase Auth не принял токен (или сломался разбор
+      // ответа). Показываем это как ошибку сервера, а не «нет сети».
+      debugPrint('ServerAuth: не удалось завершить вход: $error');
+      return const ServerSignInResult(ServerSignInStatus.serverError);
     }
   }
 
@@ -110,8 +116,9 @@ class ServerAuth extends _$ServerAuth {
         return signIn(local.login, password);
       }
       return ServerSignInResult(_statusFor(error));
-    } catch (_) {
-      return const ServerSignInResult(ServerSignInStatus.unavailable);
+    } catch (error) {
+      debugPrint('ServerAuth: не удалось перенести аккаунт на сервер: $error');
+      return const ServerSignInResult(ServerSignInStatus.serverError);
     }
   }
 

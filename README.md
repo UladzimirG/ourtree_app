@@ -175,6 +175,17 @@ Cloud Functions (`functions/src/accounts.ts`): scrypt с индивидуаль�
 следующей успешной операции. Служебные коллекции `accountLogins` и
 `accountMeta` закрыты правилами — писать в них может только Admin SDK.
 
+Для выдачи custom token сервисному аккаунту Cloud Functions нужна роль
+`roles/iam.serviceAccountTokenCreator` (иначе `createCustomToken` падает с
+`Permission 'iam.serviceAccounts.signBlob' denied`). В `ourtree-dev` она выдана
+аккаунту `477705174790-compute@developer.gserviceaccount.com` на уровне проекта:
+
+```powershell
+gcloud projects add-iam-policy-binding ourtree-dev `
+  --member="serviceAccount:477705174790-compute@developer.gserviceaccount.com" `
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
 ```powershell
 firebase deploy --only functions,firestore:rules
 ```

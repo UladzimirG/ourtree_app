@@ -211,7 +211,9 @@ class FirebaseAccountsApi implements AccountsApi {
       case 'invalid-argument':
         return AccountsApiException(AccountsApiErrorKind.invalid, message);
       case 'failed-precondition':
-        return AccountsApiException(AccountsApiErrorKind.forbidden, message);
+        return message.contains('account/custom-token-failed')
+            ? AccountsApiException(AccountsApiErrorKind.serverError, message)
+            : AccountsApiException(AccountsApiErrorKind.forbidden, message);
       default:
         return AccountsApiException(AccountsApiErrorKind.serverError, message);
     }

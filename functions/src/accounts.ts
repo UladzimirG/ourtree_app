@@ -380,10 +380,22 @@ export const accountLogin = onCall(
       await migrateIdentity(oldUid, account.id);
     }
 
-    const token = await getAuth(ensureAdminApp()).createCustomToken(
-      account.id,
-      { login: account.login },
-    );
+    let token: string;
+    try {
+      token = await getAuth(ensureAdminApp()).createCustomToken(account.id, {
+        login: account.login,
+      });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      logger.error('accounts: createCustomToken failed', {
+        accountId: account.id,
+        detail,
+      });
+      throw new HttpsError(
+        'failed-precondition',
+        `account/custom-token-failed: ${detail.slice(0, 300)}`,
+      );
+    }
     logger.info('accounts: вход', { accountId: account.id });
     return { token, account: toPublic(account) };
   },

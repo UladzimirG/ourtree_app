@@ -905,7 +905,9 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
         ServerSignInStatus.invalidCredentials ||
         ServerSignInStatus.accountNotFound =>
           l10n.accountLoginFailed,
-        ServerSignInStatus.success => l10n.accountServerError,
+        ServerSignInStatus.success ||
+        ServerSignInStatus.serverError =>
+          l10n.accountServerError,
       };
     });
   }
