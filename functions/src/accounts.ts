@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
 
-import { getApps, initializeApp } from 'firebase-admin/app';
+import { App, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
@@ -59,7 +59,7 @@ interface PublicAccount {
 }
 
 function db() {
-  return getFirestore();
+  return getFirestore(ensureAdminApp());
 }
 
 function accounts() {
@@ -70,8 +70,20 @@ function logins() {
   return db().collection(LOGINS);
 }
 
-function ensureAdminApp(): void {
-  if (getApps().length === 0) initializeApp();
+const DEFAULT_APP_NAME = '[DEFAULT]';
+
+/**
+ * Возвращает именно default-приложение Admin SDK.
+ *
+ * `getApps().length !== 0` не гарантирует наличие `[DEFAULT]`: в окружении
+ * Cloud Functions может существовать приложение с другим именем. Поэтому
+ * ищем по имени и при необходимости создаём default.
+ */
+function ensureAdminApp(): App {
+  const apps = getApps();
+  const existing = apps.find((app) => app.name === DEFAULT_APP_NAME);
+  if (existing) return existing;
+  return initializeApp();
 }
 
 function readString(value: unknown, fallback = ''): string {
@@ -148,10 +160,10 @@ async function requireAuthUid(request: CallableRequest): Promise<string> {
  */
 async function ensureAuthUser(uid: string, name: string): Promise<void> {
   try {
-    await getAuth().getUser(uid);
+    await getAuth(ensureAdminApp()).getUser(uid);
   } catch {
     try {
-      await getAuth().createUser({ uid, displayName: name });
+      await getAuth(ensureAdminApp()).createUser({ uid, displayName: name });
     } catch (error) {
       logger.warn('accounts: не удалось создать пользователя Firebase', {
         uid,
@@ -368,9 +380,10 @@ export const accountLogin = onCall(
       await migrateIdentity(oldUid, account.id);
     }
 
-    const token = await getAuth().createCustomToken(account.id, {
-      login: account.login,
-    });
+    const token = await getAuth(ensureAdminApp()).createCustomToken(
+      account.id,
+      { login: account.login },
+    );
     logger.info('accounts: вход', { accountId: account.id });
     return { token, account: toPublic(account) };
   },
@@ -540,7 +553,7 @@ export const accountDelete = onCall(
     await batch.commit();
 
     try {
-      await getAuth().deleteUser(target.id);
+      await getAuth(ensureAdminApp()).deleteUser(target.id);
     } catch (error) {
       logger.warn('accounts: пользователь Firebase не удалён', {
         accountId: target.id,

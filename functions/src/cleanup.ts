@@ -1,6 +1,6 @@
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { getApps, initializeApp } from 'firebase-admin/app';
+import { App, getApps, initializeApp } from 'firebase-admin/app';
 import {
   Firestore,
   getFirestore,
@@ -41,8 +41,18 @@ export interface CleanupSummary {
   dryRun: boolean;
 }
 
-function ensureAdmin(): void {
-  if (getApps().length === 0) initializeApp();
+const DEFAULT_APP_NAME = '[DEFAULT]';
+
+/**
+ * Возвращает именно default-приложение Admin SDK.
+ *
+ * В окружении Cloud Functions может существовать приложение с другим именем,
+ * поэтому `getApps().length` недостаточно: `getFirestore()` без аргумента
+ * ищет `[DEFAULT]` и падает, если его нет.
+ */
+function ensureAdmin(): App {
+  const existing = getApps().find((app) => app.name === DEFAULT_APP_NAME);
+  return existing ?? initializeApp();
 }
 
 /**
@@ -65,8 +75,9 @@ export async function runCleanup(
 
   const now = options.now ?? Date.now();
   const dryRun = options.dryRun ?? false;
-  const db = getFirestore();
-  const bucket = getStorage().bucket();
+  const app = ensureAdmin();
+  const db = getFirestore(app);
+  const bucket = getStorage(app).bucket();
 
   const summary: CleanupSummary = {
     expiredInvites: 0,
