@@ -1,12 +1,25 @@
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/v2/https';
 
+import { FUNCTIONS_REGION } from './region';
+
 /** Регион всех функций — совпадает с регионом Firestore/Storage. */
-export const FUNCTIONS_REGION = 'europe-west3';
+export { FUNCTIONS_REGION } from './region';
 
 // Ежедневная уборка «мусора» в облаке: брошенные файлы, пустые и мёртвые семьи,
 // просроченные коды приглашений. Подробности — в `cleanup.ts`.
 export { scheduledCleanup } from './cleanup';
+
+// Серверные аккаунты семьи: логин/пароль проверяются в Cloud Functions,
+// клиент получает Firebase custom token (см. `accounts.ts`).
+export {
+  accountDelete,
+  accountList,
+  accountLogin,
+  accountRegister,
+  accountUpdate,
+} from './accounts';
+
 
 /**
  * Проверка живости деплоя: GET /health → { ok: true }.

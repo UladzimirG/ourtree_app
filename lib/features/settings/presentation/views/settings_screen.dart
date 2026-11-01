@@ -5,16 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/widgets/accounts_panel.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_cloud_panel.dart';
-import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
+import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
+import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_library_panel.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
@@ -65,7 +68,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(familySettingsProvider.notifier);
-    notifier.updateFamilyName(_nameController.text.trim());
+
+    // Название семьи живёт в двух местах: «шапка» локального архива и документ
+    // семьи в облаке. Облачную запись делает только владелец — остальным
+    // правила Firestore менять её не разрешают.
+    if (!await _renameFamilyIfNeeded(_nameController.text.trim(), l10n)) {
+      return;
+    }
+
     notifier.updateFamilySubtitle(_subtitleController.text);
     notifier.updateFamilyPhoto(_photoController.text);
     await notifier.save();
@@ -77,6 +87,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.settingsSaved)),
     );
+  }
+
+  /// Переименование семьи: облако (если подключено) + локальная «шапка».
+  ///
+  /// Возвращает false, если сохранять форму нельзя: облако отклонило
+  /// переименование (нет прав или нет сети) — тогда пользователь видит ошибку,
+  /// а локальные данные остаются прежними.
+  Future<bool> _renameFamilyIfNeeded(
+    String name,
+    AppLocalizations l10n,
+  ) async {
+    final notifier = ref.read(familySettingsProvider.notifier);
+    final family = ref.read(activeFamilyControllerProvider).value;
+    if (family == null) {
+      notifier.updateFamilyName(name);
+      return true;
+    }
+
+    final identity = ref.read(identityControllerProvider).value;
+    final isOwner = identity != null && family.ownerAuthUid == identity.authUid;
+    if (!isOwner) {
+      // Поле названия для не-владельца только для чтения: не трогаем его,
+      // но остальные настройки сохранить можно.
+      return true;
+    }
+    if (family.name == name) {
+      notifier.updateFamilyName(name);
+      return true;
+    }
+
+    try {
+      await ref.read(activeFamilyControllerProvider.notifier).rename(name);
+      return true;
+    } catch (_) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.familyRenameFailed)),
+      );
+      return false;
+    }
+  }
+
+  /// После отката к демо-данным форма должна перечитаться из архива.
+  void _onArchiveReset() {
+    if (!mounted) return;
+    setState(() => _initialized = false);
   }
 
   Future<void> _pickFamilyPhoto() async {
@@ -230,7 +286,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final isAdmin = role == UserRole.admin;
     final canEdit = role != UserRole.viewer;
     final sections = <_SettingsSection>[
-      if (isAdmin) _SettingsSection.family,
+      // «Семья» показываем всем: название и оформление должны быть
+      // обнаружимы, даже если менять их может только администратор.
+      _SettingsSection.family,
       if (canEdit) ...const [
         _SettingsSection.members,
         _SettingsSection.events,
@@ -251,6 +309,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             data: (family) {
               final settings = settingsAsync.value ?? family.settings;
               final visible = ref.watch(visibleFamilyProvider) ?? family;
+              final activeFamily =
+                  ref.watch(activeFamilyControllerProvider).value;
+              final identity = ref.watch(identityControllerProvider).value;
+              // Название семьи меняет только владелец: остальным поля формы
+              // доступны, а имя — только для чтения.
+              final canRename = activeFamily == null ||
+                  (identity != null &&
+                      activeFamily.ownerAuthUid == identity.authUid);
               if (!_initialized) {
                 _nameController.text = settings.familyName;
                 _subtitleController.text = settings.familySubtitle;
@@ -324,6 +390,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         .read(familySettingsProvider
                                             .notifier)
                                         .updateShowEventPhotos(value),
+                                    canRename: canRename,
+                                    canEdit: isAdmin,
+                                    onPhotoPositionChanged: (position) => ref
+                                        .read(familySettingsProvider.notifier)
+                                        .updateFamilyPhotoPosition(position),
+                                    onPhotoZoomChanged: (zoom) => ref
+                                        .read(familySettingsProvider.notifier)
+                                        .updateFamilyPhotoZoom(zoom),
                                     onSave: _save,
                                   ),
                                 ],
@@ -355,8 +429,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     _confirmRemoveEvent(event, l10n),
                               ),
                             _SettingsSection.media => const MediaLibraryPanel(),
-                            _SettingsSection.general =>
-                              const _GeneralSection(),
+                            _SettingsSection.general => _GeneralSection(
+                              onArchiveReset: _onArchiveReset,
+                            ),
                           },
                   ),
                 ],
@@ -557,7 +632,10 @@ class _EventsSection extends StatelessWidget {
 /// аккаунтов — самостоятельные страницы с собственной прокруткой, поэтому
 /// открываем их отдельными маршрутами, а не аккордеоном внутри списка.
 class _GeneralSection extends ConsumerWidget {
-  const _GeneralSection();
+  const _GeneralSection({required this.onArchiveReset});
+
+  /// Сообщает странице настроек, что архив сброшен и форму надо перечитать.
+  final VoidCallback onArchiveReset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -601,8 +679,8 @@ class _GeneralSection extends ConsumerWidget {
           const SizedBox(height: 10),
           _SettingsLink(
             icon: Icons.restore,
-            title: l10n.settingsReload,
-            subtitle: l10n.settingsArchiveSource,
+            title: l10n.settingsResetDemo,
+            subtitle: l10n.settingsResetDemoHint,
             onTap: () => _resetToDemo(context, ref),
           ),
         ],
@@ -611,13 +689,75 @@ class _GeneralSection extends ConsumerWidget {
   }
 
   /// Сбрасывает локальные правки и возвращает демо-архив.
+  ///
+  /// Действие необратимо: сначала предупреждаем и предлагаем сделать
+  /// резервную копию. Облачные данные при этом не удаляются.
   Future<void> _resetToDemo(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
+    final hasCloud = ref.read(activeFamilyControllerProvider).value != null;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.settingsResetDemoConfirmTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.settingsResetDemoConfirmBody),
+            if (hasCloud) ...[
+              const SizedBox(height: 10),
+              Text(
+                l10n.settingsResetDemoCloudWarning(l10n.familyCloudDeleteCloud),
+                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => _backupBeforeReset(dialogContext, ref),
+            child: Text(l10n.settingsResetDemoBackup),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.settingsResetDemoAction),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     await ref.read(familyDataProvider.notifier).resetToDemo();
+    onArchiveReset();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.settingsReloadStarted)),
+      SnackBar(content: Text(l10n.settingsResetDemoDone)),
     );
+  }
+
+  /// Делает снимок текущего состояния прямо из диалога отката.
+  Future<void> _backupBeforeReset(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(backupsProvider.notifier).create();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsResetDemoBackupDone)),
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsResetDemoBackupFailed)),
+      );
+    }
   }
 }
 
@@ -891,6 +1031,10 @@ class _SettingsForm extends StatelessWidget {
     required this.onClearPhoto,
     required this.onShowFamilyPhotoChanged,
     required this.onShowEventPhotosChanged,
+    required this.canRename,
+    required this.canEdit,
+    required this.onPhotoPositionChanged,
+    required this.onPhotoZoomChanged,
     required this.onSave,
   });
 
@@ -907,6 +1051,16 @@ class _SettingsForm extends StatelessWidget {
   final VoidCallback onClearPhoto;
   final ValueChanged<bool> onShowFamilyPhotoChanged;
   final ValueChanged<bool> onShowEventPhotosChanged;
+
+  /// Может ли текущий пользователь менять название семьи.
+  final bool canRename;
+
+  /// Может ли текущий пользователь редактировать настройки семьи.
+  /// Наблюдатели и редакторы видят раздел, но только для чтения.
+  final bool canEdit;
+
+  final ValueChanged<PhotoPosition> onPhotoPositionChanged;
+  final ValueChanged<double> onPhotoZoomChanged;
   final VoidCallback onSave;
 
   @override
@@ -925,6 +1079,7 @@ class _SettingsForm extends StatelessWidget {
             TextFormField(
               controller: nameController,
               onChanged: onNameChanged,
+              readOnly: !canEdit || !canRename,
               textInputAction: TextInputAction.next,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -932,14 +1087,40 @@ class _SettingsForm extends StatelessWidget {
                 }
                 return null;
               },
-              decoration: _inputDecoration(hint: l10n.settingsFamilyName),
+              decoration: _inputDecoration(hint: l10n.settingsFamilyName)
+                  .copyWith(
+                suffixIcon: canEdit && canRename
+                    ? null
+                    : const Icon(Icons.lock_outline, size: 18),
+              ),
             ),
+            if (!canRename)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  l10n.familyRenameOwnerOnly,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.terracotta,
+                  ),
+                ),
+              ),
+            if (!canEdit)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  l10n.settingsFamilyReadOnly,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.terracotta,
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
             _Caption(label: l10n.settingsFamilySubtitle),
             const SizedBox(height: 6),
             TextFormField(
               controller: subtitleController,
               onChanged: onSubtitleChanged,
+              readOnly: !canEdit,
               textInputAction: TextInputAction.next,
               decoration: _inputDecoration(
                 hint: l10n.settingsFamilySubtitleHint,
@@ -951,17 +1132,16 @@ class _SettingsForm extends StatelessWidget {
             TextFormField(
               controller: photoController,
               onChanged: onPhotoChanged,
+              readOnly: !canEdit,
               decoration: _inputDecoration(hint: l10n.settingsFamilyPhotoHint),
             ),
             const SizedBox(height: 10),
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: FamilyPhoto(
-                  source: photoController.text,
-                  fit: BoxFit.cover,
-                  fallback: Container(
+            if (photoController.text.trim().isEmpty)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
                     color: AppColors.kraftWash,
                     child: Center(
                       child: Text(
@@ -975,19 +1155,30 @@ class _SettingsForm extends StatelessWidget {
                     ),
                   ),
                 ),
+              )
+            else
+              InteractivePhotoCrop(
+                source: photoController.text.trim(),
+                position:
+                    settings.familyPhotoPosition ?? PhotoPosition.center,
+                zoom: photoZoomOrDefault(settings.familyPhotoZoom),
+                onChanged: (position, zoom) {
+                  onPhotoPositionChanged(position);
+                  onPhotoZoomChanged(zoom);
+                },
+                showExpand: true,
               ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
-                  onPressed: onUploadPhoto,
+                  onPressed: canEdit ? onUploadPhoto : null,
                   icon: const Icon(Icons.upload_file),
                   label: Text(l10n.mediaUpload),
                 ),
                 if (photoController.text.trim().isNotEmpty)
                   TextButton.icon(
-                    onPressed: onClearPhoto,
+                    onPressed: canEdit ? onClearPhoto : null,
                     icon: const Icon(Icons.close),
                     label: Text(l10n.settingsClearPhoto),
                   ),
@@ -999,7 +1190,7 @@ class _SettingsForm extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               activeThumbColor: AppColors.moss,
               value: settings.showFamilyPhotoInHeader,
-              onChanged: onShowFamilyPhotoChanged,
+              onChanged: canEdit ? onShowFamilyPhotoChanged : null,
               title: Text(
                 l10n.settingsShowFamilyPhoto,
                 style: theme.textTheme.bodyLarge,
@@ -1009,7 +1200,7 @@ class _SettingsForm extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               activeThumbColor: AppColors.moss,
               value: settings.showEventPhotos,
-              onChanged: onShowEventPhotosChanged,
+              onChanged: canEdit ? onShowEventPhotosChanged : null,
               title: Text(
                 l10n.settingsShowEventPhotos,
                 style: theme.textTheme.bodyLarge,
@@ -1019,7 +1210,7 @@ class _SettingsForm extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: onSave,
+                onPressed: canEdit ? onSave : null,
                 icon: const Icon(Icons.save_outlined),
                 label: Text(l10n.settingsSave),
               ),

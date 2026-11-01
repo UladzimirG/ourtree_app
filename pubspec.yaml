@@ -1,7 +1,7 @@
 name: ourtree_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.3.0
+version: 0.4.0+3
 
 environment:
   sdk: ^3.6.0
@@ -33,6 +33,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   connectivity_plus: ^7.0.0
   ffmpeg_kit_flutter_new_min_gpl: ^2.6.7
+  cloud_functions: ^7.0.1
 
 dev_dependencies:
   flutter_test:

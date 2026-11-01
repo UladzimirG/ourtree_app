@@ -10,19 +10,25 @@ part of 'accounts_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// Изменяемый список учётных записей семейного альбома.
 ///
-/// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
+/// Записи хранятся в Hive и переживают перезапуск. Аккаунты, созданные на
+/// сервере (`serverBacked == true`), здесь лежат как локальная копия для
+/// списка, ролей и офлайн-входа; пароль проверяет Cloud Function.
 
 @ProviderFor(AccountsNotifier)
 final accountsProvider = AccountsNotifierProvider._();
 
 /// Изменяемый список учётных записей семейного альбома.
 ///
-/// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
+/// Записи хранятся в Hive и переживают перезапуск. Аккаунты, созданные на
+/// сервере (`serverBacked == true`), здесь лежат как локальная копия для
+/// списка, ролей и офлайн-входа; пароль проверяет Cloud Function.
 final class AccountsNotifierProvider
     extends $AsyncNotifierProvider<AccountsNotifier, List<Account>> {
   /// Изменяемый список учётных записей семейного альбома.
   ///
-  /// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
+  /// Записи хранятся в Hive и переживают перезапуск. Аккаунты, созданные на
+  /// сервере (`serverBacked == true`), здесь лежат как локальная копия для
+  /// списка, ролей и офлайн-входа; пароль проверяет Cloud Function.
   AccountsNotifierProvider._()
       : super(
           from: null,
@@ -42,11 +48,13 @@ final class AccountsNotifierProvider
   AccountsNotifier create() => AccountsNotifier();
 }
 
-String _$accountsNotifierHash() => r'2fd773bfe0ac1fe5612243f4316ec4eed6104c21';
+String _$accountsNotifierHash() => r'4a63cc64f33ea9059f839e592ce3948f580df8ce';
 
 /// Изменяемый список учётных записей семейного альбома.
 ///
-/// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
+/// Записи хранятся в Hive и переживают перезапуск. Аккаунты, созданные на
+/// сервере (`serverBacked == true`), здесь лежат как локальная копия для
+/// списка, ролей и офлайн-входа; пароль проверяет Cloud Function.
 
 abstract class _$AccountsNotifier extends $AsyncNotifier<List<Account>> {
   FutureOr<List<Account>> build();

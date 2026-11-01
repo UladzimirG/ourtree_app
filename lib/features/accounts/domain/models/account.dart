@@ -15,6 +15,7 @@ class Account {
     this.passwordHash,
     this.passwordSalt,
     this.legacyId,
+    this.serverBacked = false,
   });
 
   final String id;
@@ -41,6 +42,11 @@ class Account {
   final String? passwordHash;
   final String? passwordSalt;
 
+  /// Аккаунт создан на сервере: логин и пароль проверяет Cloud Functions,
+  /// поэтому вход работает на любом устройстве. Локальная запись — копия
+  /// для офлайн-режима, хеш пароля в неё не попадает.
+  final bool serverBacked;
+
   bool get isAdmin => role == UserRole.admin;
 
   bool get canEdit => role != UserRole.viewer;
@@ -62,6 +68,7 @@ class Account {
       passwordHash: readNullableString(json['passwordHash']),
       passwordSalt: readNullableString(json['passwordSalt']),
       legacyId: readNullableString(json['legacyId']),
+      serverBacked: readBool(json['serverBacked']) ?? false,
     );
   }
 
@@ -77,6 +84,7 @@ class Account {
         if (passwordHash != null) 'passwordHash': passwordHash,
         if (passwordSalt != null) 'passwordSalt': passwordSalt,
         if (legacyId != null) 'legacyId': legacyId,
+        if (serverBacked) 'serverBacked': true,
       };
 
   Account copyWith({
@@ -90,6 +98,7 @@ class Account {
     String? passwordHash,
     String? passwordSalt,
     String? legacyId,
+    bool? serverBacked,
   }) =>
       Account(
         id: id ?? this.id,
@@ -102,6 +111,7 @@ class Account {
         passwordHash: passwordHash ?? this.passwordHash,
         passwordSalt: passwordSalt ?? this.passwordSalt,
         legacyId: legacyId ?? this.legacyId,
+        serverBacked: serverBacked ?? this.serverBacked,
       );
 
   @override
@@ -117,7 +127,8 @@ class Account {
           listsEqual(visibleMemberIds, other.visibleMemberIds) &&
           passwordHash == other.passwordHash &&
           passwordSalt == other.passwordSalt &&
-          legacyId == other.legacyId;
+          legacyId == other.legacyId &&
+          serverBacked == other.serverBacked;
 
   @override
   int get hashCode => Object.hash(
@@ -131,6 +142,7 @@ class Account {
         passwordHash,
         passwordSalt,
         legacyId,
+        serverBacked,
       );
 }
 

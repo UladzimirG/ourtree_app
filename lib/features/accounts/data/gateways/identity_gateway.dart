@@ -15,6 +15,15 @@ abstract class IdentityGateway {
   /// `request.auth.uid` для Security Rules.
   Future<String> signInAnonymously();
 
+  /// Вход по custom token, который выдаёт Cloud Function после проверки
+  /// логина и пароля. `uid` становится равным id серверного аккаунта,
+  /// поэтому вход работает на любом устройстве.
+  ///
+  /// Реализация по умолчанию нужна, чтобы тестовые шлюзы не описывали метод.
+  Future<String> signInWithCustomToken(String token) async {
+    throw UnsupportedError('Custom token sign-in is not supported');
+  }
+
   Future<void> signOut();
 }
 
@@ -38,6 +47,16 @@ class FirebaseIdentityGateway implements IdentityGateway {
     final uid = credential.user?.uid;
     if (uid == null || uid.isEmpty) {
       throw StateError('Firebase Auth не вернул uid анонимного пользователя');
+    }
+    return uid;
+  }
+
+  @override
+  Future<String> signInWithCustomToken(String token) async {
+    final credential = await _auth.signInWithCustomToken(token);
+    final uid = credential.user?.uid;
+    if (uid == null || uid.isEmpty) {
+      throw StateError('Firebase Auth не вернул uid серверного аккаунта');
     }
     return uid;
   }

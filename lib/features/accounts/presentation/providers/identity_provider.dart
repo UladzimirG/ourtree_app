@@ -48,8 +48,9 @@ String localUserId(Ref ref) {
 
 /// Личность пользователя: локальный id + анонимный `auth.uid` + профиль в облаке.
 ///
-/// Вход полностью бесшовный: пользователь не видит ни формы, ни пароля — при
-/// первом запуске выполняется `signInAnonymously()`.
+/// Демо-режим бесшовный: без аккаунта при первом запуске выполняется
+/// `signInAnonymously()`. После серверного входа (`ServerAuth`) действует
+/// `auth.uid` аккаунта, поэтому членство в семье переживает смену устройства.
 @Riverpod(keepAlive: true)
 class IdentityController extends _$IdentityController {
   @override

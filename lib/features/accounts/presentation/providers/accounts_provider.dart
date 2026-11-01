@@ -15,7 +15,9 @@ const String currentAccountStorageKey = 'current_account_id';
 
 /// Изменяемый список учётных записей семейного альбома.
 ///
-/// Аккаунты и права хранятся в Hive и переживают перезапуск приложения.
+/// Записи хранятся в Hive и переживают перезапуск. Аккаунты, созданные на
+/// сервере (`serverBacked == true`), здесь лежат как локальная копия для
+/// списка, ролей и офлайн-входа; пароль проверяет Cloud Function.
 @Riverpod(keepAlive: true)
 class AccountsNotifier extends _$AccountsNotifier {
   @override
@@ -165,6 +167,30 @@ class AccountsNotifier extends _$AccountsNotifier {
   void replaceAll(List<Account> accounts) {
     _set(List<Account>.unmodifiable(accounts));
   }
+
+  /// Добавляет или обновляет одну запись — используется серверным входом
+  /// и синхронизацией списка аккаунтов.
+  void upsert(Account account) {
+    final index = _accounts.indexWhere((item) => item.id == account.id);
+    final next = [..._accounts];
+    if (index >= 0) {
+      next[index] = account;
+    } else {
+      next.add(account);
+    }
+    _set(next);
+  }
+
+  /// Заменяет серверные записи ответом `accountList`, сохраняя локальные
+  /// аккаунты, которые ещё не перенесены на сервер.
+  void replaceServerAccounts(List<Account> serverAccounts) {
+    final local = _accounts.where((account) => !account.serverBacked);
+    _set([...local, ...serverAccounts]);
+  }
+
+  /// Аккаунт по id или `null`.
+  Account? byId(String id) =>
+      _firstOrNull(_accounts, (account) => account.id == id);
 
   List<Account> get _accounts => state.value ?? const <Account>[];
 

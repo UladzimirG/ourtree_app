@@ -174,6 +174,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsFamilyName => 'Название семьи';
 
   @override
+  String get settingsFamilyReadOnly =>
+      'Менять настройки семьи может только администратор.';
+
+  @override
   String get settingsFamilySubtitle => 'Подзаголовок семьи';
 
   @override
@@ -185,13 +189,44 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsArchiveSource =>
-      'Семейный архив из демонстрационных файлов приложения';
+      'Семейный архив из демонстрационных файлов приложения (локально)';
 
   @override
-  String get settingsReload => 'Обновить данные';
+  String get settingsResetDemo => 'Откат к демонстрационным данным';
 
   @override
-  String get settingsReloadStarted => 'Данные семьи обновлены.';
+  String get settingsResetDemoHint =>
+      'Вернуть локальный архив к демонстрационным файлам приложения';
+
+  @override
+  String get settingsResetDemoConfirmTitle =>
+      'Откатить к демонстрационным данным?';
+
+  @override
+  String get settingsResetDemoConfirmBody =>
+      'Все локальные изменения семьи — участники, события, медиатека, название и фото — будут потеряны. Отменить это действие нельзя.';
+
+  @override
+  String settingsResetDemoCloudWarning(String deleteAction) {
+    return 'Данные в облаке не удаляются. Удалить их можно в разделе «Общие настройки → Облако» — кнопка «$deleteAction».';
+  }
+
+  @override
+  String get settingsResetDemoAction => 'Откатить';
+
+  @override
+  String get settingsResetDemoBackup => 'Сделать бэкап';
+
+  @override
+  String get settingsResetDemoBackupDone => 'Резервная копия создана.';
+
+  @override
+  String get settingsResetDemoBackupFailed =>
+      'Не удалось создать резервную копию.';
+
+  @override
+  String get settingsResetDemoDone =>
+      'Архив возвращён к демонстрационным данным.';
 
   @override
   String get settingsEditingSoon =>
@@ -227,6 +262,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsNameRequired => 'Название семьи не может быть пустым.';
+
+  @override
+  String get familyRenameOwnerOnly =>
+      'Переименовать семью может только администратор семьи — тот, кто её создал.';
+
+  @override
+  String get familyRenamed => 'Название семьи изменено.';
+
+  @override
+  String get familyRenameFailed =>
+      'Не удалось изменить название в облаке. Проверьте соединение.';
 
   @override
   String get settingsLocalOnly =>
@@ -346,11 +392,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAccountsHint =>
-      'Создавайте семейные аккаунты, назначайте роли и выпускайте гостевые ссылки.';
+      'Создавайте семейные аккаунты с логином и паролем, назначайте роли и выпускайте гостевые ссылки. Аккаунты хранятся на сервере.';
 
   @override
   String get settingsAccountsLocalOnly =>
-      'Аккаунты, права доступа и гостевые ссылки хранятся локально, переживают перезапуск и входят в бэкап.';
+      'Аккаунты синхронизируются с сервером: входите с тем же логином и паролем на любом устройстве. Локальная копия позволяет войти без сети.';
 
   @override
   String get settingsBackupsHint =>
@@ -584,6 +630,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get accountUnknownError => 'Что-то пошло не так.';
+
+  @override
+  String get accountServerUnavailable =>
+      'Сервер аккаунтов недоступен. Проверьте соединение и повторите.';
+
+  @override
+  String get accountServerError =>
+      'Сервер аккаунтов вернул ошибку. Попробуйте позже.';
+
+  @override
+  String get accountCreatedLocalOnly =>
+      'Сервер недоступен: аккаунт сохранён только на этом устройстве.';
+
+  @override
+  String get accountServerBadge => 'Сервер';
+
+  @override
+  String get accountMigratedOnServer => 'Аккаунт перенесён на сервер.';
 
   @override
   String get accountsEmpty => 'Аккаунтов пока нет. Создайте первый выше.';
@@ -880,26 +944,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Видео автоматически приводится к поддерживаемому формату.';
 
   @override
-  String get mediaCropX => 'По горизонтали';
+  String get mediaCropHint => 'Перетаскивайте фото и масштабируйте щипком';
 
   @override
-  String get mediaCropY => 'По вертикали';
+  String get mediaCropExpand => 'Развернуть';
 
   @override
-  String get mediaZoom => 'Масштаб';
-
-  @override
-  String get mediaCropHint =>
-      'Перетащите фото и используйте жест масштабирования';
+  String get mediaCropDone => 'Готово';
 
   @override
   String get mediaCropReset => 'Сбросить кадр';
-
-  @override
-  String get mediaZoomIn => 'Приблизить';
-
-  @override
-  String get mediaZoomOut => 'Отдалить';
 
   @override
   String get mediaRemove => 'Удалить медиа';

@@ -174,6 +174,10 @@ class AppLocalizationsBe extends AppLocalizations {
   String get settingsFamilyName => 'Назва сям\'і';
 
   @override
+  String get settingsFamilyReadOnly =>
+      'Мяняць налады сям\'і можа толькі адміністратар.';
+
+  @override
   String get settingsFamilySubtitle => 'Падзагаловак сям\'і';
 
   @override
@@ -185,13 +189,43 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get settingsArchiveSource =>
-      'Сямейны архіў з дэманстрацыйных файлаў праграмы';
+      'Сямейны архіў з дэманстрацыйных файлаў праграмы (лакальна)';
 
   @override
-  String get settingsReload => 'Абнавіць даныя';
+  String get settingsResetDemo => 'Адкат да дэманстрацыйных даных';
 
   @override
-  String get settingsReloadStarted => 'Даныя сям\'і абноўленыя.';
+  String get settingsResetDemoHint =>
+      'Вярнуць лакальны архіў да дэманстрацыйных файлаў праграмы';
+
+  @override
+  String get settingsResetDemoConfirmTitle =>
+      'Адкаціць да дэманстрацыйных даных?';
+
+  @override
+  String get settingsResetDemoConfirmBody =>
+      'Усе лакальныя змены сям\'і — удзельнікі, падзеі, медыятэка, назва і фота — будуць страчаныя. Адмяніць гэта немагчыма.';
+
+  @override
+  String settingsResetDemoCloudWarning(String deleteAction) {
+    return 'Даныя ў воблаку не выдаляюцца. Выдаліць іх можна ў раздзеле «Агульныя налады → Воблака» — кнопка «$deleteAction».';
+  }
+
+  @override
+  String get settingsResetDemoAction => 'Адкаціць';
+
+  @override
+  String get settingsResetDemoBackup => 'Зрабіць бэкап';
+
+  @override
+  String get settingsResetDemoBackupDone => 'Рэзервовая копія створаная.';
+
+  @override
+  String get settingsResetDemoBackupFailed =>
+      'Не ўдалося стварыць рэзервовую копію.';
+
+  @override
+  String get settingsResetDemoDone => 'Архіў вернуты да дэманстрацыйных даных.';
 
   @override
   String get settingsEditingSoon => 'Рэдагаванне з\'явіцца на наступным кроку.';
@@ -226,6 +260,17 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get settingsNameRequired => 'Назва сям\'і не можа быць пустой.';
+
+  @override
+  String get familyRenameOwnerOnly =>
+      'Перайменаваць сям\'ю можа толькі адміністратар сям\'і — той, хто яе стварыў.';
+
+  @override
+  String get familyRenamed => 'Назва сям\'і змененая.';
+
+  @override
+  String get familyRenameFailed =>
+      'Не ўдалося змяніць назву ў воблаку. Праверце злучэнне.';
 
   @override
   String get settingsLocalOnly =>
@@ -345,11 +390,11 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get settingsAccountsHint =>
-      'Стварайце акаўнты сям\'і, прызначайце ролі і выдавайце гасцявыя спасылкі.';
+      'Стварайце акаўнты сям\'і з лагінам і паролем, прызначайце ролі і выдавайце гасцявыя спасылкі. Акаўнты захоўваюцца на серверы.';
 
   @override
   String get settingsAccountsLocalOnly =>
-      'Акаўнты, правы доступу і гасцявыя спасылкі захоўваюцца лакальна і перажываюць перазапуск і копіі.';
+      'Акаўнты сінхранізуюцца з серверам: уваходзьце з тым жа лагінам і паролем на любой прыладзе. Лакальная копія дазваляе ўвайсці без сеткі.';
 
   @override
   String get settingsBackupsHint =>
@@ -582,6 +627,24 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get accountUnknownError => 'Штосьці пайшло не так.';
+
+  @override
+  String get accountServerUnavailable =>
+      'Сервер акаўнтаў недаступны. Праверце злучэнне і паспрабуйце зноў.';
+
+  @override
+  String get accountServerError =>
+      'Сервер акаўнтаў вярнуў памылку. Паспрабуйце пазней.';
+
+  @override
+  String get accountCreatedLocalOnly =>
+      'Сервер недаступны: акаўнт захаваны толькі на гэтай прыладзе.';
+
+  @override
+  String get accountServerBadge => 'Сервер';
+
+  @override
+  String get accountMigratedOnServer => 'Акаўнт перанесены на сервер.';
 
   @override
   String get accountsEmpty => 'Акаўнтаў пакуль няма. Стварыце першы вышэй.';
@@ -878,26 +941,16 @@ class AppLocalizationsBe extends AppLocalizations {
       'Відэа аўтаматычна прыводзіцца да падтрыманага фармату.';
 
   @override
-  String get mediaCropX => 'Па гарызанталі';
+  String get mediaCropHint => 'Перацягвайце фота і маштабуйце дшчыпкам';
 
   @override
-  String get mediaCropY => 'Па вертыкалі';
+  String get mediaCropExpand => 'Разгарнуць';
 
   @override
-  String get mediaZoom => 'Маштаб';
-
-  @override
-  String get mediaCropHint =>
-      'Перацягніце фота і выкарыстайце жэст маштабавання';
+  String get mediaCropDone => 'Гатова';
 
   @override
   String get mediaCropReset => 'Скінуць кадр';
-
-  @override
-  String get mediaZoomIn => 'Наблізіць';
-
-  @override
-  String get mediaZoomOut => 'Аддаліць';
 
   @override
   String get mediaRemove => 'Выдаліць медыя';

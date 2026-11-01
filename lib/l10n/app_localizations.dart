@@ -336,6 +336,12 @@ abstract class AppLocalizations {
   /// **'Family name'**
   String get settingsFamilyName;
 
+  /// No description provided for @settingsFamilyReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an administrator can change the family settings.'**
+  String get settingsFamilyReadOnly;
+
   /// Editable subtitle of the family page
   ///
   /// In en, this message translates to:
@@ -357,20 +363,68 @@ abstract class AppLocalizations {
   /// Description of the bundled family archive
   ///
   /// In en, this message translates to:
-  /// **'Family archive from the bundled demo files'**
+  /// **'Family archive from the bundled demo files (local)'**
   String get settingsArchiveSource;
 
-  /// Button that reloads family data
+  /// Menu item that resets the archive to demo data
   ///
   /// In en, this message translates to:
-  /// **'Reload data'**
-  String get settingsReload;
+  /// **'Reset to demo data'**
+  String get settingsResetDemo;
 
-  /// Confirmation after reloading data
+  /// Description of the demo reset action
   ///
   /// In en, this message translates to:
-  /// **'Family data reloaded.'**
-  String get settingsReloadStarted;
+  /// **'Restore the local archive from the bundled demo files'**
+  String get settingsResetDemoHint;
+
+  /// Title of the demo reset confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to demo data?'**
+  String get settingsResetDemoConfirmTitle;
+
+  /// Body of the demo reset confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'All local family changes - members, events, media library, name and photo - will be lost. This cannot be undone.'**
+  String get settingsResetDemoConfirmBody;
+
+  /// Warning about cloud data on demo reset
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud data is not deleted. You can remove it in “General settings → Cloud” with the “{deleteAction}” button.'**
+  String settingsResetDemoCloudWarning(String deleteAction);
+
+  /// Confirm button of the demo reset
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get settingsResetDemoAction;
+
+  /// Button that creates a backup before the reset
+  ///
+  /// In en, this message translates to:
+  /// **'Create a backup'**
+  String get settingsResetDemoBackup;
+
+  /// Backup created before the reset
+  ///
+  /// In en, this message translates to:
+  /// **'Backup created.'**
+  String get settingsResetDemoBackupDone;
+
+  /// Backup failed before the reset
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create a backup.'**
+  String get settingsResetDemoBackupFailed;
+
+  /// Confirmation of the demo reset
+  ///
+  /// In en, this message translates to:
+  /// **'Archive reset to demo data.'**
+  String get settingsResetDemoDone;
 
   /// Note about upcoming editing
   ///
@@ -437,6 +491,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Family name cannot be empty.'**
   String get settingsNameRequired;
+
+  /// Hint that only the family administrator (the creator) can rename the family
+  ///
+  /// In en, this message translates to:
+  /// **'Only the family administrator - the person who created the family - can rename it.'**
+  String get familyRenameOwnerOnly;
+
+  /// Confirmation of the family rename
+  ///
+  /// In en, this message translates to:
+  /// **'Family name updated.'**
+  String get familyRenamed;
+
+  /// Error when the cloud rename fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the name in the cloud. Check the connection.'**
+  String get familyRenameFailed;
 
   /// Note that changes are kept in memory
   ///
@@ -639,13 +711,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAccountsHint.
   ///
   /// In en, this message translates to:
-  /// **'Create family accounts, assign roles and issue guest links.'**
+  /// **'Create family accounts with a login and password, assign roles and issue guest links. Accounts are stored on the server.'**
   String get settingsAccountsHint;
 
   /// No description provided for @settingsAccountsLocalOnly.
   ///
   /// In en, this message translates to:
-  /// **'Accounts, access rights and guest links are stored locally and survive restarts and backups.'**
+  /// **'Accounts are synced with the server: sign in with the same login and password on any device. A local copy keeps the sign-in working offline.'**
   String get settingsAccountsLocalOnly;
 
   /// No description provided for @settingsBackupsHint.
@@ -1097,6 +1169,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong.'**
   String get accountUnknownError;
+
+  /// No description provided for @accountServerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The accounts server is unavailable. Check your connection and try again.'**
+  String get accountServerUnavailable;
+
+  /// No description provided for @accountServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The accounts server returned an error. Try again later.'**
+  String get accountServerError;
+
+  /// No description provided for @accountCreatedLocalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is unavailable: the account is saved on this device only.'**
+  String get accountCreatedLocalOnly;
+
+  /// No description provided for @accountServerBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get accountServerBadge;
+
+  /// No description provided for @accountMigratedOnServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Account migrated to the server.'**
+  String get accountMigratedOnServer;
 
   /// No description provided for @accountsEmpty.
   ///
@@ -1632,47 +1734,29 @@ abstract class AppLocalizations {
   /// **'The video is converted to a supported format automatically.'**
   String get videoConvertHint;
 
-  /// No description provided for @mediaCropX.
-  ///
-  /// In en, this message translates to:
-  /// **'Horizontal'**
-  String get mediaCropX;
-
-  /// No description provided for @mediaCropY.
-  ///
-  /// In en, this message translates to:
-  /// **'Vertical'**
-  String get mediaCropY;
-
-  /// No description provided for @mediaZoom.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom'**
-  String get mediaZoom;
-
   /// No description provided for @mediaCropHint.
   ///
   /// In en, this message translates to:
   /// **'Drag the photo and pinch to zoom'**
   String get mediaCropHint;
 
+  /// Button that opens the full-screen crop editor
+  ///
+  /// In en, this message translates to:
+  /// **'Open full screen'**
+  String get mediaCropExpand;
+
+  /// Confirm button of the crop editor
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get mediaCropDone;
+
   /// No description provided for @mediaCropReset.
   ///
   /// In en, this message translates to:
   /// **'Reset crop'**
   String get mediaCropReset;
-
-  /// No description provided for @mediaZoomIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom in'**
-  String get mediaZoomIn;
-
-  /// No description provided for @mediaZoomOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom out'**
-  String get mediaZoomOut;
 
   /// No description provided for @mediaRemove.
   ///

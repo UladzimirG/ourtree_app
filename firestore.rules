@@ -66,6 +66,33 @@ service cloud.firestore {
       allow read, write: if signedIn() && request.auth.uid == authUid;
     }
 
+    // Серверные аккаунты семьи. Пишут только Cloud Functions (Admin SDK),
+    // клиент читает свой аккаунт, администратор — весь список.
+    function accountRole() {
+      return get(/databases/$(database)/documents/accounts/$(request.auth.uid)).data.role;
+    }
+
+    function isAccountAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/accounts/$(request.auth.uid))
+        && accountRole() == 'admin';
+    }
+
+    match /accounts/{accountId} {
+      allow read: if signedIn()
+        && (request.auth.uid == accountId || isAccountAdmin());
+      allow write: if false;
+    }
+
+    // Индекс логинов и флаг «первый аккаунт»: служебные данные сервера.
+    match /accountLogins/{login} {
+      allow read, write: if false;
+    }
+
+    match /accountMeta/{document} {
+      allow read, write: if false;
+    }
+
     // Семья: читают участники, создаёт владелец, правит владелец.
     // Клиент может менять только «шапку» (name, settings, updatedAt, revision).
     match /families/{familyId} {

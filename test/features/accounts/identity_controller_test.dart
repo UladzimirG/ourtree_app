@@ -27,6 +27,12 @@ class _FakeGateway implements IdentityGateway {
   }
 
   @override
+  Future<String> signInWithCustomToken(String token) async {
+    sessionUid = token;
+    return token;
+  }
+
+  @override
   Future<void> signOut() async => sessionUid = null;
 }
 
@@ -169,6 +175,10 @@ class _FailingGateway implements IdentityGateway {
   @override
   Future<String> signInAnonymously() async =>
       throw StateError('Анонимный вход недоступен');
+
+  @override
+  Future<String> signInWithCustomToken(String token) async =>
+      throw StateError('Вход по custom token недоступен');
 
   @override
   Future<void> signOut() async {}

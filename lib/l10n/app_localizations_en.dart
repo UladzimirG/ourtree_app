@@ -165,6 +165,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFamilyName => 'Family name';
 
   @override
+  String get settingsFamilyReadOnly =>
+      'Only an administrator can change the family settings.';
+
+  @override
   String get settingsFamilySubtitle => 'Family subtitle';
 
   @override
@@ -176,13 +180,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsArchiveSource =>
-      'Family archive from the bundled demo files';
+      'Family archive from the bundled demo files (local)';
 
   @override
-  String get settingsReload => 'Reload data';
+  String get settingsResetDemo => 'Reset to demo data';
 
   @override
-  String get settingsReloadStarted => 'Family data reloaded.';
+  String get settingsResetDemoHint =>
+      'Restore the local archive from the bundled demo files';
+
+  @override
+  String get settingsResetDemoConfirmTitle => 'Reset to demo data?';
+
+  @override
+  String get settingsResetDemoConfirmBody =>
+      'All local family changes - members, events, media library, name and photo - will be lost. This cannot be undone.';
+
+  @override
+  String settingsResetDemoCloudWarning(String deleteAction) {
+    return 'Cloud data is not deleted. You can remove it in “General settings → Cloud” with the “$deleteAction” button.';
+  }
+
+  @override
+  String get settingsResetDemoAction => 'Reset';
+
+  @override
+  String get settingsResetDemoBackup => 'Create a backup';
+
+  @override
+  String get settingsResetDemoBackupDone => 'Backup created.';
+
+  @override
+  String get settingsResetDemoBackupFailed => 'Could not create a backup.';
+
+  @override
+  String get settingsResetDemoDone => 'Archive reset to demo data.';
 
   @override
   String get settingsEditingSoon => 'Editing will appear in the next step.';
@@ -217,6 +249,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNameRequired => 'Family name cannot be empty.';
+
+  @override
+  String get familyRenameOwnerOnly =>
+      'Only the family administrator - the person who created the family - can rename it.';
+
+  @override
+  String get familyRenamed => 'Family name updated.';
+
+  @override
+  String get familyRenameFailed =>
+      'Could not update the name in the cloud. Check the connection.';
 
   @override
   String get settingsLocalOnly => 'Changes are saved locally on this device.';
@@ -336,11 +379,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAccountsHint =>
-      'Create family accounts, assign roles and issue guest links.';
+      'Create family accounts with a login and password, assign roles and issue guest links. Accounts are stored on the server.';
 
   @override
   String get settingsAccountsLocalOnly =>
-      'Accounts, access rights and guest links are stored locally and survive restarts and backups.';
+      'Accounts are synced with the server: sign in with the same login and password on any device. A local copy keeps the sign-in working offline.';
 
   @override
   String get settingsBackupsHint =>
@@ -573,6 +616,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountUnknownError => 'Something went wrong.';
+
+  @override
+  String get accountServerUnavailable =>
+      'The accounts server is unavailable. Check your connection and try again.';
+
+  @override
+  String get accountServerError =>
+      'The accounts server returned an error. Try again later.';
+
+  @override
+  String get accountCreatedLocalOnly =>
+      'The server is unavailable: the account is saved on this device only.';
+
+  @override
+  String get accountServerBadge => 'Server';
+
+  @override
+  String get accountMigratedOnServer => 'Account migrated to the server.';
 
   @override
   String get accountsEmpty => 'No accounts yet. Create the first one above.';
@@ -869,25 +930,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'The video is converted to a supported format automatically.';
 
   @override
-  String get mediaCropX => 'Horizontal';
-
-  @override
-  String get mediaCropY => 'Vertical';
-
-  @override
-  String get mediaZoom => 'Zoom';
-
-  @override
   String get mediaCropHint => 'Drag the photo and pinch to zoom';
 
   @override
+  String get mediaCropExpand => 'Open full screen';
+
+  @override
+  String get mediaCropDone => 'Done';
+
+  @override
   String get mediaCropReset => 'Reset crop';
-
-  @override
-  String get mediaZoomIn => 'Zoom in';
-
-  @override
-  String get mediaZoomOut => 'Zoom out';
 
   @override
   String get mediaRemove => 'Remove media';

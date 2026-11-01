@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/accounts/domain/models/accounts_models.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/server_auth_provider.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
@@ -92,6 +95,7 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
   final TextEditingController _password = TextEditingController();
   UserRole _role = UserRole.viewer;
   String? _error;
+  bool _busy = false;
 
   @override
   void dispose() {
@@ -101,32 +105,57 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final l10n = widget.l10n;
-    final error = ref.read(accountsProvider.notifier).create(
-          AccountInput(
-            login: _login.text,
-            name: _name.text,
-            password: _password.text,
-            role: _role,
-          ),
-        );
+    final input = AccountInput(
+      login: _login.text,
+      name: _name.text,
+      password: _password.text,
+      role: _role,
+    );
 
-    if (error != null) {
-      setState(() => _error = accountErrorLabel(error, l10n));
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+
+    var error = await ref.read(serverAuthProvider.notifier).create(input);
+    if (!mounted) return;
+
+    // Сервер недоступен: сохраняем локальную копию, чтобы приложение
+    // продолжало работать без сети. При первом успешном входе она
+    // перенесётся на сервер автоматически.
+    if (error == AccountsError.offline) {
+      error = ref.read(accountsProvider.notifier).create(input);
+      setState(() {
+        _busy = false;
+        _error = error == null ? null : accountErrorLabel(error, l10n);
+      });
+      if (error != null) return;
+      _resetFields();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.accountCreatedLocalOnly)),
+      );
       return;
     }
 
     setState(() {
-      _error = null;
-      _role = UserRole.viewer;
+      _busy = false;
+      _error = error == null ? null : accountErrorLabel(error, l10n);
     });
-    _login.clear();
-    _name.clear();
-    _password.clear();
+    if (error != null) return;
+
+    _resetFields();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.accountCreated)),
     );
+  }
+
+  void _resetFields() {
+    setState(() => _role = UserRole.viewer);
+    _login.clear();
+    _name.clear();
+    _password.clear();
   }
 
   @override
@@ -175,7 +204,7 @@ class _AccountCreateFormState extends ConsumerState<_AccountCreateForm> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: _submit,
+              onPressed: _busy ? null : _submit,
               icon: const Icon(Icons.person_add_alt_1),
               label: Text(l10n.accountCreate),
             ),
@@ -206,6 +235,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
   final TextEditingController _password = TextEditingController();
   late UserRole _role;
   String? _error;
+  bool _busy = false;
 
   @override
   void initState() {
@@ -221,26 +251,52 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     super.dispose();
   }
 
-  void _save() {
-    final error = ref.read(accountsProvider.notifier).updateAccount(
-          widget.account.id,
-          AccountPatch(
-            name: _name.text,
-            role: _role,
-            password: _password.text.isEmpty ? null : _password.text,
-          ),
-        );
-    if (error != null) {
-      setState(() => _error = accountErrorLabel(error, widget.l10n));
-      return;
+  Future<void> _save() async {
+    final patch = AccountPatch(
+      name: _name.text,
+      // Роль отправляем только при изменении: сервер запрещает менять
+      // собственную роль, даже если значение совпадает.
+      role: _role == widget.account.role ? null : _role,
+      password: _password.text.isEmpty ? null : _password.text,
+    );
+
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+
+    AccountsError? error;
+    if (widget.account.serverBacked) {
+      error = await ref.read(serverAuthProvider.notifier).update(
+            widget.account,
+            patch,
+          );
+      if (error == AccountsError.offline) {
+        // Нет сети: правим локальную копию, сервер обновится при следующем входе.
+        error = ref.read(accountsProvider.notifier).updateAccount(
+              widget.account.id,
+              patch,
+            );
+      }
+    } else {
+      error = ref.read(accountsProvider.notifier).updateAccount(
+            widget.account.id,
+            patch,
+          );
     }
+
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _error = error == null ? null : accountErrorLabel(error, widget.l10n);
+    });
+    if (error != null) return;
+
     _password.clear();
-    setState(() => _error = null);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(widget.l10n.accountSaved)),
     );
   }
-
   Future<void> _confirmDelete() async {
     final l10n = widget.l10n;
     final confirmed = await showDialog<bool>(
@@ -262,7 +318,14 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     );
     if (confirmed != true || !mounted) return;
 
-    ref.read(accountsProvider.notifier).remove(widget.account.id);
+    final error = await ref
+        .read(serverAuthProvider.notifier)
+        .delete(widget.account);
+    if (!mounted) return;
+    if (error != null) {
+      setState(() => _error = accountErrorLabel(error, l10n));
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.accountDeleted)),
     );
@@ -277,6 +340,15 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
           allMembersVisible: allMembersVisible,
           visibleMemberIds: visibleMemberIds,
         );
+    if (widget.account.serverBacked) {
+      unawaited(
+        ref.read(serverAuthProvider.notifier).updateAccess(
+              widget.account.id,
+              allMembersVisible: allMembersVisible,
+              visibleMemberIds: visibleMemberIds,
+            ),
+      );
+    }
   }
 
   void _toggleMember(String memberId, bool selected) {
@@ -391,7 +463,8 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
         ),
         title: Text(widget.account.name, style: theme.textTheme.titleMedium),
         subtitle: Text(
-          '${widget.account.login} · ${roleLabel(widget.account.role, l10n)}',
+          '${widget.account.login} · ${roleLabel(widget.account.role, l10n)}'
+          '${widget.account.serverBacked ? ' · ${l10n.accountServerBadge}' : ''}',
           style: theme.textTheme.bodySmall,
         ),
         children: [
@@ -427,14 +500,14 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: _save,
+                  onPressed: _busy ? null : _save,
                   icon: const Icon(Icons.save_outlined),
                   label: Text(l10n.settingsSave),
                 ),
               ),
               const SizedBox(width: 8),
               TextButton.icon(
-                onPressed: _confirmDelete,
+                onPressed: _busy ? null : _confirmDelete,
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.terracotta,
                 ),
@@ -709,8 +782,6 @@ class AccountSessionBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final account = ref.watch(currentAccountProvider);
-    final accounts = ref.watch(accountsProvider).value ??
-        const <Account>[];
     final role = ref.watch(currentRoleProvider);
 
     return Padding(
@@ -735,15 +806,20 @@ class AccountSessionBar extends ConsumerWidget {
               style: theme.textTheme.bodySmall,
             ),
           ),
-          if (account == null && accounts.isNotEmpty)
+          if (account == null)
             TextButton(
               onPressed: () => _signIn(context, ref),
               child: Text(l10n.accountSignIn),
             ),
           if (account != null)
             TextButton(
-              onPressed: () {
-                ref.read(currentAccountIdProvider.notifier).signOut();
+              onPressed: () async {
+                if (account.serverBacked) {
+                  await ref.read(serverAuthProvider.notifier).signOut();
+                } else {
+                  ref.read(currentAccountIdProvider.notifier).signOut();
+                }
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.accountSignedOut)),
                 );
@@ -769,6 +845,7 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
   final TextEditingController _login = TextEditingController();
   final TextEditingController _password = TextEditingController();
   String? _error;
+  bool _busy = false;
 
   @override
   void dispose() {
@@ -777,16 +854,60 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
     super.dispose();
   }
 
-  void _submit() {
-    final account = ref.read(accountsProvider.notifier).authenticate(
-          _login.text,
-          _password.text,
-        );
-    if (account == null) {
-      setState(() => _error = widget.l10n.accountLoginFailed);
+  Future<void> _submit() async {
+    final l10n = widget.l10n;
+    final login = _login.text;
+    final password = _password.text;
+
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+
+    final serverAuth = ref.read(serverAuthProvider.notifier);
+    final outcome = await serverAuth.signIn(login, password);
+    if (!mounted) return;
+
+    if (outcome.isSuccess) {
+      Navigator.of(context).pop(outcome.account);
       return;
     }
-    Navigator.of(context).pop(account);
+
+    // Сервер не нашёл аккаунт или недоступен — проверяем локальную копию.
+    // Если пароль верный, переносим аккаунт на сервер (или входим локально,
+    // когда сети нет вовсе).
+    final canTryLocal =
+        outcome.status == ServerSignInStatus.accountNotFound ||
+            outcome.status == ServerSignInStatus.unavailable;
+    if (canTryLocal) {
+      final local =
+          ref.read(accountsProvider.notifier).authenticate(login, password);
+      if (local != null) {
+        final migrated = await serverAuth.claimLocal(local, password);
+        if (!mounted) return;
+        if (migrated.isSuccess) {
+          Navigator.of(context).pop(migrated.account);
+          return;
+        }
+        if (migrated.status == ServerSignInStatus.unavailable) {
+          // Офлайн-режим: продолжаем с локальной копией.
+          ref.read(currentAccountIdProvider.notifier).setAccount(local.id);
+          Navigator.of(context).pop(local);
+          return;
+        }
+      }
+    }
+
+    setState(() {
+      _busy = false;
+      _error = switch (outcome.status) {
+        ServerSignInStatus.unavailable => l10n.accountServerUnavailable,
+        ServerSignInStatus.invalidCredentials ||
+        ServerSignInStatus.accountNotFound =>
+          l10n.accountLoginFailed,
+        ServerSignInStatus.success => l10n.accountServerError,
+      };
+    });
   }
 
   @override
@@ -821,11 +942,11 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _busy ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.cancel),
         ),
         FilledButton(
-          onPressed: _submit,
+          onPressed: _busy ? null : _submit,
           child: Text(l10n.accountSignInAction),
         ),
       ],
