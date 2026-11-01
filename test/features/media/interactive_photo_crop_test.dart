@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
@@ -57,6 +58,41 @@ void main() {
     // Движение вправо открывает левую часть кадра.
     expect(position!.x, lessThan(50));
     expect(zoom, 1);
+  });
+
+  testWidgets('щипок трекпада (PointerScaleEvent) меняет масштаб', (
+    tester,
+  ) async {
+    PhotoPosition? position;
+    double? zoom;
+
+    await tester.pumpWidget(
+      _host(onChanged: (nextPosition, nextZoom) {
+        position = nextPosition;
+        zoom = nextZoom;
+      }),
+    );
+
+    final frame = find.descendant(
+      of: find.byType(InteractivePhotoCrop),
+      matching: find.byType(AspectRatio),
+    );
+    final center = tester.getCenter(frame);
+    tester.binding.handlePointerEvent(
+      PointerScaleEvent(
+        position: center,
+        scale: 1.5,
+        kind: PointerDeviceKind.trackpad,
+        viewId: tester.view.viewId,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('1.50x'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(zoom, closeTo(1.5, 0.001));
+    expect(position, PhotoPosition.center);
   });
 
   testWidgets('сброс возвращает центр и масштаб 1', (tester) async {

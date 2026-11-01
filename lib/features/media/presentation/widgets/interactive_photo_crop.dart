@@ -196,9 +196,11 @@ class _InteractivePhotoCropState extends State<InteractivePhotoCrop> {
     if (_viewport.width <= 0 || _viewport.height <= 0) return;
 
     final zoom = clampPhotoZoom(_startZoom * details.scale);
-    // Двумя пальцами меняем только масштаб: иначе фокус «уезжает» вместе
-    // с центром щипка. Одним пальцем и трекпадом (pointerCount == 0) двигаем.
-    final next = details.pointerCount <= 1
+    // Двигаем кадр одним пальцем и прокруткой трекпада (scale == 1).
+    // Во время щипка (scale != 1) не панорамируем: иначе фокус «уезжает»
+    // вместе с центром жеста.
+    final isPinching = (details.scale - 1).abs() >= 0.02;
+    final next = details.pointerCount <= 1 || !isPinching
         ? panPhotoPosition(
             position: _position,
             dx: details.focalPointDelta.dx,
@@ -220,9 +222,24 @@ class _InteractivePhotoCropState extends State<InteractivePhotoCrop> {
     _commit();
   }
 
-  /// Щипок трекпада в браузере приходит как прокрутка с зажатым Ctrl.
+  /// Щипок трекпада приходит по-разному:
+  ///  * web — `PointerScaleEvent` (Ctrl+wheel от браузера);
+  ///  * Windows/macOS — `PointerPanZoom` (его обрабатывает `GestureDetector`);
+  ///  * часть платформ — `Ctrl` + `PointerScrollEvent`.
+  ///
   /// Обычное колесо мыши намеренно игнорируем.
   void _onPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScaleEvent) {
+      GestureBinding.instance.pointerSignalResolver.register(event, (event) {
+        final scaleEvent = event as PointerScaleEvent;
+        final factor = scaleEvent.scale;
+        if (!factor.isFinite || factor <= 0) return;
+        setState(() => _zoom = clampPhotoZoom(_zoom * factor));
+        _scheduleCommit();
+      });
+      return;
+    }
+
     if (event is! PointerScrollEvent) return;
     if (!HardwareKeyboard.instance.isControlPressed) return;
 
@@ -232,10 +249,14 @@ class _InteractivePhotoCropState extends State<InteractivePhotoCrop> {
       if (delta == 0) return;
       final factor = math.exp(-delta / 200);
       setState(() => _zoom = clampPhotoZoom(_zoom * factor));
-      // Трекпадный щипок приходит серией событий: сохраняем кадр один раз.
-      _scrollCommit?.cancel();
-      _scrollCommit = Timer(const Duration(milliseconds: 250), _commit);
+      _scheduleCommit();
     });
+  }
+
+  /// Сохраняет кадр один раз после серии сигналов трекпада.
+  void _scheduleCommit() {
+    _scrollCommit?.cancel();
+    _scrollCommit = Timer(const Duration(milliseconds: 250), _commit);
   }
 
   void _reset() {
