@@ -21,8 +21,7 @@ class FirebaseBootstrap {
 
   /// App Check включается только после настройки провайдеров в консоли:
   /// `flutter run --dart-define=APP_CHECK_ENABLED=true`.
-  static const bool appCheckEnabled =
-      bool.fromEnvironment('APP_CHECK_ENABLED');
+  static const bool appCheckEnabled = bool.fromEnvironment('APP_CHECK_ENABLED');
 
   /// reCAPTCHA v3 site key для web/windows:
   /// `--dart-define=APP_CHECK_WEB_KEY=<key>`.

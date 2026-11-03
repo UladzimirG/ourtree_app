@@ -221,9 +221,7 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
           children: [
             Center(
               child: AspectRatio(
-                aspectRatio: value.aspectRatio > 0
-                    ? value.aspectRatio
-                    : 16 / 9,
+                aspectRatio: value.aspectRatio > 0 ? value.aspectRatio : 16 / 9,
                 child: VideoPlayer(controller),
               ),
             ),
@@ -268,8 +266,7 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
                         children: [
                           IconButton(
                             visualDensity: VisualDensity.compact,
-                            tooltip:
-                                playing ? l10n.videoPause : l10n.videoPlay,
+                            tooltip: playing ? l10n.videoPause : l10n.videoPlay,
                             onPressed: _togglePlay,
                             icon: Icon(
                               playing ? Icons.pause : Icons.play_arrow,
@@ -288,8 +285,7 @@ class _MediaVideoPlayerState extends State<MediaVideoPlayer> {
                           const Spacer(),
                           IconButton(
                             visualDensity: VisualDensity.compact,
-                            tooltip:
-                                _muted ? l10n.videoUnmute : l10n.videoMute,
+                            tooltip: _muted ? l10n.videoUnmute : l10n.videoMute,
                             onPressed: _toggleMute,
                             icon: Icon(
                               _muted ? Icons.volume_off : Icons.volume_up,

@@ -221,12 +221,11 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
         }
 
         final hash = sha256.convert(mediaBytes).toString();
-        final existing =
-            ref.read(familyDataProvider).value?.findDuplicateMedia(
-                  hash: hash,
-                  name: prepared.name,
-                  size: mediaBytes.length,
-                );
+        final existing = ref.read(familyDataProvider).value?.findDuplicateMedia(
+              hash: hash,
+              name: prepared.name,
+              size: mediaBytes.length,
+            );
         if (existing != null) {
           added.add(_linkFromAsset(existing));
           error = l10n.mediaDuplicateAttached;
@@ -264,27 +263,41 @@ class _MediaListEditorState extends ConsumerState<MediaListEditor> {
     final theme = Theme.of(context);
     final family = ref.watch(familyDataProvider).value;
 
+    final title = Text(
+      widget.title ?? l10n.mediaTitle,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.titleMedium,
+    );
+
+    // Заголовок всегда занимает свою строку: длинная подпись кнопки
+    // («Загрузить с устройства») иначе сжимает его до одного символа в строке.
+    final wide = MediaQuery.sizeOf(context).width >= 520;
+    final uploadLabel = _busy ? l10n.mediaUploading : l10n.mediaUpload;
+    final uploadIcon = Icon(_busy ? Icons.hourglass_top : Icons.upload_file);
+    final uploadButton = wide
+        ? FilledButton.tonalIcon(
+            onPressed: _busy ? null : _pickFiles,
+            icon: uploadIcon,
+            label: Text(uploadLabel),
+          )
+        : IconButton.filledTonal(
+            onPressed: _busy ? null : _pickFiles,
+            tooltip: uploadLabel,
+            icon: uploadIcon,
+          );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                widget.title ?? l10n.mediaTitle,
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            TextButton.icon(
-              onPressed: _busy ? null : _pickFiles,
-              icon: Icon(_busy ? Icons.hourglass_top : Icons.upload_file),
-              label: Text(_busy ? l10n.mediaUploading : l10n.mediaUpload),
-            ),
-          ],
-        ),
+        title,
+        const SizedBox(height: 2),
         Wrap(
           spacing: 4,
+          runSpacing: 2,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            uploadButton,
             TextButton.icon(
               onPressed: _pickFromLibrary,
               icon: const Icon(Icons.photo_library_outlined),

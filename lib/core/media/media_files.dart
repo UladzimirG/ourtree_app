@@ -38,7 +38,8 @@ class MediaFiles {
   }
 
   /// Сохраняет байты и возвращает путь к файлу (или `null` на web).
-  Future<String?> save(String id, Uint8List bytes, {String extension = 'jpg'}) async {
+  Future<String?> save(String id, Uint8List bytes,
+      {String extension = 'jpg'}) async {
     final path = await pathFor(id, extension: extension);
     if (path == null) return null;
     final file = File(path);

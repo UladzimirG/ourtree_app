@@ -157,7 +157,8 @@ class DisplayDatePattern {
     final known = _patterns[localeName];
     if (known != null) return known;
     try {
-      return DateFormat.yMd(localeName).pattern ?? _patterns[defaultDateLocale]!;
+      return DateFormat.yMd(localeName).pattern ??
+          _patterns[defaultDateLocale]!;
     } catch (_) {
       // Для языка без данных intl остаёмся на безопасном порядке «день.месяц».
       return _patterns[defaultDateLocale]!;

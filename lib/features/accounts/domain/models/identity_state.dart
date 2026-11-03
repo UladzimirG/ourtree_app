@@ -21,15 +21,12 @@ class IdentityState {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IdentityState &&
-          user == other.user &&
-          authUid == other.authUid;
+      other is IdentityState && user == other.user && authUid == other.authUid;
 
   @override
   int get hashCode => Object.hash(user, authUid);
 
   @override
-  String toString() =>
-      'IdentityState(userId: $userId, authUid: $authUid, '
+  String toString() => 'IdentityState(userId: $userId, authUid: $authUid, '
       'activeFamilyId: $activeFamilyId)';
 }

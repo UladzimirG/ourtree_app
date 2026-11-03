@@ -3,9 +3,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
-import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
+import 'package:ourtree_app/features/accounts/presentation/widgets/account_button.dart';
 import 'package:ourtree_app/features/accounts/presentation/widgets/accounts_panel.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
@@ -15,6 +15,7 @@ import 'package:ourtree_app/features/family/presentation/widgets/family_cloud_pa
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/presentation/providers/media_upload_service.dart';
+import 'package:ourtree_app/features/notifications/presentation/widgets/notifications_panel.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/demo_storage_notice.dart';
 import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/interactive_photo_crop.dart';
@@ -24,9 +25,8 @@ import 'package:ourtree_app/features/settings/domain/models/settings_models.dart
 import 'package:ourtree_app/features/settings/presentation/providers/backup_provider.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
+import 'package:ourtree_app/features/settings/presentation/views/about_screen.dart';
 import 'package:ourtree_app/features/settings/presentation/widgets/backup_panel.dart';
-import 'package:ourtree_app/features/settings/presentation/widgets/member_editor_card.dart';
-import 'package:ourtree_app/features/settings/presentation/widgets/timeline_event_editor_card.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 /// Разделы страницы настроек.
@@ -34,7 +34,7 @@ import 'package:ourtree_app/l10n/app_localizations.dart';
 /// «Общие настройки» объединяют то, что не относится к контенту семьи:
 /// язык интерфейса, резервные копии и доступы. Внутри они открываются
 /// отдельными подстраницами.
-enum _SettingsSection { family, members, events, media, general }
+enum _SettingsSection { family, media, general }
 
 /// Полноценная страница настроек семьи.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -142,12 +142,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final bytes = await file.readAsBytes();
     if (bytes.isEmpty) return;
     final hash = sha256.convert(bytes).toString();
-    final existing =
-        ref.read(familyDataProvider).value?.findDuplicateMedia(
-              hash: hash,
-              name: file.name,
-              size: bytes.length,
-            );
+    final existing = ref.read(familyDataProvider).value?.findDuplicateMedia(
+          hash: hash,
+          name: file.name,
+          size: bytes.length,
+        );
 
     String source;
     if (existing != null) {
@@ -170,106 +169,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() {});
   }
 
-  void _addMember() {
-    final l10n = AppLocalizations.of(context)!;
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final memberId = 'member-${DateTime.now().millisecondsSinceEpoch}';
-    ref.read(familyDataProvider.notifier).addMember(
-          FamilyMember(
-            id: memberId,
-            role: l10n.memberDefaultRole,
-            name: l10n.memberDefaultName,
-            nickname: '',
-            birthday: today,
-            showBirthdayOnTimeline: true,
-            about: '',
-            accent: '#6b7352',
-          ),
-        );
-    final account = ref.read(currentAccountProvider);
-    if (account != null) {
-      ref
-          .read(accountsProvider.notifier)
-          .grantMemberVisibility(account.id, memberId);
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.memberAdded)),
-    );
-  }
-
-  void _addEvent() {
-    final l10n = AppLocalizations.of(context)!;
-    final today = DateTime.now().toIso8601String().split('T').first;
-    ref.read(familyDataProvider.notifier).addTimelineEvent(
-          TimelineEvent(
-            id: 'event-${DateTime.now().millisecondsSinceEpoch}',
-            date: today,
-            title: l10n.eventDefaultTitle,
-            kind: EventKind.milestone,
-          ),
-        );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.eventAdded)),
-    );
-  }
-
-  Future<void> _confirmRemoveMember(
-      FamilyMember member, AppLocalizations l10n) async {
-    final confirmed = await _confirm(
-      title: l10n.memberDeleteConfirmTitle,
-      body: l10n.memberDeleteConfirmBody,
-      action: l10n.memberDelete,
-      l10n: l10n,
-    );
-    if (confirmed != true || !mounted) return;
-    ref.read(familyDataProvider.notifier).removeMember(member.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.memberDeleted)),
-    );
-  }
-
-  Future<void> _confirmRemoveEvent(
-    TimelineEvent event,
-    AppLocalizations l10n,
-  ) async {
-    final confirmed = await _confirm(
-      title: l10n.eventDeleteConfirmTitle,
-      body: l10n.eventDeleteConfirmBody,
-      action: l10n.eventDelete,
-      l10n: l10n,
-    );
-    if (confirmed != true || !mounted) return;
-    ref.read(familyDataProvider.notifier).removeTimelineEvent(event.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.eventDeleted)),
-    );
-  }
-
-  Future<bool?> _confirm({
-    required String title,
-    required String body,
-    required String action,
-    required AppLocalizations l10n,
-  }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(action),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -289,11 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // «Семья» показываем всем: название и оформление должны быть
       // обнаружимы, даже если менять их может только администратор.
       _SettingsSection.family,
-      if (canEdit) ...const [
-        _SettingsSection.members,
-        _SettingsSection.events,
-        _SettingsSection.media,
-      ],
+      if (canEdit) _SettingsSection.media,
       // Общие настройки доступны всем: язык — это настройка устройства.
       _SettingsSection.general,
     ];
@@ -308,7 +203,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: familyAsync.when(
             data: (family) {
               final settings = settingsAsync.value ?? family.settings;
-              final visible = ref.watch(visibleFamilyProvider) ?? family;
               final activeFamily =
                   ref.watch(activeFamilyControllerProvider).value;
               final identity = ref.watch(identityControllerProvider).value;
@@ -333,7 +227,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     l10n: l10n,
                     onSelected: (next) => setState(() => _section = next),
                   ),
-                  const AccountSessionBar(),
                   Expanded(
                     child: section == null
                         ? Center(
@@ -377,18 +270,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       _photoController.clear();
                                       ref
                                           .read(
-                                            familySettingsProvider
-                                                .notifier,
+                                            familySettingsProvider.notifier,
                                           )
                                           .updateFamilyPhoto('');
                                     },
                                     onShowFamilyPhotoChanged: (value) => ref
-                                        .read(familySettingsProvider
-                                            .notifier)
+                                        .read(familySettingsProvider.notifier)
                                         .updateShowFamilyPhotoInHeader(value),
                                     onShowEventPhotosChanged: (value) => ref
-                                        .read(familySettingsProvider
-                                            .notifier)
+                                        .read(familySettingsProvider.notifier)
                                         .updateShowEventPhotos(value),
                                     canRename: canRename,
                                     canEdit: isAdmin,
@@ -402,36 +292,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ),
                                 ],
                               ),
-                            _SettingsSection.members => _MembersSection(
-                                members: visible.members,
-                                events: visible.timelineEvents,
-                                canManage: isAdmin,
-                                l10n: l10n,
-                                onAdd: _addMember,
-                                onChanged: (member) => ref
-                                    .read(familyDataProvider.notifier)
-                                    .updateMember(member.id, (_) => member),
-                                onRemove: (member) =>
-                                    _confirmRemoveMember(member, l10n),
-                              ),
-                            _SettingsSection.events => _EventsSection(
-                                events: [...visible.timelineEvents]
-                                  ..sort((a, b) => a.date.compareTo(b.date)),
-                                members: visible.members,
-                                canManage: isAdmin,
-                                l10n: l10n,
-                                onAdd: _addEvent,
-                                onChanged: (event) => ref
-                                    .read(familyDataProvider.notifier)
-                                    .updateTimelineEvent(
-                                        event.id, (_) => event),
-                                onRemove: (event) =>
-                                    _confirmRemoveEvent(event, l10n),
-                              ),
                             _SettingsSection.media => const MediaLibraryPanel(),
                             _SettingsSection.general => _GeneralSection(
-                              onArchiveReset: _onArchiveReset,
-                            ),
+                                onArchiveReset: _onArchiveReset,
+                              ),
                           },
                   ),
                 ],
@@ -495,137 +359,6 @@ class _SettingsTabs extends StatelessWidget {
   }
 }
 
-class _MembersSection extends StatelessWidget {
-  const _MembersSection({
-    required this.members,
-    required this.events,
-    required this.canManage,
-    required this.l10n,
-    required this.onAdd,
-    required this.onChanged,
-    required this.onRemove,
-  });
-
-  final List<FamilyMember> members;
-  final List<TimelineEvent> events;
-  final bool canManage;
-  final AppLocalizations l10n;
-  final VoidCallback onAdd;
-  final ValueChanged<FamilyMember> onChanged;
-  final ValueChanged<FamilyMember> onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
-      children: [
-        Text(l10n.settingsMembersHint, style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.person_add_alt_1),
-            label: Text(l10n.memberAdd),
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (members.isEmpty)
-          PaperCard(
-            tilt: 0.3,
-            child: Text(
-              l10n.familyEmpty,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge,
-            ),
-          )
-        else
-          for (final member in members) ...[
-            MemberEditorCard(
-              member: member,
-              l10n: l10n,
-              members: members,
-              events: events,
-              canDelete: canManage,
-              onChanged: onChanged,
-              onRemove: () => onRemove(member),
-            ),
-            const SizedBox(height: 12),
-          ],
-      ],
-    );
-  }
-}
-
-class _EventsSection extends StatelessWidget {
-  const _EventsSection({
-    required this.events,
-    required this.members,
-    required this.canManage,
-    required this.l10n,
-    required this.onAdd,
-    required this.onChanged,
-    required this.onRemove,
-  });
-
-  final List<TimelineEvent> events;
-  final List<FamilyMember> members;
-  final bool canManage;
-  final AppLocalizations l10n;
-  final VoidCallback onAdd;
-  final ValueChanged<TimelineEvent> onChanged;
-  final ValueChanged<TimelineEvent> onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
-      children: [
-        Text(l10n.settingsEventsHint, style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.event_available),
-            label: Text(l10n.eventAdd),
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (events.isEmpty)
-          PaperCard(
-            tilt: -0.3,
-            child: Text(
-              l10n.timelineEmpty,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge,
-            ),
-          )
-        else
-          for (final event in events) ...[
-            TimelineEventEditorCard(
-              event: event,
-              members: members,
-              canDelete: canManage,
-              otherEvents: [
-                for (final other in events)
-                  if (other.id != event.id) other,
-              ],
-              l10n: l10n,
-              onChanged: onChanged,
-              onRemove: () => onRemove(event),
-            ),
-            const SizedBox(height: 12),
-          ],
-      ],
-    );
-  }
-}
-
 /// Общие настройки семьи: точки входа в подстраницы.
 ///
 /// Здесь только то, что не относится к контенту семьи. Панели копий и
@@ -661,6 +394,20 @@ class _GeneralSection extends ConsumerWidget {
           subtitle: l10n.settingsLanguageHint,
           page: (_) => const _LanguageSection(),
         ),
+        const SizedBox(height: 10),
+        _SettingsLink(
+          icon: Icons.notifications_outlined,
+          title: l10n.notificationsTitle,
+          subtitle: l10n.notificationsHint,
+          page: (_) => const NotificationsPanel(),
+        ),
+        const SizedBox(height: 10),
+        _SettingsLink(
+          icon: Icons.info_outline,
+          title: l10n.aboutTitle,
+          subtitle: l10n.aboutHint,
+          page: (_) => const AboutScreen(),
+        ),
         if (isAdmin) ...[
           const SizedBox(height: 10),
           _SettingsLink(
@@ -682,6 +429,24 @@ class _GeneralSection extends ConsumerWidget {
             title: l10n.settingsResetDemo,
             subtitle: l10n.settingsResetDemoHint,
             onTap: () => _resetToDemo(context, ref),
+          ),
+        ] else ...[
+          const SizedBox(height: 10),
+          PaperCard(
+            tilt: 0.3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.lock_outline, color: AppColors.inkSoft),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.adminOnlySettingsHint,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ],
@@ -879,7 +644,8 @@ class _LanguageSection extends ConsumerWidget {
             children: [
               _Caption(label: l10n.settingsLanguage),
               const SizedBox(height: 8),
-              Text(l10n.settingsLanguageHint, style: theme.textTheme.bodyMedium),
+              Text(l10n.settingsLanguageHint,
+                  style: theme.textTheme.bodyMedium),
               const SizedBox(height: 10),
               _LanguageOption(
                 label: l10n.settingsLanguageSystem,
@@ -965,8 +731,6 @@ class _LanguageOption extends StatelessWidget {
 String _settingsSectionLabel(_SettingsSection section, AppLocalizations l10n) {
   return switch (section) {
     _SettingsSection.family => l10n.settingsTabFamily,
-    _SettingsSection.members => l10n.settingsTabMembers,
-    _SettingsSection.events => l10n.settingsTabEvents,
     _SettingsSection.media => l10n.settingsTabMedia,
     _SettingsSection.general => l10n.settingsTabGeneral,
   };
@@ -1087,8 +851,8 @@ class _SettingsForm extends StatelessWidget {
                 }
                 return null;
               },
-              decoration: _inputDecoration(hint: l10n.settingsFamilyName)
-                  .copyWith(
+              decoration:
+                  _inputDecoration(hint: l10n.settingsFamilyName).copyWith(
                 suffixIcon: canEdit && canRename
                     ? null
                     : const Icon(Icons.lock_outline, size: 18),
@@ -1159,8 +923,7 @@ class _SettingsForm extends StatelessWidget {
             else
               InteractivePhotoCrop(
                 source: photoController.text.trim(),
-                position:
-                    settings.familyPhotoPosition ?? PhotoPosition.center,
+                position: settings.familyPhotoPosition ?? PhotoPosition.center,
                 zoom: photoZoomOrDefault(settings.familyPhotoZoom),
                 onChanged: (position, zoom) {
                   onPhotoPositionChanged(position);
@@ -1270,6 +1033,7 @@ class _SettingsTopBar extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
+          const AccountButton(),
         ],
       ),
     );

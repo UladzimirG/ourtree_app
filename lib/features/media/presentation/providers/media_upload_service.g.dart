@@ -57,7 +57,7 @@ final class MediaUploadServiceProvider
 }
 
 String _$mediaUploadServiceHash() =>
-    r'959999a6efd6fb11483ec7acd7305491a21013ad';
+    r'550d3e8df6dca2519d270ccd99194446d2637b11';
 
 /// Единая точка сохранения выбранного пользователем файла.
 ///

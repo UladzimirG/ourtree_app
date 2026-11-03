@@ -122,8 +122,7 @@ class FamilyMembership {
         if (displayName.isNotEmpty) 'displayName': displayName,
         'role': role.wireName,
         'allMembersVisible': allMembersVisible,
-        if (visiblePersonIds.isNotEmpty)
-          'visiblePersonIds': visiblePersonIds,
+        if (visiblePersonIds.isNotEmpty) 'visiblePersonIds': visiblePersonIds,
         'status': status.wireName,
         if (joinedAt > 0) 'joinedAt': joinedAt,
         'updatedAt': updatedAt,

@@ -146,8 +146,7 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
               Expanded(
                 child: Text(family.name, style: theme.textTheme.titleMedium),
               ),
-              if (isOwner)
-                Chip(label: Text(_l10n.familyCloudOwnerBadge)),
+              if (isOwner) Chip(label: Text(_l10n.familyCloudOwnerBadge)),
             ],
           ),
           const SizedBox(height: 4),
@@ -171,16 +170,30 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
           const SizedBox(height: 4),
           Text(
             _l10n.familyCloudInviteHint,
-            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkSoft),
+            style:
+                theme.textTheme.bodySmall?.copyWith(color: AppColors.inkSoft),
           ),
           if (_inviteCode != null) ...[
             const SizedBox(height: 10),
-            SelectableText(
-              _inviteCode!,
-              style: theme.textTheme.titleLarge?.copyWith(
-                letterSpacing: 4,
-                color: AppColors.terracotta,
-              ),
+            // Код копируется сам при создании, а иконка рядом позволяет
+            // скопировать его повторно — без отдельной кнопки-статуса.
+            Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    _inviteCode!,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      letterSpacing: 4,
+                      color: AppColors.terracotta,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _copyInvite,
+                  tooltip: _l10n.familyCloudInviteCopy,
+                  icon: const Icon(Icons.copy_outlined),
+                ),
+              ],
             ),
           ],
           const SizedBox(height: 10),
@@ -193,12 +206,6 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
                 icon: const Icon(Icons.vpn_key_outlined),
                 label: Text(_l10n.familyCloudInviteCreate),
               ),
-              if (_inviteCode != null)
-                OutlinedButton.icon(
-                  onPressed: _copyInvite,
-                  icon: const Icon(Icons.copy_all_outlined),
-                  label: Text(_l10n.familyCloudInviteCopied),
-                ),
             ],
           ),
           const Divider(height: 24),
@@ -209,7 +216,8 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
           const SizedBox(height: 4),
           Text(
             _l10n.familyCloudPrivacyHint,
-            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkSoft),
+            style:
+                theme.textTheme.bodySmall?.copyWith(color: AppColors.inkSoft),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -269,7 +277,9 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
     if (!confirmed) return;
 
     await _run(() async {
-      await ref.read(activeFamilyControllerProvider.notifier).deleteFamilyData();
+      await ref
+          .read(activeFamilyControllerProvider.notifier)
+          .deleteFamilyData();
       if (!mounted) return;
       _showMessage(l10n.familyCloudDeleteCloudDone);
     });
@@ -336,15 +346,37 @@ class _FamilyCloudPanelState extends ConsumerState<FamilyCloudPanel> {
           .createInvite();
       if (!mounted) return;
       setState(() => _inviteCode = code);
+      // Код сразу уходит в буфер обмена: его почти всегда пересылают в
+      // мессенджер, и лишнее нажатие только мешает. Если браузер запретил
+      // запись вне жеста пользователя — подскажем нажать иконку.
+      final copied = await _copyToClipboard(code);
+      if (!mounted) return;
+      _showMessage(
+        copied
+            ? _l10n.familyCloudInviteCopied
+            : _l10n.familyCloudInviteCopyHint,
+      );
     });
   }
 
   Future<void> _copyInvite() async {
     final code = _inviteCode;
     if (code == null) return;
-    await Clipboard.setData(ClipboardData(text: code));
+    final copied = await _copyToClipboard(code);
     if (!mounted) return;
-    _showMessage(_l10n.familyCloudInviteCopied);
+    _showMessage(
+      copied ? _l10n.familyCloudInviteCopied : _l10n.familyCloudInviteCopyHint,
+    );
+  }
+
+  /// Кладёт текст в буфер обмена; `false`, если платформа не разрешила.
+  Future<bool> _copyToClipboard(String value) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: value));
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _run(Future<void> Function() action) async {

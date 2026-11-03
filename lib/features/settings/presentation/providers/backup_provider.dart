@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/utils/asset_path.dart';
@@ -97,8 +97,8 @@ class BackupsNotifier extends _$BackupsNotifier {
 
     final current = state.value ?? const BackupList();
     if (automatic && current.backups.isNotEmpty) {
-      final elapsed = DateTime.now().millisecondsSinceEpoch -
-          current.backups.first.savedAt;
+      final elapsed =
+          DateTime.now().millisecondsSinceEpoch - current.backups.first.savedAt;
       if (elapsed < backupThrottleMs) return null;
     }
 
@@ -153,13 +153,14 @@ class BackupsNotifier extends _$BackupsNotifier {
       }
     }
 
-    final accounts =
-        ref.read(accountsProvider).value ?? const <Account>[];
-    final guestLinks = ref.read(guestLinksProvider).value ??
-        const <GuestLink>[];
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    final guestLinks =
+        ref.read(guestLinksProvider).value ?? const <GuestLink>[];
 
     return <String, dynamic>{
-      'data': family.toJson(),
+      // Пути к файлам на этом устройстве в снимок не пишем: на другом
+      // устройстве они недействительны.
+      'data': family.toJson(includeLocalMediaPaths: false),
       'media': media,
       'assets': assets,
       'accounts': accounts.map((account) => account.toJson()).toList(),
@@ -176,8 +177,16 @@ class BackupsNotifier extends _$BackupsNotifier {
     return _applyBundle(bundle);
   }
 
+  /// Сколько медиафайлов не удалось восстановить при последнем импорте.
+  ///
+  /// На вебе (особенно в PWA на iPhone) квота IndexedDB может не вместить
+  /// большой снимок: архив всё равно применяем, а о пропущенных файлах
+  /// сообщаем в интерфейсе.
+  int lastSkippedMedia = 0;
+
   /// Импортирует бэкап из файла, сохранённого на устройстве.
   Future<bool> importBytes(Uint8List bytes) async {
+    lastSkippedMedia = 0;
     try {
       final decoded = jsonDecode(utf8.decode(bytes));
       if (decoded is! Map) return false;
@@ -197,8 +206,13 @@ class BackupsNotifier extends _$BackupsNotifier {
       for (final entry in media.entries) {
         final id = entry.key;
         final encoded = entry.value;
-        if (id is String && encoded is String) {
+        if (id is! String || encoded is! String) continue;
+        try {
           await _storage.putBytes(id, base64Decode(encoded));
+        } catch (error) {
+          // Один файл не должен отменять импорт всего архива.
+          lastSkippedMedia++;
+          debugPrint('Бэкап: файл $id пропущен: $error');
         }
       }
     }
@@ -215,7 +229,15 @@ class BackupsNotifier extends _$BackupsNotifier {
         if (source is! String || encoded is! String) continue;
         final digest = sha256.convert(utf8.encode(source)).toString();
         final id = 'restored-${digest.substring(0, 24)}';
-        await _storage.putBytes(id, base64Decode(encoded));
+        try {
+          await _storage.putBytes(id, base64Decode(encoded));
+        } catch (error) {
+          // Ссылки на этот файл не переписываем: путь `/photos/...` ещё может
+          // найтись в сборке приложения.
+          lastSkippedMedia++;
+          debugPrint('Бэкап: встроенный файл $source пропущен: $error');
+          continue;
+        }
         for (final alias in _sourceAliases(source)) {
           replacedSources[alias] = 'hive://$id';
         }

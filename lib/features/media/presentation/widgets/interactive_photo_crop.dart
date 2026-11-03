@@ -277,7 +277,6 @@ class _InteractivePhotoCropState extends State<InteractivePhotoCrop> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -449,4 +448,3 @@ class _GridPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _GridPainter oldDelegate) => false;
 }
-

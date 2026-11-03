@@ -10,6 +10,7 @@ abstract final class AppColors {
   static const Color kraftDark = Color(0xFF6F4B2A);
   static const Color moss = Color(0xFF4E5C38);
   static const Color terracotta = Color(0xFFA44B2C);
+
   /// Базовый тон фона: светлый крафт вместо прежнего насыщенного коричневого.
   static const Color background = Color(0xFFDCC7A6);
 

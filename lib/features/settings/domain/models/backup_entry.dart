@@ -87,9 +87,8 @@ class BackupList {
       );
 
   Map<String, dynamic> toJson() => {
-        'backups': backups
-            .map((backup) => backup.toJson())
-            .toList(growable: false),
+        'backups':
+            backups.map((backup) => backup.toJson()).toList(growable: false),
         'kept': kept,
         'throttleMs': throttleMs,
         'totalSize': totalSize,

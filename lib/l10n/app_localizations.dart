@@ -915,7 +915,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventMemberField.
   ///
   /// In en, this message translates to:
-  /// **'Related member'**
+  /// **'Main member'**
   String get eventMemberField;
 
   /// No description provided for @eventMemberNone.
@@ -2250,6 +2250,12 @@ abstract class AppLocalizations {
   /// **'Failed to upload: {count}'**
   String mediaUploadAllFailed(int count);
 
+  /// No description provided for @mediaUploadUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These files were stored on another device or lost after reinstall — please add them again.'**
+  String get mediaUploadUnavailableHint;
+
   /// No description provided for @mediaOutboxRetry.
   ///
   /// In en, this message translates to:
@@ -2279,6 +2285,720 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Offline'**
   String get syncStatusError;
+
+  /// No description provided for @editModeEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mode'**
+  String get editModeEnter;
+
+  /// No description provided for @editModeExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit edit mode'**
+  String get editModeExit;
+
+  /// No description provided for @editModeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mode: tap the pencil on a card'**
+  String get editModeBanner;
+
+  /// No description provided for @editModeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get editModeDone;
+
+  /// No description provided for @adminOnlyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin only'**
+  String get adminOnlyAction;
+
+  /// No description provided for @adminOnlyDeleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an administrator can delete events and members.'**
+  String get adminOnlyDeleteHint;
+
+  /// No description provided for @adminOnlySettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups, accounts and the demo reset are available to administrators only.'**
+  String get adminOnlySettingsHint;
+
+  /// No description provided for @accountEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountEntryTitle;
+
+  /// No description provided for @accountAuthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account'**
+  String get accountAuthTitle;
+
+  /// No description provided for @accountSignInTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get accountSignInTab;
+
+  /// No description provided for @accountSignUpTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get accountSignUpTab;
+
+  /// No description provided for @accountSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to load your family data.'**
+  String get accountSignInSubtitle;
+
+  /// No description provided for @accountSignUpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A new account gets the viewer role. An administrator can change it later.'**
+  String get accountSignUpHint;
+
+  /// No description provided for @accountFirstAdminHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The first account of the family becomes an administrator.'**
+  String get accountFirstAdminHint;
+
+  /// Current account in the account sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String accountSessionTitle(String name);
+
+  /// No description provided for @accountManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage accounts'**
+  String get accountManage;
+
+  /// No description provided for @accountSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch account'**
+  String get accountSwitch;
+
+  /// No description provided for @calendarViewMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get calendarViewMonth;
+
+  /// No description provided for @calendarViewYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get calendarViewYear;
+
+  /// No description provided for @calendarToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get calendarToday;
+
+  /// No description provided for @calendarAddEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add event'**
+  String get calendarAddEvent;
+
+  /// No description provided for @calendarAddDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add date'**
+  String get calendarAddDate;
+
+  /// No description provided for @calendarEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar date'**
+  String get calendarEntryTitle;
+
+  /// No description provided for @calendarEntryTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get calendarEntryTitleField;
+
+  /// No description provided for @calendarEntryNoteField.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get calendarEntryNoteField;
+
+  /// No description provided for @calendarEntryDateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get calendarEntryDateField;
+
+  /// No description provided for @calendarEntryRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every year'**
+  String get calendarEntryRecurring;
+
+  /// No description provided for @calendarEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This date appears only in the calendar and is not added to the timeline.'**
+  String get calendarEntryHint;
+
+  /// No description provided for @calendarEntrySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Date added to the calendar.'**
+  String get calendarEntrySaved;
+
+  /// No description provided for @calendarEntryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Date removed from the calendar.'**
+  String get calendarEntryDeleted;
+
+  /// No description provided for @calendarEntryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit date'**
+  String get calendarEntryEdit;
+
+  /// No description provided for @calendarEntryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete date'**
+  String get calendarEntryDelete;
+
+  /// No description provided for @calendarEntryDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this date?'**
+  String get calendarEntryDeleteConfirmTitle;
+
+  /// No description provided for @calendarEntryDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The date will disappear from the calendar. Timeline events are not affected.'**
+  String get calendarEntryDeleteConfirmBody;
+
+  /// No description provided for @calendarEntryDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get calendarEntryDefaultTitle;
+
+  /// No description provided for @calendarLegendEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get calendarLegendEvent;
+
+  /// No description provided for @calendarLegendBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthdays'**
+  String get calendarLegendBirthday;
+
+  /// No description provided for @eventShowInTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in timeline'**
+  String get eventShowInTimeline;
+
+  /// No description provided for @eventRecurringYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every year'**
+  String get eventRecurringYearly;
+
+  /// No description provided for @eventCalendarOnlyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar only'**
+  String get eventCalendarOnlyBadge;
+
+  /// No description provided for @eventMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Affects access and the profile. Tag several people on a photo in \"Who is in the photo\".'**
+  String get eventMemberHint;
+
+  /// No description provided for @eventNewBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get eventNewBadge;
+
+  /// No description provided for @timelineOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get timelineOrderLabel;
+
+  /// No description provided for @timelineOrderOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get timelineOrderOldest;
+
+  /// No description provided for @timelineOrderNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get timelineOrderNewest;
+
+  /// No description provided for @profileStories.
+  ///
+  /// In en, this message translates to:
+  /// **'Interesting'**
+  String get profileStories;
+
+  /// No description provided for @profileStoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No stories yet.'**
+  String get profileStoriesEmpty;
+
+  /// No description provided for @profileStoriesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add story'**
+  String get profileStoriesAdd;
+
+  /// No description provided for @profileStoryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete story'**
+  String get profileStoryDelete;
+
+  /// No description provided for @profileStoryTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get profileStoryTitleField;
+
+  /// No description provided for @profileStoryTextField.
+  ///
+  /// In en, this message translates to:
+  /// **'Story text'**
+  String get profileStoryTextField;
+
+  /// No description provided for @readMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get readMore;
+
+  /// No description provided for @readLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get readLess;
+
+  /// No description provided for @memberEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get memberEditorTitle;
+
+  /// No description provided for @eventEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get eventEditorTitle;
+
+  /// No description provided for @memberEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit member'**
+  String get memberEdit;
+
+  /// No description provided for @eventEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit event'**
+  String get eventEdit;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEdit;
+
+  /// No description provided for @familyCloudInviteCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get familyCloudInviteCopy;
+
+  /// No description provided for @familyCloudInviteCopyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser blocked copying: tap the copy icon next to the code.'**
+  String get familyCloudInviteCopyHint;
+
+  /// No description provided for @backupDownloadStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup file has been downloaded by the browser.'**
+  String get backupDownloadStarted;
+
+  /// No description provided for @backupImportWrongFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose an OurTree backup file (.json or .ourtree).'**
+  String get backupImportWrongFile;
+
+  /// No description provided for @backupImportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is larger than {mb} MB and may not fit into browser memory. Export a backup without media and try again.'**
+  String backupImportTooLarge(int mb);
+
+  /// No description provided for @backupImportUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file could not be read. If it is stored in iCloud, download it to the device first.'**
+  String get backupImportUnreadable;
+
+  /// No description provided for @backupImportPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} media files could not be restored.'**
+  String backupImportPartial(int count);
+
+  /// No description provided for @demoEditNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes stay on this device'**
+  String get demoEditNoticeTitle;
+
+  /// No description provided for @demoEditNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive will not be saved to the cloud. Create a family and sign in to an account to keep the data and see it on other devices.'**
+  String get demoEditNoticeBody;
+
+  /// No description provided for @demoEditNoticeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create family'**
+  String get demoEditNoticeAction;
+
+  /// No description provided for @demoEditNoticeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get demoEditNoticeLater;
+
+  /// No description provided for @demoLocalOnlyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Local archive only: not synced to the cloud'**
+  String get demoLocalOnlyNotice;
+
+  /// No description provided for @accountNoFamilyAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not linked to a family yet — connect by invite code in General settings → Cloud.'**
+  String get accountNoFamilyAttached;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Version, developer, documents and licenses.'**
+  String get aboutHint;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'OurTree is a family album: profiles, timeline, calendar and media library. Data is kept on the device and synced to the cloud once a family is connected.'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersion;
+
+  /// No description provided for @aboutVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String aboutVersionLabel(String version);
+
+  /// No description provided for @aboutPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get aboutPlatform;
+
+  /// No description provided for @aboutDeveloper.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get aboutDeveloper;
+
+  /// No description provided for @aboutContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get aboutContact;
+
+  /// No description provided for @aboutPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get aboutPrivacy;
+
+  /// No description provided for @aboutTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get aboutTerms;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get aboutLicenses;
+
+  /// No description provided for @aboutChangelogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get aboutChangelogTitle;
+
+  /// No description provided for @aboutChangelog1.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits arrive from other devices without restarting the app'**
+  String get aboutChangelog1;
+
+  /// No description provided for @aboutChangelog2.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos are uploaded to the cloud automatically in a created family'**
+  String get aboutChangelog2;
+
+  /// No description provided for @aboutChangelog3.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup import works on iPhone (web version)'**
+  String get aboutChangelog3;
+
+  /// No description provided for @aboutChangelog4.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code is copied automatically'**
+  String get aboutChangelog4;
+
+  /// No description provided for @aboutChangelog5.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications about birthdays, events and family updates'**
+  String get aboutChangelog5;
+
+  /// No description provided for @aboutSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get aboutSupport;
+
+  /// No description provided for @aboutFamilyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Family ID'**
+  String get aboutFamilyId;
+
+  /// No description provided for @aboutCopyFamilyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy family ID'**
+  String get aboutCopyFamilyId;
+
+  /// No description provided for @aboutFamilyIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Family ID copied.'**
+  String get aboutFamilyIdCopied;
+
+  /// No description provided for @aboutNoFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'No family connected yet: connect one in General settings → Cloud.'**
+  String get aboutNoFamily;
+
+  /// No description provided for @aboutCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'© {year} OurTree'**
+  String aboutCopyright(int year);
+
+  /// No description provided for @aboutLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link.'**
+  String get aboutLinkFailed;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthdays, calendar events and family updates.'**
+  String get notificationsHint;
+
+  /// No description provided for @notificationsStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Status on this device'**
+  String get notificationsStatusTitle;
+
+  /// No description provided for @notificationsEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications'**
+  String get notificationsEnable;
+
+  /// No description provided for @notificationsDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get notificationsDisable;
+
+  /// No description provided for @notificationsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh token'**
+  String get notificationsRefresh;
+
+  /// No description provided for @notificationsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are on: reminders and family updates will arrive on this device.'**
+  String get notificationsEnabled;
+
+  /// No description provided for @notificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off. Enable them to get reminders.'**
+  String get notificationsDisabled;
+
+  /// No description provided for @notificationsDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are blocked in the browser or system settings. Allow them for this app and try again.'**
+  String get notificationsDenied;
+
+  /// No description provided for @notificationsNoFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a family first: reminders are sent for your family archive.'**
+  String get notificationsNoFamily;
+
+  /// No description provided for @notificationsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not enable notifications.'**
+  String get notificationsFailed;
+
+  /// No description provided for @notificationsFailedNoKey.
+  ///
+  /// In en, this message translates to:
+  /// **'This build has no web-push key (FIREBASE_VAPID_KEY). Rebuild with --dart-define-from-file.'**
+  String get notificationsFailedNoKey;
+
+  /// No description provided for @notificationsFailedPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser did not grant permission.'**
+  String get notificationsFailedPermission;
+
+  /// No description provided for @notificationsFailedToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not get a device token.'**
+  String get notificationsFailedToken;
+
+  /// No description provided for @notificationsPrefsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to send'**
+  String get notificationsPrefsTitle;
+
+  /// No description provided for @notificationsBirthdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthdays'**
+  String get notificationsBirthdays;
+
+  /// No description provided for @notificationsBirthdaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The day before and on the day itself.'**
+  String get notificationsBirthdaysHint;
+
+  /// No description provided for @notificationsCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar events'**
+  String get notificationsCalendar;
+
+  /// No description provided for @notificationsCalendarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Events marked \"show in calendar\".'**
+  String get notificationsCalendarHint;
+
+  /// No description provided for @notificationsFamilyUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Family updates'**
+  String get notificationsFamilyUpdates;
+
+  /// No description provided for @notificationsFamilyUpdatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone edits the shared archive.'**
+  String get notificationsFamilyUpdatesHint;
+
+  /// No description provided for @notificationsIosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On iPhone notifications only work in the app added to the Home Screen (iOS 16.4+).'**
+  String get notificationsIosHint;
+
+  /// No description provided for @notificationsUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get notificationsUpcoming;
+
+  /// No description provided for @notificationsUpcomingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No birthdays or events in the next 7 days.'**
+  String get notificationsUpcomingEmpty;
 }
 
 class _AppLocalizationsDelegate

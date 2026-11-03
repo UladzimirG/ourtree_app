@@ -53,7 +53,9 @@ void main() {
     final family = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
       members: [
-        member('papa', gallery: [const GalleryShot(media: [linked])]),
+        member('papa', gallery: [
+          const GalleryShot(media: [linked])
+        ]),
       ],
       timelineEvents: const [
         TimelineEvent(id: 'e1', date: '2020-01-01', title: 'Event'),

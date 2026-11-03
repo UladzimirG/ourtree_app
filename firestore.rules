@@ -138,6 +138,15 @@ service cloud.firestore {
            );
     }
 
+    // Устройства с FCM-токенами: участник пишет только своё устройство,
+    // удалить может только автор записи (сам участник при отключении).
+    match /families/{familyId}/devices/{deviceId} {
+      allow read: if isMember(familyId);
+      allow create, update: if isMember(familyId) && freshTimestamp();
+      allow delete: if isMember(familyId)
+        && resource.data.authUid == request.auth.uid;
+    }
+
     // Содержимое семьи: people, events, media, audit.
     match /families/{familyId}/{collection}/{document} {
       allow read: if isMember(familyId);

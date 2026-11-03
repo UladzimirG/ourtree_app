@@ -5,16 +5,21 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
+import 'package:ourtree_app/features/accounts/presentation/widgets/account_button.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/family/presentation/providers/edit_mode_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/edit_mode_button.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
 import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
+import 'package:ourtree_app/features/profile/presentation/widgets/expandable_text.dart';
 import 'package:ourtree_app/features/profile/presentation/widgets/member_avatar.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/settings_provider.dart';
+import 'package:ourtree_app/features/settings/presentation/views/member_editor_screen.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -32,6 +37,7 @@ class ProfileScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final familyAsync = ref.watch(familyDataProvider);
     final settingsAsync = ref.watch(familySettingsProvider);
+    final editMode = ref.watch(editModeProvider);
 
     return KraftBackground(
       child: Scaffold(
@@ -45,8 +51,7 @@ class ProfileScreen extends ConsumerWidget {
               return Column(
                 children: [
                   _ProfileTopBar(
-                    title: settingsAsync.value?.familyName ??
-                        family.familyName,
+                    title: settingsAsync.value?.familyName ?? family.familyName,
                     backTooltip: l10n.profileBack,
                   ),
                   Expanded(
@@ -56,6 +61,8 @@ class ProfileScreen extends ConsumerWidget {
                             member: member,
                             family: visible,
                             l10n: l10n,
+                            editMode: editMode,
+                            onEdit: () => _openMemberEditor(context, member),
                           ),
                   ),
                 ],
@@ -72,6 +79,14 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _openMemberEditor(BuildContext context, FamilyMember member) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => MemberEditorScreen(memberId: member.id),
+    ),
+  );
 }
 
 class _ProfileTopBar extends StatelessWidget {
@@ -103,6 +118,8 @@ class _ProfileTopBar extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
+          const AccountButton(),
+          const EditModeButton(),
         ],
       ),
     );
@@ -114,11 +131,15 @@ class _ProfileBody extends StatelessWidget {
     required this.member,
     required this.family,
     required this.l10n,
+    required this.editMode,
+    required this.onEdit,
   });
 
   final FamilyMember member;
   final FamilyData family;
   final AppLocalizations l10n;
+  final bool editMode;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +156,17 @@ class _ProfileBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
       children: [
+        if (editMode) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_outlined),
+              label: Text(l10n.profileEdit),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         PaperCard(
           tilt: -0.6,
           child: Column(
@@ -230,10 +262,90 @@ class _ProfileBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
+        _StoriesCard(
+          member: member,
+          l10n: l10n,
+          editMode: editMode,
+          onEdit: onEdit,
+        ),
+        const SizedBox(height: 14),
         _WishlistCard(member: member, l10n: l10n),
         const SizedBox(height: 14),
         _GalleryCard(member: member, family: family, l10n: l10n),
       ],
+    );
+  }
+}
+
+class _StoriesCard extends StatelessWidget {
+  const _StoriesCard({
+    required this.member,
+    required this.l10n,
+    required this.editMode,
+    required this.onEdit,
+  });
+
+  final FamilyMember member;
+  final AppLocalizations l10n;
+  final bool editMode;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (member.stories.isEmpty && !editMode) {
+      return const SizedBox.shrink();
+    }
+
+    return PaperCard(
+      tilt: 0.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.profileStories,
+                  style: theme.textTheme.headlineSmall,
+                ),
+              ),
+              if (editMode)
+                TextButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: Text(l10n.profileEdit),
+                ),
+            ],
+          ),
+          if (member.stories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l10n.profileStoriesEmpty,
+                style: theme.textTheme.bodySmall,
+              ),
+            )
+          else
+            for (var index = 0; index < member.stories.length; index++) ...[
+              if (index > 0) const SizedBox(height: 16),
+              Text(
+                member.stories[index].title.trim().isEmpty
+                    ? l10n.profileStories
+                    : member.stories[index].title,
+                style: theme.textTheme.titleMedium,
+              ),
+              if (member.stories[index].text.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                ExpandableText(
+                  text: member.stories[index].text,
+                  style: theme.textTheme.bodyLarge,
+                  collapsedLines: 4,
+                ),
+              ],
+            ],
+        ],
+      ),
     );
   }
 }
@@ -598,6 +710,17 @@ class _StatusView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ClipOval(
+                child: Image.asset(
+                  'assets/branding/app_icon.png',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: 12),
               if (onRetry == null)
                 const CircularProgressIndicator()
               else
@@ -638,6 +761,17 @@ class _ProfileNotFound extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ClipOval(
+                child: Image.asset(
+                  'assets/branding/app_icon.png',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(l10n.profileNotFound, textAlign: TextAlign.center),
               const SizedBox(height: 12),
               TextButton(

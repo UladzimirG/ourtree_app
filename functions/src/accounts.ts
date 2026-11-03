@@ -155,6 +155,62 @@ async function requireAuthUid(request: CallableRequest): Promise<string> {
 }
 
 /**
+ * Семья, в которой состоит аккаунт.
+ *
+ * Основной указатель — `memberUids`, но приглашённые по коду участники туда
+ * долгое время не попадали (клиенту менять список запрещено правилами),
+ * поэтому проверяем ещё владение и документ членства.
+ */
+async function findFamilyId(accountId: string): Promise<string | null> {
+  try {
+    const owned = await db()
+      .collection('families')
+      .where('ownerAuthUid', '==', accountId)
+      .limit(5)
+      .get();
+    if (!owned.empty) return owned.docs[0].id;
+  } catch (error) {
+    logger.warn('accounts: не удалось найти семью владельца', {
+      accountId,
+      error,
+    });
+  }
+
+  try {
+    const byUid = await db()
+      .collection('families')
+      .where('memberUids', 'array-contains', accountId)
+      .limit(5)
+      .get();
+    if (!byUid.empty) return byUid.docs[0].id;
+  } catch (error) {
+    logger.warn('accounts: не удалось найти семью по memberUids', {
+      accountId,
+      error,
+    });
+  }
+
+  try {
+    const members = await db()
+      .collectionGroup('members')
+      .where('userId', '==', accountId)
+      .limit(5)
+      .get();
+    for (const member of members.docs) {
+      const familyRef = member.ref.parent.parent;
+      if (familyRef) return familyRef.id;
+    }
+  } catch (error) {
+    logger.warn('accounts: не удалось найти семью по документу участника', {
+      accountId,
+      error,
+    });
+  }
+
+  return null;
+}
+
+/**
  * Создаёт пользователя Firebase с нужным uid, чтобы `auth.uid` совпадал
  * с id аккаунта и переживал переустановку приложения.
  */
@@ -227,6 +283,11 @@ async function migrateIdentity(oldUid: string, newUid: string): Promise<void> {
       await batch.commit();
     }
 
+    // Приглашённые по коду участники не попадают в `memberUids` (правила
+    // запрещают клиенту менять список), поэтому отдельно переносим членство,
+    // найденное по полю `userId` в документе участника.
+    await migrateInvitedMembership(oldUid, newUid);
+
     const oldUserRef = db().collection('users').doc(oldUid);
     const oldUser = await oldUserRef.get();
     if (oldUser.exists) {
@@ -258,6 +319,79 @@ async function migrateIdentity(oldUid: string, newUid: string): Promise<void> {
   }
 }
 
+
+/**
+ * Переносит членство приглашённых участников на новый uid.
+ *
+ * Документ участника приглашённого создан под его анонимным uid, а поле
+ * `userId` содержит id аккаунта: по нему и находим такие семьи.
+ */
+async function migrateInvitedMembership(
+  oldUid: string,
+  newAuthUid: string,
+): Promise<void> {
+  let docs;
+  try {
+    const snapshot = await db()
+      .collectionGroup('members')
+      .where('userId', '==', newAuthUid)
+      .limit(20)
+      .get();
+    docs = snapshot.docs;
+  } catch (error) {
+    logger.warn('accounts: не удалось прочитать членство приглашённых', {
+      newAuthUid,
+      error,
+    });
+    return;
+  }
+
+  for (const member of docs) {
+    const familyRef = member.ref.parent.parent;
+    if (!familyRef) continue;
+    if (member.id === newAuthUid) continue;
+
+    try {
+      const familySnap = await familyRef.get();
+      if (!familySnap.exists) continue;
+      const familyData = familySnap.data() ?? {};
+      const memberUids: string[] = Array.isArray(familyData.memberUids)
+        ? familyData.memberUids.filter(
+            (uid: unknown): uid is string => typeof uid === 'string',
+          )
+        : [];
+      const nextUids = Array.from(
+        new Set([...memberUids, newAuthUid]),
+      ).filter((uid) => uid !== oldUid);
+
+      const batch = db().batch();
+      batch.set(
+        familyRef.collection('members').doc(newAuthUid),
+        {
+          ...member.data(),
+          authUid: newAuthUid,
+          userId: newAuthUid,
+          status: 'active',
+        },
+        { merge: true },
+      );
+      batch.delete(member.ref);
+      batch.update(familyRef, { memberUids: nextUids });
+      await batch.commit();
+
+      logger.info('accounts: членство приглашённого перенесено', {
+        familyId: familyRef.id,
+        from: member.id,
+        to: newAuthUid,
+      });
+    } catch (error) {
+      logger.error('accounts: не удалось перенести членство приглашённого', {
+        familyId: familyRef.id,
+        error,
+      });
+    }
+  }
+}
 
 /** Регистрация: логин, пароль и роль (роль выдаёт только администратор). */
 export const accountRegister = onCall(
@@ -396,8 +530,13 @@ export const accountLogin = onCall(
         `account/custom-token-failed: ${detail.slice(0, 300)}`,
       );
     }
-    logger.info('accounts: вход', { accountId: account.id });
-    return { token, account: toPublic(account) };
+    // Семья, в которой аккаунт уже состоит: нужна клиенту, чтобы сразу
+    // подтянуть семейный архив, а не показывать демо-данные до ручного
+    // подключения по коду. Ошибка чтения не должна блокировать вход.
+    const familyId = await findFamilyId(account.id);
+
+    logger.info('accounts: вход', { accountId: account.id, familyId });
+    return { token, account: toPublic(account), familyId };
   },
 );
 

@@ -50,17 +50,25 @@ class FamilyData {
             .toList(growable: false),
       );
 
-  Map<String, dynamic> toJson() => {
+  /// Плоский JSON для хранения на устройстве или в облаке.
+  ///
+  /// [includeLocalMediaPaths] = `false` не пишет пути к файлам на конкретном
+  /// устройстве: они не имеют смысла в облаке и в резервной копии.
+  Map<String, dynamic> toJson({bool includeLocalMediaPaths = true}) => {
         ...settings.toJson(),
-        'members': members
-            .map((member) => member.toJson())
-            .toList(growable: false),
+        'members':
+            members.map((member) => member.toJson()).toList(growable: false),
         'timelineEvents': timelineEvents
             .map((event) => event.toJson())
             .toList(growable: false),
         if (mediaLibrary.isNotEmpty)
-          'mediaLibrary':
-              mediaLibrary.map((asset) => asset.toJson()).toList(growable: false),
+          'mediaLibrary': mediaLibrary
+              .map(
+                (asset) => asset.toJson(
+                  includeLocalPath: includeLocalMediaPaths,
+                ),
+              )
+              .toList(growable: false),
       };
 
   /// Профиль по идентификатору; `null`, если такого члена семьи нет.
@@ -76,7 +84,8 @@ class FamilyData {
   /// Даты хранятся как `YYYY-MM-DD`, поэтому обычное сравнение строк даёт
   /// правильный хронологический порядок.
   List<TimelineEvent> get sortedTimelineEvents {
-    final sorted = [...timelineEvents]..sort((a, b) => a.date.compareTo(b.date));
+    final sorted = [...timelineEvents]
+      ..sort((a, b) => a.date.compareTo(b.date));
     return List<TimelineEvent>.unmodifiable(sorted);
   }
 
@@ -227,10 +236,21 @@ class FamilyData {
   /// Подпись и кадрирование каждой связи сохраняются: меняются только
   /// свойства самого файла — источник, тип, имя и отмеченные люди.
   FamilyData withUpdatedMediaAsset(MediaAsset asset) {
+    // Прежний источник нужен, чтобы найти связи, которые ещё ссылаются на
+    // локальный путь: после выгрузки в облако `source` меняется на URL.
+    final previous = assetById(asset.id)?.source.trim();
+    final oldSource = previous == null || previous.isEmpty ? null : previous;
+    final newSource = asset.source.trim();
+
+    bool linked(FamilyMedia media) {
+      if (media.mediaId == asset.id) return true;
+      final source = media.source.trim();
+      if (oldSource != null && source == oldSource) return true;
+      return newSource.isNotEmpty && source == newSource;
+    }
+
     FamilyMedia sync(FamilyMedia media) {
-      if (media.mediaId != asset.id && media.source != asset.source) {
-        return media;
-      }
+      if (!linked(media)) return media;
       return media.copyWith(
         mediaId: asset.id,
         source: asset.source,
@@ -240,7 +260,19 @@ class FamilyData {
       );
     }
 
+    /// Обложки (фото семьи, участника, снимка галереи, события) хранятся
+    /// строкой без `mediaId` — их тоже переводим на облачную ссылку.
+    String? cover(String? value) {
+      final current = value?.trim();
+      if (current == null || current.isEmpty) return value;
+      if (oldSource != null && current == oldSource) return newSource;
+      return value;
+    }
+
     return copyWith(
+      settings: settings.copyWith(
+        familyPhoto: () => cover(settings.familyPhoto),
+      ),
       mediaLibrary: [
         for (final item in mediaLibrary)
           if (item.id == asset.id) asset else item,
@@ -249,11 +281,13 @@ class FamilyData {
       members: [
         for (final member in members)
           member.copyWith(
+            photo: () => cover(member.photo),
             birthdayMedia:
                 member.birthdayMedia.map(sync).toList(growable: false),
             gallery: [
               for (final shot in member.gallery)
                 shot.copyWith(
+                  photo: () => cover(shot.photo),
                   media: shot.media.map(sync).toList(growable: false),
                 ),
             ],
@@ -262,6 +296,7 @@ class FamilyData {
       timelineEvents: [
         for (final event in timelineEvents)
           event.copyWith(
+            photo: () => cover(event.photo),
             media: event.media.map(sync).toList(growable: false),
           ),
       ],

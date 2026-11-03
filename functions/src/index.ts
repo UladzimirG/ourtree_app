@@ -20,6 +20,13 @@ export {
   accountUpdate,
 } from './accounts';
 
+// Денормализованные списки участников: клиенту менять их правилами запрещено,
+// поэтому вход по коду дописывает участника на сервере.
+export { familyMemberJoined } from './family_members';
+
+// Пуши: «семья обновилась» и ежедневные напоминания о днях рождения и событиях.
+export { notifyFamilyUpdated, scheduledReminders } from './notifications';
+
 
 /**
  * Проверка живости деплоя: GET /health → { ok: true }.

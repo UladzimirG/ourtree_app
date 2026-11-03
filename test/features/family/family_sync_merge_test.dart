@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ourtree_app/features/family/domain/family_sync_merge.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
@@ -43,6 +45,45 @@ void main() {
     );
   }
 
+  test('Payload читает отметки, записанные JSON-строкой', () {
+    final payload = FamilySyncPayload(
+      data: data(members: [member('papa', 'Папа')]),
+      stamps: {'member:papa': 777},
+    );
+
+    final restored = FamilySyncPayload.fromJson({
+      ...payload.data.toJson(),
+      // Ранние версии клиента писали карту отметок строкой — такие документы
+      // обязаны читаться, иначе серверные правки молча игнорируются.
+      'entityUpdatedAt': jsonEncode(payload.stamps),
+      'entityDeletedAt': jsonEncode({'member:mama': 555}),
+      'updatedAt': 1,
+    });
+
+    expect(restored.stamps['member:papa'], 777);
+    expect(restored.tombstones['member:mama'], 555);
+  });
+
+  test('Медиатека не сериализует путь к локальному файлу', () {
+    final local = MediaAsset(
+      id: 'asset-1',
+      source: 'hive://media-1',
+      localPath: r'C:\Users\user\media\asset-1.jpg',
+    );
+    final family = data(assets: [local]);
+
+    expect(family.toJson()['mediaLibrary'], isNotEmpty);
+    final withPath =
+        (family.toJson()['mediaLibrary'] as List).first as Map<String, dynamic>;
+    expect(withPath['localPath'], isNotNull);
+
+    final withoutPath =
+        (family.toJson(includeLocalMediaPaths: false)['mediaLibrary'] as List)
+            .first as Map<String, dynamic>;
+    expect(withoutPath.containsKey('localPath'), isFalse);
+    expect(withoutPath['source'], 'hive://media-1');
+  });
+
   test('Entities merged by timestamps', () {
     final local = data(
       members: [member('papa', 'Папа (локально)'), member('mama', 'Мама')],
@@ -73,7 +114,8 @@ void main() {
     expect(names['papa'], 'Папа (локально)');
     expect(names['son'], 'Сын');
     expect(names['mama'], 'Мама');
-    expect(merged.data.timelineEvents.map((e) => e.id), containsAll(['e1', 'e2']));
+    expect(
+        merged.data.timelineEvents.map((e) => e.id), containsAll(['e1', 'e2']));
     expect(merged.stamps['member:papa'], 900);
     expect(merged.stamps['member:son'], 500);
   });
@@ -146,7 +188,8 @@ void main() {
       ),
     );
 
-    expect(merged.data.timelineEvents.map((e) => e.date), ['2019-09-09', '2022-02-02']);
+    expect(merged.data.timelineEvents.map((e) => e.date),
+        ['2019-09-09', '2022-02-02']);
   });
 
   test('Fingerprints change only for edited entity', () {
@@ -296,7 +339,10 @@ void main() {
   test('Local edits with stamps survive while unstamped demo is dropped', () {
     final merged = mergeSyncPayloads(
       local: data(
-        members: [member('papa', 'Папа (правка телефона)'), member('mama', 'Демо')],
+        members: [
+          member('papa', 'Папа (правка телефона)'),
+          member('mama', 'Демо')
+        ],
         events: [event('local-event', '2023-03-03', 'Своё событие')],
       ),
       localStamps: {'member:papa': now - 1000, 'event:local-event': now - 1000},

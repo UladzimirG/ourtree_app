@@ -45,7 +45,7 @@ final class BulkUploadControllerProvider
 }
 
 String _$bulkUploadControllerHash() =>
-    r'923f2df6299cc68a46a763bbfce2dc3caa74a708';
+    r'cd3d148a8dfc503cd0e6f20c7d54c013762d7b16';
 
 /// Разовая выгрузка всех локальных файлов семьи в Firebase Storage.
 

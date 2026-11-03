@@ -79,8 +79,7 @@ class Account {
         'role': role.wireName,
         'createdAt': createdAt,
         'allMembersVisible': allMembersVisible,
-        if (visibleMemberIds.isNotEmpty)
-          'visibleMemberIds': visibleMemberIds,
+        if (visibleMemberIds.isNotEmpty) 'visibleMemberIds': visibleMemberIds,
         if (passwordHash != null) 'passwordHash': passwordHash,
         if (passwordSalt != null) 'passwordSalt': passwordSalt,
         if (legacyId != null) 'legacyId': legacyId,

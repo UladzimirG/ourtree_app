@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ourtree_app/core/media/media_cache.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
+import 'package:ourtree_app/core/media/restored_media.dart';
 import 'package:ourtree_app/core/utils/asset_path.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
 
@@ -75,8 +76,7 @@ class FamilyPhoto extends StatelessWidget {
         fit: fit,
         alignment: alignment,
         fadeInDuration: const Duration(milliseconds: 150),
-        placeholder: (context, url) =>
-            fallback ?? const SizedBox.shrink(),
+        placeholder: (context, url) => fallback ?? const SizedBox.shrink(),
         errorWidget: (context, url, error) =>
             fallback ?? const SizedBox.shrink(),
       );
@@ -123,15 +123,23 @@ class _StoredMediaImageState extends State<_StoredMediaImage> {
   @override
   void initState() {
     super.initState();
-    _bytes = MediaStorage.instance.loadBytes(widget.id);
+    _bytes = _load();
   }
 
   @override
   void didUpdateWidget(covariant _StoredMediaImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.id != widget.id) {
-      _bytes = MediaStorage.instance.loadBytes(widget.id);
+      _bytes = _load();
     }
+  }
+
+  /// Сначала Hive, затем встроенный ассет: файл мог быть восстановлен из
+  /// резервной копии и потеряться при переустановке приложения.
+  Future<Uint8List?> _load() async {
+    final stored = await MediaStorage.instance.loadBytes(widget.id);
+    if (stored != null) return stored;
+    return RestoredMedia.instance.bytesFor(widget.id);
   }
 
   @override

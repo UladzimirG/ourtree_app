@@ -49,7 +49,8 @@ void main() {
         ru.timelineEvents.map((event) => event.id),
         reason: localeName,
       );
-      expect(data.settings.familySubtitle.trim(), isNotEmpty, reason: localeName);
+      expect(data.settings.familySubtitle.trim(), isNotEmpty,
+          reason: localeName);
     }
 
     // Контент именно переведён, а не скопирован.
@@ -91,9 +92,12 @@ void main() {
     for (final localeName in FamilyRepository.demoArchives.keys) {
       final data = _readArchive(FamilyRepository.assetFor(localeName));
       for (final member in data.members) {
-        expect(member.name.trim(), isNotEmpty, reason: '$localeName/${member.id}');
-        expect(member.role.trim(), isNotEmpty, reason: '$localeName/${member.id}');
-        expect(member.birthdayDate, isNotNull, reason: '$localeName/${member.id}');
+        expect(member.name.trim(), isNotEmpty,
+            reason: '$localeName/${member.id}');
+        expect(member.role.trim(), isNotEmpty,
+            reason: '$localeName/${member.id}');
+        expect(member.birthdayDate, isNotNull,
+            reason: '$localeName/${member.id}');
       }
     }
   });

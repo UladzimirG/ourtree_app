@@ -498,7 +498,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get eventTextField => 'Опис';
 
   @override
-  String get eventMemberField => 'Пов\'язаний учасник';
+  String get eventMemberField => 'Основний учасник';
 
   @override
   String get eventMemberNone => 'Без учасника';
@@ -1265,6 +1265,10 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
+  String get mediaUploadUnavailableHint =>
+      'Ці файли зберігалися лише на іншому пристрої або зникли після перевстановлення — додайте їх знову.';
+
+  @override
   String mediaOutboxRetry(int count) {
     return 'У черзі: $count — надіслати';
   }
@@ -1280,4 +1284,403 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get syncStatusError => 'Немає зв\'язку';
+
+  @override
+  String get editModeEnter => 'Режим редагування';
+
+  @override
+  String get editModeExit => 'Вийти з режиму редагування';
+
+  @override
+  String get editModeBanner =>
+      'Режим редагування: натисніть на олівець біля картки';
+
+  @override
+  String get editModeDone => 'Готово';
+
+  @override
+  String get adminOnlyAction => 'Тільки адміністратор';
+
+  @override
+  String get adminOnlyDeleteHint =>
+      'Видаляти події та учасників може лише адміністратор.';
+
+  @override
+  String get adminOnlySettingsHint =>
+      'Резервні копії, акаунти й повернення до демо-даних доступні лише адміністратору.';
+
+  @override
+  String get accountEntryTitle => 'Акаунт';
+
+  @override
+  String get accountAuthTitle => 'Вхід або створення акаунта';
+
+  @override
+  String get accountSignInTab => 'Вхід';
+
+  @override
+  String get accountSignUpTab => 'Реєстрація';
+
+  @override
+  String get accountSignInSubtitle =>
+      'Увійдіть, щоб завантажити дані своєї сім\'ї.';
+
+  @override
+  String get accountSignUpHint =>
+      'Новий акаунт отримає роль спостерігача. Адміністратор зможе змінити її пізніше.';
+
+  @override
+  String get accountFirstAdminHint =>
+      'Перший акаунт сім\'ї стане адміністратором.';
+
+  @override
+  String accountSessionTitle(String name) {
+    return 'Ви увійшли як $name';
+  }
+
+  @override
+  String get accountManage => 'Керування акаунтами';
+
+  @override
+  String get accountSwitch => 'Змінити акаунт';
+
+  @override
+  String get calendarViewMonth => 'Місяць';
+
+  @override
+  String get calendarViewYear => 'Рік';
+
+  @override
+  String get calendarToday => 'Сьогодні';
+
+  @override
+  String get calendarAddEvent => 'Додати подію';
+
+  @override
+  String get calendarAddDate => 'Додати дату';
+
+  @override
+  String get calendarEntryTitle => 'Дата в календарі';
+
+  @override
+  String get calendarEntryTitleField => 'Назва';
+
+  @override
+  String get calendarEntryNoteField => 'Замітка';
+
+  @override
+  String get calendarEntryDateField => 'Дата';
+
+  @override
+  String get calendarEntryRecurring => 'Повторювати щороку';
+
+  @override
+  String get calendarEntryHint =>
+      'Дата з\'явиться лише в календарі й не потрапить у таймлайн.';
+
+  @override
+  String get calendarEntrySaved => 'Дату додано до календаря.';
+
+  @override
+  String get calendarEntryDeleted => 'Дату видалено з календаря.';
+
+  @override
+  String get calendarEntryEdit => 'Змінити дату';
+
+  @override
+  String get calendarEntryDelete => 'Видалити дату';
+
+  @override
+  String get calendarEntryDeleteConfirmTitle => 'Видалити цю дату?';
+
+  @override
+  String get calendarEntryDeleteConfirmBody =>
+      'Дата зникне з календаря. Події таймлайну не змінюються.';
+
+  @override
+  String get calendarEntryDefaultTitle => 'Дата';
+
+  @override
+  String get calendarLegendEvent => 'Події';
+
+  @override
+  String get calendarLegendBirthday => 'Дні народження';
+
+  @override
+  String get eventShowInTimeline => 'Показувати в таймлайні';
+
+  @override
+  String get eventRecurringYearly => 'Повторювати щороку';
+
+  @override
+  String get eventCalendarOnlyBadge => 'Лише календар';
+
+  @override
+  String get eventMemberHint =>
+      'Впливає на доступ і профіль. Кількох людей на фото позначайте в «Хто на фото».';
+
+  @override
+  String get eventNewBadge => 'Нове';
+
+  @override
+  String get timelineOrderLabel => 'Порядок';
+
+  @override
+  String get timelineOrderOldest => 'Спочатку старі';
+
+  @override
+  String get timelineOrderNewest => 'Спочатку нові';
+
+  @override
+  String get profileStories => 'Цікаве';
+
+  @override
+  String get profileStoriesEmpty => 'Поки немає історій.';
+
+  @override
+  String get profileStoriesAdd => 'Додати історію';
+
+  @override
+  String get profileStoryDelete => 'Видалити історію';
+
+  @override
+  String get profileStoryTitleField => 'Заголовок';
+
+  @override
+  String get profileStoryTextField => 'Текст історії';
+
+  @override
+  String get readMore => 'Читати далі';
+
+  @override
+  String get readLess => 'Згорнути';
+
+  @override
+  String get memberEditorTitle => 'Учасник';
+
+  @override
+  String get eventEditorTitle => 'Подія';
+
+  @override
+  String get memberEdit => 'Редагувати учасника';
+
+  @override
+  String get eventEdit => 'Редагувати подію';
+
+  @override
+  String get profileEdit => 'Редагувати профіль';
+
+  @override
+  String get familyCloudInviteCopy => 'Копіювати код';
+
+  @override
+  String get familyCloudInviteCopyHint =>
+      'Браузер не дозволив скопіювати автоматично: натисніть значок копіювання біля коду.';
+
+  @override
+  String get backupDownloadStarted =>
+      'Файл резервної копії завантажено браузером.';
+
+  @override
+  String get backupImportWrongFile =>
+      'Виберіть файл резервної копії OurTree (.json або .ourtree).';
+
+  @override
+  String backupImportTooLarge(int mb) {
+    return 'Файл більший за $mb МБ і може не вміститися в пам\'ять браузера. Збережіть копію без медіа і спробуйте знову.';
+  }
+
+  @override
+  String get backupImportUnreadable =>
+      'Не вдалося прочитати вибраний файл. Якщо він у iCloud, спочатку завантажте його на пристрій.';
+
+  @override
+  String backupImportPartial(int count) {
+    return 'Не вдалося відновити файлів медіа: $count.';
+  }
+
+  @override
+  String get demoEditNoticeTitle => 'Зміни залишаться на цьому пристрої';
+
+  @override
+  String get demoEditNoticeBody =>
+      'Архів не буде збережено в хмарі. Створіть сім\'ю та увійдіть в акаунт, щоб дані зберігалися і були доступні на інших пристроях.';
+
+  @override
+  String get demoEditNoticeAction => 'Створити сім\'ю';
+
+  @override
+  String get demoEditNoticeLater => 'Пізніше';
+
+  @override
+  String get demoLocalOnlyNotice =>
+      'Лише на цьому пристрої: немає синхронізації з хмарою';
+
+  @override
+  String get accountNoFamilyAttached =>
+      'Цей акаунт ще не пов\'язаний із сім\'єю — підключіться за кодом запрошення в «Загальні налаштування → Хмара».';
+
+  @override
+  String get aboutTitle => 'Про застосунок';
+
+  @override
+  String get aboutHint => 'Версія, розробник, документи та ліцензії.';
+
+  @override
+  String get aboutDescription =>
+      'OurTree — сімейний альбом: профілі, таймлайн, календар і медіатека. Дані зберігаються на пристрої та синхронізуються з хмарою, коли сім\'я підключена.';
+
+  @override
+  String get aboutVersion => 'Версія';
+
+  @override
+  String aboutVersionLabel(String version) {
+    return 'Версія $version';
+  }
+
+  @override
+  String get aboutPlatform => 'Платформа';
+
+  @override
+  String get aboutDeveloper => 'Розробник';
+
+  @override
+  String get aboutContact => 'Зв\'язатися';
+
+  @override
+  String get aboutPrivacy => 'Політика конфіденційності';
+
+  @override
+  String get aboutTerms => 'Умови використання';
+
+  @override
+  String get aboutLicenses => 'Ліцензії відкритого ПЗ';
+
+  @override
+  String get aboutChangelogTitle => 'Що нового';
+
+  @override
+  String get aboutChangelog1 =>
+      'Правки з інших пристроїв надходять без перезапуску';
+
+  @override
+  String get aboutChangelog2 =>
+      'Фото автоматично надсилаються в хмару у створеній сім\'ї';
+
+  @override
+  String get aboutChangelog3 =>
+      'Імпорт резервної копії працює на iPhone (веб-версія)';
+
+  @override
+  String get aboutChangelog4 => 'Код запрошення копіюється автоматично';
+
+  @override
+  String get aboutChangelog5 =>
+      'Push-сповіщення про дні народження, події та зміни родини';
+
+  @override
+  String get aboutSupport => 'Підтримка';
+
+  @override
+  String get aboutFamilyId => 'ID сім\'ї';
+
+  @override
+  String get aboutCopyFamilyId => 'Скопіювати ID сім\'ї';
+
+  @override
+  String get aboutFamilyIdCopied => 'ID сім\'ї скопійовано.';
+
+  @override
+  String get aboutNoFamily =>
+      'Сім\'я ще не підключена: підключіть її в «Загальні налаштування → Хмара».';
+
+  @override
+  String aboutCopyright(int year) {
+    return '© $year OurTree';
+  }
+
+  @override
+  String get aboutLinkFailed => 'Не вдалося відкрити посилання.';
+
+  @override
+  String get notificationsTitle => 'Сповіщення';
+
+  @override
+  String get notificationsHint =>
+      'Дні народження, події календаря та зміни родини.';
+
+  @override
+  String get notificationsStatusTitle => 'Стан на цьому пристрої';
+
+  @override
+  String get notificationsEnable => 'Увімкнути сповіщення';
+
+  @override
+  String get notificationsDisable => 'Вимкнути';
+
+  @override
+  String get notificationsRefresh => 'Оновити токен';
+
+  @override
+  String get notificationsEnabled =>
+      'Сповіщення увімкнено: нагадування та зміни родини надходитимуть на цей пристрій.';
+
+  @override
+  String get notificationsDisabled =>
+      'Сповіщення вимкнено. Увімкніть їх, щоб отримувати нагадування.';
+
+  @override
+  String get notificationsDenied =>
+      'Сповіщення заблоковано в браузері або налаштуваннях системи. Дозвольте їх для застосунку та спробуйте ще раз.';
+
+  @override
+  String get notificationsNoFamily =>
+      'Спочатку підключіть родину: нагадування надходять за архівом вашої родини.';
+
+  @override
+  String get notificationsFailed => 'Не вдалося увімкнути сповіщення.';
+
+  @override
+  String get notificationsFailedNoKey =>
+      'У цій збірці немає ключа web-push (FIREBASE_VAPID_KEY). Перезберіть із --dart-define-from-file.';
+
+  @override
+  String get notificationsFailedPermission => 'Браузер не надав дозвіл.';
+
+  @override
+  String get notificationsFailedToken => 'Не вдалося отримати токен пристрою.';
+
+  @override
+  String get notificationsPrefsTitle => 'Що надсилати';
+
+  @override
+  String get notificationsBirthdays => 'Дні народження';
+
+  @override
+  String get notificationsBirthdaysHint => 'Напередодні та в сам день.';
+
+  @override
+  String get notificationsCalendar => 'Події календаря';
+
+  @override
+  String get notificationsCalendarHint =>
+      'Події з позначкою «показувати в календарі».';
+
+  @override
+  String get notificationsFamilyUpdates => 'Зміни родини';
+
+  @override
+  String get notificationsFamilyUpdatesHint =>
+      'Коли хтось редагує спільний архів.';
+
+  @override
+  String get notificationsIosHint =>
+      'На iPhone сповіщення працюють лише в застосунку, доданому на екран «Домівка» (iOS 16.4+).';
+
+  @override
+  String get notificationsUpcoming => 'Найближче';
+
+  @override
+  String get notificationsUpcomingEmpty =>
+      'У найближчі 7 днів днів народження та подій немає.';
 }

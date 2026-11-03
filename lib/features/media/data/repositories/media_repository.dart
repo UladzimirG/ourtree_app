@@ -48,6 +48,8 @@ class MediaRepository {
     return asset.copyWith(
       id: assetId,
       source: result.downloadUrl,
+      // Размер мог быть неизвестен: ассет собран из ссылки в архиве.
+      size: () => bytes.length,
       localPath: () => localPath,
       storagePath: () => result.storagePath,
       downloadUrl: () => result.downloadUrl,

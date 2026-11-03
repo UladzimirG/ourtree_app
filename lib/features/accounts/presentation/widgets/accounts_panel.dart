@@ -9,6 +9,7 @@ import 'package:ourtree_app/features/accounts/presentation/providers/accounts_pr
 import 'package:ourtree_app/features/accounts/presentation/providers/server_auth_provider.dart';
 import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_attach.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
@@ -36,8 +37,7 @@ class AccountsPanel extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     final accounts = accountsAsync.value ?? const <Account>[];
-    final links = ref.watch(guestLinksProvider).value ??
-        const <GuestLink>[];
+    final links = ref.watch(guestLinksProvider).value ?? const <GuestLink>[];
     final family = ref.watch(familyDataProvider).value;
 
     return ListView(
@@ -297,6 +297,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
       SnackBar(content: Text(widget.l10n.accountSaved)),
     );
   }
+
   Future<void> _confirmDelete() async {
     final l10n = widget.l10n;
     final confirmed = await showDialog<bool>(
@@ -318,9 +319,8 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
     );
     if (confirmed != true || !mounted) return;
 
-    final error = await ref
-        .read(serverAuthProvider.notifier)
-        .delete(widget.account);
+    final error =
+        await ref.read(serverAuthProvider.notifier).delete(widget.account);
     if (!mounted) return;
     if (error != null) {
       setState(() => _error = accountErrorLabel(error, l10n));
@@ -413,8 +413,7 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
                   member.name.trim().isEmpty ? '—' : member.name,
                 ),
                 selected: account.visibleMemberIds.contains(member.id),
-                onSelected: (selected) =>
-                    _toggleMember(member.id, selected),
+                onSelected: (selected) => _toggleMember(member.id, selected),
               ),
           ],
         ),
@@ -486,7 +485,6 @@ class _AccountEditorCardState extends ConsumerState<_AccountEditorCard> {
             onChanged: (role) => setState(() => _role = role),
           ),
           ..._accessSection(context, l10n),
-
           if (_error != null) ...[
             const SizedBox(height: 8),
             Text(
@@ -571,8 +569,7 @@ class _GuestLinksCardState extends ConsumerState<_GuestLinksCard> {
           const SizedBox(height: 12),
           TextField(
             controller: _label,
-            decoration:
-                settingsInputDecoration(hint: l10n.guestLinkLabelField),
+            decoration: settingsInputDecoration(hint: l10n.guestLinkLabelField),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -648,7 +645,6 @@ class _GuestLinksCardState extends ConsumerState<_GuestLinksCard> {
     );
   }
 }
-
 
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
@@ -869,6 +865,8 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
     if (!mounted) return;
 
     if (outcome.isSuccess) {
+      await attachFamilyAfterSignIn(ref);
+      if (!mounted) return;
       Navigator.of(context).pop(outcome.account);
       return;
     }
@@ -876,9 +874,8 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
     // Сервер не нашёл аккаунт или недоступен — проверяем локальную копию.
     // Если пароль верный, переносим аккаунт на сервер (или входим локально,
     // когда сети нет вовсе).
-    final canTryLocal =
-        outcome.status == ServerSignInStatus.accountNotFound ||
-            outcome.status == ServerSignInStatus.unavailable;
+    final canTryLocal = outcome.status == ServerSignInStatus.accountNotFound ||
+        outcome.status == ServerSignInStatus.unavailable;
     if (canTryLocal) {
       final local =
           ref.read(accountsProvider.notifier).authenticate(login, password);
@@ -886,6 +883,8 @@ class _LoginDialogState extends ConsumerState<_LoginDialog> {
         final migrated = await serverAuth.claimLocal(local, password);
         if (!mounted) return;
         if (migrated.isSuccess) {
+          await attachFamilyAfterSignIn(ref);
+          if (!mounted) return;
           Navigator.of(context).pop(migrated.account);
           return;
         }
@@ -961,4 +960,3 @@ String guestLinkStatus(GuestLink link, DateTime now, AppLocalizations l10n) {
   if (link.isExpiredAt(now)) return l10n.guestLinkStatusExpired;
   return l10n.guestLinkStatusActive;
 }
-

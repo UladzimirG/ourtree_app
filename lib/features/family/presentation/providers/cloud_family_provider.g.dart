@@ -188,7 +188,7 @@ final class ActiveFamilyControllerProvider
 }
 
 String _$activeFamilyControllerHash() =>
-    r'bab3fbde6f4eae06113ee1a68c200c1af2ac6d70';
+    r'd76144dc178437b55f06d955160040ce9c15def0';
 
 /// Семья, открытая на этом устройстве.
 ///

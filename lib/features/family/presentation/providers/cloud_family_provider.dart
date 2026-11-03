@@ -70,9 +70,7 @@ class ActiveFamilyController extends _$ActiveFamilyController {
     await settings.save();
     // Сразу отдаём локальный архив в облако: иначе документ состояния семьи
     // пуст и второе устройство после подключения видит только демо-архив.
-    await ref
-        .read(familySyncControllerProvider.notifier)
-        .seedFamily(family.id);
+    await ref.read(familySyncControllerProvider.notifier).seedFamily(family.id);
     return family;
   }
 
@@ -258,10 +256,10 @@ class ActiveFamilyController extends _$ActiveFamilyController {
 
   /// Локальное отключение: стираем отметки синхронизации и активную семью.
   Future<void> _detachLocally(String familyId) async {
-    await ref.read(familySyncControllerProvider.notifier).forgetFamily(familyId);
     await ref
-        .read(identityControllerProvider.notifier)
-        .setActiveFamily(null);
+        .read(familySyncControllerProvider.notifier)
+        .forgetFamily(familyId);
+    await ref.read(identityControllerProvider.notifier).setActiveFamily(null);
     state = const AsyncData(null);
   }
 }

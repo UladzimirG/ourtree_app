@@ -1,12 +1,20 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
+import 'package:ourtree_app/core/utils/picker_web_options.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/settings/domain/models/settings_models.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/backup_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
+
+/// Предел размера файла резервной копии для импорта.
+///
+/// Снимок с медиа — это base64 внутри JSON: на iPhone такой файл целиком
+/// разбирается в памяти, поэтому слишком большие файлы предупреждаем заранее.
+const int backupImportSizeLimit = 64 * 1024 * 1024;
 
 /// Список резервных копий архива и действия над ними.
 class BackupPanel extends ConsumerWidget {
@@ -71,6 +79,15 @@ class BackupPanel extends ConsumerWidget {
       dialogTitle: l10n.backupSaveDialogTitle,
     );
     if (!context.mounted) return;
+
+    // На вебе файл скачивается браузером, и путь не возвращается (null) —
+    // это успех, а не отмена.
+    if (kIsWeb && uri == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupDownloadStarted)),
+      );
+      return;
+    }
     if (uri == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.backupExportCanceled)),
@@ -86,24 +103,73 @@ class BackupPanel extends ConsumerWidget {
 
   Future<void> _import(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
+
+    // На вебе (в том числе в PWA на iPhone) любой браузер работает через
+    // WebKit: фильтр по расширениям там ненадёжен, а авт-отмена выбора по
+    // возврату фокуса вообще ломает импорт. Поэтому берём любой файл и
+    // проверяем расширение сами.
     final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: const ['json', 'ourtree'],
+      type: kIsWeb ? FileType.any : FileType.custom,
+      allowedExtensions: kIsWeb ? null : const ['json', 'ourtree'],
       dialogTitle: l10n.backupImport,
+      webOptions: importPickerWebOptions(),
     );
     if (file == null || !context.mounted) return;
 
-    final bytes = await file.readAsBytes();
-    final imported =
-        await ref.read(backupsProvider.notifier).importBytes(bytes);
+    if (kIsWeb && !_looksLikeBackup(file.name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupImportWrongFile)),
+      );
+      return;
+    }
+
+    final size = file.lengthSync() ?? await file.length() ?? 0;
+    if (size > backupImportSizeLimit) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.backupImportTooLarge(backupImportSizeLimit ~/ (1024 * 1024)),
+          ),
+        ),
+      );
+      return;
+    }
+
+    Uint8List bytes;
+    try {
+      bytes = await file.readAsBytes();
+    } catch (error) {
+      debugPrint('Бэкап: файл не прочитан: $error');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.backupImportUnreadable)),
+      );
+      return;
+    }
+
+    final notifier = ref.read(backupsProvider.notifier);
+    final imported = await notifier.importBytes(bytes);
     if (!context.mounted) return;
+
+    final skipped = notifier.lastSkippedMedia;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          imported ? l10n.backupImportSuccess : l10n.backupImportFailed,
+          !imported
+              ? l10n.backupImportFailed
+              : skipped > 0
+                  ? '${l10n.backupImportSuccess} ${l10n.backupImportPartial(skipped)}'
+                  : l10n.backupImportSuccess,
         ),
       ),
     );
+  }
+
+  /// Похоже ли имя файла на резервную копию OurTree.
+  bool _looksLikeBackup(String name) {
+    final lower = name.toLowerCase();
+    return lower.endsWith('.json') || lower.endsWith('.ourtree');
   }
 
   Future<void> _restore(

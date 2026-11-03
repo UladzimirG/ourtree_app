@@ -19,6 +19,7 @@ class TimelineEventEditorCard extends StatelessWidget {
     required this.onRemove,
     this.canDelete = true,
     this.otherEvents = const <TimelineEvent>[],
+    this.initiallyExpanded = false,
   });
 
   final TimelineEvent event;
@@ -28,6 +29,7 @@ class TimelineEventEditorCard extends StatelessWidget {
   final ValueChanged<TimelineEvent> onChanged;
   final VoidCallback onRemove;
   final bool canDelete;
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +41,35 @@ class TimelineEventEditorCard extends StatelessWidget {
     return PaperCard(
       padding: EdgeInsets.zero,
       child: ExpansionTile(
+        initiallyExpanded: initiallyExpanded,
         shape: const Border(),
         collapsedShape: const Border(),
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.event_outlined, color: AppColors.terracotta),
-        title: Text(
-          event.title.trim().isEmpty ? '—' : event.title,
-          style: theme.textTheme.titleMedium,
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                event.title.trim().isEmpty ? '—' : event.title,
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            if (event.isCalendarOnly) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.kraftWash,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  l10n.eventCalendarOnlyBadge,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                ),
+              ),
+            ],
+          ],
         ),
         subtitle: Text(
           formatDisplayDateFromIso(event.date, localeName: l10n.localeName),
@@ -175,11 +198,32 @@ class TimelineEventEditorCard extends StatelessWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              l10n.eventMemberHint,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
           SettingsSwitchField(
             label: l10n.eventShowElapsed,
             value: event.showElapsed ?? false,
             onChanged: (value) => onChanged(
               event.copyWith(showElapsed: () => value),
+            ),
+          ),
+          SettingsSwitchField(
+            label: l10n.eventShowInTimeline,
+            value: event.showInTimeline ?? true,
+            onChanged: (value) => onChanged(
+              event.copyWith(showInTimeline: value),
+            ),
+          ),
+          SettingsSwitchField(
+            label: l10n.eventRecurringYearly,
+            value: event.recurringYearly ?? false,
+            onChanged: (value) => onChanged(
+              event.copyWith(recurringYearly: value),
             ),
           ),
           SettingsSwitchField(
@@ -189,18 +233,29 @@ class TimelineEventEditorCard extends StatelessWidget {
               event.copyWith(showInCalendar: value),
             ),
           ),
-          if (canDelete)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: onRemove,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.terracotta,
-                ),
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l10n.eventDelete),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: canDelete
+                  ? onRemove
+                  : () => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.adminOnlyDeleteHint)),
+                      ),
+              style: TextButton.styleFrom(
+                foregroundColor: canDelete
+                    ? AppColors.terracotta
+                    : AppColors.inkSoft.withValues(alpha: 0.6),
+              ),
+              icon: Icon(
+                canDelete ? Icons.delete_outline : Icons.lock_outline,
+              ),
+              label: Text(
+                canDelete
+                    ? l10n.eventDelete
+                    : '${l10n.eventDelete} · ${l10n.adminOnlyAction}',
               ),
             ),
+          ),
         ],
       ),
     );

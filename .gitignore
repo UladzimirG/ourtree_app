@@ -63,3 +63,6 @@ new_media/*
 # Рабочая таблица правок демо-текстов (tools/export_texts.js)
 demo_texts.tsv
 .tmp_import_report.txt
+
+# Ключи, передаваемые в сборку через --dart-define-from-file (VAPID и т.п.)
+dart_defines.json

@@ -5,6 +5,7 @@ import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/storage/app_migrations.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/family/data/repositories/family_repository.dart';
+import 'package:ourtree_app/features/family/domain/family_sync_merge.dart';
 
 /// UUID v4: `xxxxxxxx-xxxx-4xxx-[89ab]xxx-xxxxxxxxxxxx`.
 final RegExp _uuidV4 = RegExp(
@@ -13,6 +14,7 @@ final RegExp _uuidV4 = RegExp(
 
 void main() {
   final storage = MediaStorage.instance;
+
   /// До версии схемы 2 архив лежал в языковом ключе — его и проверяет v1.
   final legacyFamilyKey = FamilyRepository.legacyStorageKeyFor('ru');
 
@@ -156,6 +158,152 @@ void main() {
         storage.getString(storageSchemaVersionKey),
         '$currentStorageSchemaVersion',
       );
+    });
+  });
+
+  group('AppMigrations v2 to v3', () {
+    Future<void> seedArchive(Map<String, dynamic> archive) async {
+      await storage.putString(storageSchemaVersionKey, '2');
+      await storage.putString(
+        FamilyRepository.storageKey,
+        jsonEncode(archive),
+      );
+    }
+
+    Map<String, dynamic> archiveWith(List<Map<String, dynamic>> events) => {
+          'familyName': 'Наша семья',
+          'members': [
+            {
+              'id': 'child-4',
+              'role': 'Дочь',
+              'name': 'Марианна',
+              'gallery': [
+                {
+                  'media': [
+                    {
+                      'id': 'media-1',
+                      'source': '/photos/media-1.jpg',
+                      'eventIds': ['birth-danya', 'event-keep'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          'timelineEvents': events,
+        };
+
+    test('удаляет демо-событие рождения и его связи', () async {
+      await seedArchive(
+        archiveWith([
+          {
+            'id': 'birth-danya',
+            'date': '2018-09-27',
+            'title': 'Рождение Даниила',
+            'kind': 'birth',
+            'memberId': 'child-4',
+          },
+          {
+            'id': 'event-keep',
+            'date': '2020-01-01',
+            'title': 'Поездка',
+            'kind': 'trip',
+          },
+        ]),
+      );
+
+      expect(await AppMigrations().run(), isTrue);
+
+      final events = readFamily()['timelineEvents'] as List;
+      expect(events.map((event) => (event as Map)['id']), ['event-keep']);
+
+      final media =
+          ((readFamily()['members'] as List).first as Map)['gallery'] as List;
+      final eventIds =
+          ((media.first as Map)['media'] as List).first['eventIds'];
+      expect(eventIds, ['event-keep']);
+    });
+
+    test('запоминает удаление для отправки в облако', () async {
+      await seedArchive(
+        archiveWith([
+          {
+            'id': 'birth-danya',
+            'date': '2018-09-27',
+            'title': 'Рождение Даниила',
+            'kind': 'birth',
+            'memberId': 'child-4',
+          },
+        ]),
+      );
+
+      await AppMigrations().run();
+
+      final raw = storage.getString(pendingTombstonesStorageKey);
+      expect(raw, isNotNull);
+      expect(
+        (jsonDecode(raw!) as Map)['event:birth-danya'],
+        isA<int>(),
+      );
+    });
+
+    test('не трогает отредактированное событие с тем же id', () async {
+      await seedArchive(
+        archiveWith([
+          {
+            'id': 'birth-danya',
+            'date': '2019-01-01',
+            'title': 'Рождение сына',
+            'kind': 'birth',
+            'memberId': 'child-4',
+          },
+        ]),
+      );
+
+      await AppMigrations().run();
+
+      final events = readFamily()['timelineEvents'] as List;
+      expect(events, hasLength(1));
+    });
+
+    test('оставляет события текущего демо-архива', () async {
+      await seedArchive(
+        archiveWith([
+          {
+            'id': 'birth-masha',
+            'date': '2013-06-21',
+            'title': 'Родилась Маша',
+            'kind': 'birth',
+            'memberId': 'masha',
+          },
+        ]),
+      );
+
+      await AppMigrations().run();
+
+      expect((readFamily()['timelineEvents'] as List), hasLength(1));
+      expect(storage.getString(pendingTombstonesStorageKey), isNull);
+    });
+
+    test('повторный запуск ничего не меняет', () async {
+      await seedArchive(
+        archiveWith([
+          {
+            'id': 'birth-danya',
+            'date': '2018-09-27',
+            'title': 'Рождение Даниила',
+            'kind': 'birth',
+            'memberId': 'child-4',
+          },
+        ]),
+      );
+
+      final migrations = AppMigrations();
+      expect(await migrations.run(), isTrue);
+      final first = storage.getString(FamilyRepository.storageKey);
+
+      expect(await migrations.run(), isFalse);
+      expect(storage.getString(FamilyRepository.storageKey), first);
     });
   });
 

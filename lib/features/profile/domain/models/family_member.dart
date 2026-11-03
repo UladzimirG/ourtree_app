@@ -2,6 +2,7 @@ import 'package:ourtree_app/core/utils/collection_equality.dart';
 import 'package:ourtree_app/core/utils/json_reader.dart';
 import 'package:ourtree_app/features/profile/domain/models/family_media.dart';
 import 'package:ourtree_app/features/profile/domain/models/gallery_shot.dart';
+import 'package:ourtree_app/features/profile/domain/models/member_story.dart';
 import 'package:ourtree_app/features/profile/domain/models/photo_position.dart';
 import 'package:ourtree_app/features/profile/domain/models/wishlist_item.dart';
 
@@ -25,6 +26,7 @@ class FamilyMember {
     this.wishlistUrl,
     this.wishlist = const <WishlistItem>[],
     this.gallery = const <GalleryShot>[],
+    this.stories = const <MemberStory>[],
     this.accent = '',
   });
 
@@ -77,6 +79,9 @@ class FamilyMember {
   final List<WishlistItem> wishlist;
   final List<GalleryShot> gallery;
 
+  /// Длинные истории для блока «Интересное».
+  final List<MemberStory> stories;
+
   /// Цвет акцента профиля в формате `#rrggbb`.
   final String accent;
 
@@ -109,6 +114,9 @@ class FamilyMember {
       gallery: readMapList(json['gallery'])
           .map(GalleryShot.fromJson)
           .toList(growable: false),
+      stories: readMapList(json['stories'])
+          .map(MemberStory.fromJson)
+          .toList(growable: false),
       accent: readString(json['accent']),
     );
   }
@@ -132,12 +140,12 @@ class FamilyMember {
         'habits': habits,
         'quotes': quotes,
         if (wishlistUrl != null) 'wishlistUrl': wishlistUrl,
-        'wishlist': wishlist
-            .map((item) => item.toJson())
-            .toList(growable: false),
-        'gallery': gallery
-            .map((shot) => shot.toJson())
-            .toList(growable: false),
+        'wishlist':
+            wishlist.map((item) => item.toJson()).toList(growable: false),
+        'gallery': gallery.map((shot) => shot.toJson()).toList(growable: false),
+        if (stories.isNotEmpty)
+          'stories':
+              stories.map((story) => story.toJson()).toList(growable: false),
         'accent': accent,
       };
 
@@ -163,6 +171,7 @@ class FamilyMember {
     String? Function()? wishlistUrl,
     List<WishlistItem>? wishlist,
     List<GalleryShot>? gallery,
+    List<MemberStory>? stories,
     String? accent,
   }) =>
       FamilyMember(
@@ -185,6 +194,7 @@ class FamilyMember {
         wishlistUrl: wishlistUrl == null ? this.wishlistUrl : wishlistUrl(),
         wishlist: wishlist ?? this.wishlist,
         gallery: gallery ?? this.gallery,
+        stories: stories ?? this.stories,
         accent: accent ?? this.accent,
       );
 
@@ -209,6 +219,7 @@ class FamilyMember {
           wishlistUrl == other.wishlistUrl &&
           listsEqual(wishlist, other.wishlist) &&
           listsEqual(gallery, other.gallery) &&
+          listsEqual(stories, other.stories) &&
           accent == other.accent;
 
   @override
@@ -230,6 +241,7 @@ class FamilyMember {
         wishlistUrl,
         listsHash(wishlist),
         listsHash(gallery),
+        listsHash(stories),
         accent,
       ]);
 }

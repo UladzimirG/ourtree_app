@@ -91,8 +91,7 @@ class FamilyModel {
     FamilySettings? settings,
   }) {
     final trimmed = name.trim();
-    final familyName =
-        trimmed.isEmpty ? FamilySettings.fallbackName : trimmed;
+    final familyName = trimmed.isEmpty ? FamilySettings.fallbackName : trimmed;
     return FamilyModel(
       id: id,
       name: familyName,

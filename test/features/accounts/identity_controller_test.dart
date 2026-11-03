@@ -126,8 +126,7 @@ void main() {
       expect(store.activeFamilyUpdates, ['family-1']);
 
       container.invalidate(identityControllerProvider);
-      final reloaded =
-          await container.read(identityControllerProvider.future);
+      final reloaded = await container.read(identityControllerProvider.future);
 
       expect(reloaded.activeFamilyId, 'family-1');
       expect(reloaded.user.createdAt, first.user.createdAt);

@@ -36,12 +36,25 @@ class FamilySyncPayload {
     );
   }
 
+  /// Читает карту отметок.
+  ///
+  /// Ранние версии клиента писали её JSON-строкой (`jsonEncode`), поэтому
+  /// строковый формат тоже разбираем — иначе серверные отметки считались бы
+  /// пустыми и правки с другого устройства никогда не применялись.
   static Map<String, int> _readMap(Object? raw) {
     final result = <String, int>{};
-    if (raw is Map) {
-      for (final entry in raw.entries) {
-        final value = entry.value;
-        if (value is num) result[entry.key.toString()] = value.toInt();
+    Object? value = raw;
+    if (value is String && value.trim().isNotEmpty) {
+      try {
+        value = jsonDecode(value);
+      } catch (_) {
+        return result;
+      }
+    }
+    if (value is Map) {
+      for (final entry in value.entries) {
+        final item = entry.value;
+        if (item is num) result[entry.key.toString()] = item.toInt();
       }
     }
     return result;
@@ -56,7 +69,16 @@ String mediaKey(String id) => 'media:$id';
 
 const String settingsKey = 'settings';
 
+/// Ключ локального хранилища с надгробиями, которые ещё не доехали до облака.
+///
+/// Их пишут миграции (например, удаление демо-событий): так удаление уезжает
+/// в облако при следующем подключении семьи, а не отменяется серверной копией.
+const String pendingTombstonesStorageKey = 'family_sync_pending_tombstones';
+
 /// Отпечатки содержимого сущностей: по ним видно, что именно изменилось.
+///
+/// Путь к локальному файлу в отпечаток не входит: он не синхронизируется и не
+/// должен считаться правкой.
 Map<String, String> entityFingerprints(FamilyData data) => {
       settingsKey: jsonEncode(data.settings.toJson()),
       for (final member in data.members)
@@ -64,7 +86,7 @@ Map<String, String> entityFingerprints(FamilyData data) => {
       for (final event in data.timelineEvents)
         eventKey(event.id): jsonEncode(event.toJson()),
       for (final asset in data.mediaLibrary)
-        mediaKey(asset.id): jsonEncode(asset.toJson()),
+        mediaKey(asset.id): jsonEncode(asset.toJson(includeLocalPath: false)),
     };
 
 /// Объединение локального и серверного архива **по сущностям**.

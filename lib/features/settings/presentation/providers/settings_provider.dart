@@ -24,7 +24,8 @@ class FamilySettingsNotifier extends _$FamilySettingsNotifier {
         familyName: name,
         // Как только значение отличается от загруженного, это правка
         // пользователя и её больше не перекрывает демо-название.
-        nameIsCustom: settings.nameIsCustom || name.trim() != settings.familyName,
+        nameIsCustom:
+            settings.nameIsCustom || name.trim() != settings.familyName,
       ),
     );
   }

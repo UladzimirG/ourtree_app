@@ -21,6 +21,7 @@ class MemberEditorCard extends StatelessWidget {
     this.canDelete = true,
     this.members = const <FamilyMember>[],
     this.events = const <TimelineEvent>[],
+    this.initiallyExpanded = false,
   });
 
   final FamilyMember member;
@@ -30,6 +31,7 @@ class MemberEditorCard extends StatelessWidget {
   final bool canDelete;
   final List<FamilyMember> members;
   final List<TimelineEvent> events;
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,7 @@ class MemberEditorCard extends StatelessWidget {
     return PaperCard(
       padding: EdgeInsets.zero,
       child: ExpansionTile(
+        initiallyExpanded: initiallyExpanded,
         shape: const Border(),
         collapsedShape: const Border(),
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -92,7 +95,8 @@ class MemberEditorCard extends StatelessWidget {
             ownerId: member.id,
             title: l10n.memberBirthdayMedia,
             showEvents: false,
-            onChanged: (media) => onChanged(member.copyWith(birthdayMedia: media)),
+            onChanged: (media) =>
+                onChanged(member.copyWith(birthdayMedia: media)),
           ),
           const Divider(color: Color(0x336F4B2A), height: 28),
           SettingsPhotoField(
@@ -166,6 +170,8 @@ class MemberEditorCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.memberWishlistTitle.toUpperCase(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: settingsCaptionStyle(theme),
                 ),
               ),
@@ -225,9 +231,8 @@ class MemberEditorCard extends StatelessWidget {
                             member.wishlist,
                             index,
                             member.wishlist[index].copyWith(
-                              url: () => value.trim().isEmpty
-                                  ? null
-                                  : value.trim(),
+                              url: () =>
+                                  value.trim().isEmpty ? null : value.trim(),
                             ),
                           ),
                         ),
@@ -243,9 +248,8 @@ class MemberEditorCard extends StatelessWidget {
                             member.wishlist,
                             index,
                             member.wishlist[index].copyWith(
-                              note: () => value.trim().isEmpty
-                                  ? null
-                                  : value.trim(),
+                              note: () =>
+                                  value.trim().isEmpty ? null : value.trim(),
                             ),
                           ),
                         ),
@@ -277,6 +281,8 @@ class MemberEditorCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.memberGalleryTitle.toUpperCase(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: settingsCaptionStyle(theme),
                 ),
               ),
@@ -377,6 +383,108 @@ class MemberEditorCard extends StatelessWidget {
                 ],
               ),
             ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.profileStories.toUpperCase(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: settingsCaptionStyle(theme),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => onChanged(
+                  member.copyWith(
+                    stories: [
+                      ...member.stories,
+                      MemberStory(
+                        id: 'story-${DateTime.now().microsecondsSinceEpoch}',
+                        title: '',
+                        text: '',
+                      ),
+                    ],
+                  ),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.profileStoriesAdd),
+              ),
+            ],
+          ),
+          if (member.stories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l10n.profileStoriesEmpty,
+                style: theme.textTheme.bodySmall,
+              ),
+            )
+          else
+            for (var index = 0; index < member.stories.length; index++)
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+                decoration: BoxDecoration(
+                  color: const Color(0x66FFFDF6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0x336F4B2A)),
+                ),
+                child: Column(
+                  children: [
+                    SettingsTextField(
+                      key: ValueKey<String>(
+                        'story-${member.stories[index].id}-title',
+                      ),
+                      label: l10n.profileStoryTitleField,
+                      initialValue: member.stories[index].title,
+                      onChanged: (value) => onChanged(
+                        member.copyWith(
+                          stories: _replaceStory(
+                            member.stories,
+                            index,
+                            member.stories[index].copyWith(title: value),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SettingsTextField(
+                      key: ValueKey<String>(
+                        'story-${member.stories[index].id}-text',
+                      ),
+                      label: l10n.profileStoryTextField,
+                      initialValue: member.stories[index].text,
+                      maxLines: 5,
+                      onChanged: (value) => onChanged(
+                        member.copyWith(
+                          stories: _replaceStory(
+                            member.stories,
+                            index,
+                            member.stories[index].copyWith(text: value),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => onChanged(
+                          member.copyWith(
+                            stories: [
+                              for (var i = 0; i < member.stories.length; i++)
+                                if (i != index) member.stories[i],
+                            ],
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.terracotta,
+                        ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text(l10n.profileStoryDelete),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           SettingsJsonField(
             label: l10n.settingsAdvancedJson,
             value: const JsonEncoder.withIndent('  ').convert(member.toJson()),
@@ -386,18 +494,29 @@ class MemberEditorCard extends StatelessWidget {
               FamilyMember.fromJson(json).copyWith(id: member.id),
             ),
           ),
-          if (canDelete)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: onRemove,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.terracotta,
-                ),
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l10n.memberDelete),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: canDelete
+                  ? onRemove
+                  : () => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.adminOnlyDeleteHint)),
+                      ),
+              style: TextButton.styleFrom(
+                foregroundColor: canDelete
+                    ? AppColors.terracotta
+                    : AppColors.inkSoft.withValues(alpha: 0.6),
+              ),
+              icon: Icon(
+                canDelete ? Icons.delete_outline : Icons.lock_outline,
+              ),
+              label: Text(
+                canDelete
+                    ? l10n.memberDelete
+                    : '${l10n.memberDelete} · ${l10n.adminOnlyAction}',
               ),
             ),
+          ),
         ],
       ),
     );
@@ -431,5 +550,16 @@ List<GalleryShot> _replaceShot(
   return [
     for (var i = 0; i < shots.length; i++)
       if (i == index) value else shots[i],
+  ];
+}
+
+List<MemberStory> _replaceStory(
+  List<MemberStory> stories,
+  int index,
+  MemberStory value,
+) {
+  return [
+    for (var i = 0; i < stories.length; i++)
+      if (i == index) value else stories[i],
   ];
 }

@@ -79,9 +79,75 @@ function Save-Png([System.Drawing.Bitmap]$bmp, [string]$target) {
   $bmp.Dispose()
 }
 
+# Обрезает белые поля мастера по границам логотипа. Без этого на иконке
+# остаётся много пустого места, и дерево кажется крошечным.
+function Get-CroppedMaster([System.Drawing.Image]$img) {
+  $bmp = New-Object System.Drawing.Bitmap $img
+  $minX = $bmp.Width
+  $minY = $bmp.Height
+  $maxX = -1
+  $maxY = -1
+  $step = 4
+  for ($y = 0; $y -lt $bmp.Height; $y += $step) {
+    for ($x = 0; $x -lt $bmp.Width; $x += $step) {
+      $c = $bmp.GetPixel($x, $y)
+      $delta = [Math]::Abs($c.R - 254) + [Math]::Abs($c.G - 255) +
+        [Math]::Abs($c.B - 254)
+      if ($delta -gt 24) {
+        if ($x -lt $minX) { $minX = $x }
+        if ($x -gt $maxX) { $maxX = $x }
+        if ($y -lt $minY) { $minY = $y }
+        if ($y -gt $maxY) { $maxY = $y }
+      }
+    }
+  }
+  $bmp.Dispose()
+  if ($maxX -lt 0) { return $img }
+
+  $size = [Math]::Max($maxX - $minX, $maxY - $minY)
+  $pad = [int]($size * 0.07)
+  $left = [Math]::Max(0, $minX - $pad)
+  $top = [Math]::Max(0, $minY - $pad)
+  $right = [Math]::Min($img.Width - 1, $maxX + $pad)
+  $bottom = [Math]::Min($img.Height - 1, $maxY + $pad)
+  $rect = New-Object System.Drawing.Rectangle $left, $top,
+    ($right - $left), ($bottom - $top)
+
+  $cropped = New-Object System.Drawing.Bitmap ($rect.Width), ($rect.Height)
+  $g = [System.Drawing.Graphics]::FromImage($cropped)
+  $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+  $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+  $g.DrawImage($img, (New-Object System.Drawing.Rectangle 0, 0, $rect.Width, $rect.Height),
+    $rect, [System.Drawing.GraphicsUnit]::Pixel)
+  $g.Dispose()
+  return $cropped
+}
+
+# Логотип на splash-экране: не квадрат, а холст нужного размера.
+function New-Splash([System.Drawing.Image]$img, [int]$width, [int]$height,
+  [System.Drawing.Color]$color) {
+  $bmp = New-Object System.Drawing.Bitmap $width, $height
+  $g = [System.Drawing.Graphics]::FromImage($bmp)
+  $g.Clear($color)
+  $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+  $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+  $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+
+  $scale = [Math]::Min($width / $img.Width, $height / $img.Height) * 0.78
+  $w = [int][Math]::Round($img.Width * $scale)
+  $h = [int][Math]::Round($img.Height * $scale)
+  $x = [int](($width - $w) / 2)
+  $y = [int](($height - $h) / 2)
+  $g.DrawImage($img, $x, $y, $w, $h)
+  $g.Dispose()
+  return $bmp
+}
+
 $master = [System.Drawing.Image]::FromFile($masterPath)
-$bg = Get-CornerColor $master
-Write-Host ("Фон мастера: #{0:X2}{1:X2}{2:X2}" -f $bg.R, $bg.G, $bg.B)
+$master = Get-CroppedMaster $master
+# Тёплый бумажный фон вместо почти белого: дерево видно на белом лаунчере.
+$bg = [System.Drawing.Color]::FromArgb(255, 255, 244, 222)
+Write-Host ("Фон иконки: #{0:X2}{1:X2}{2:X2}" -f $bg.R, $bg.G, $bg.B)
 
 # --- Android: legacy + adaptive ---------------------------------------------
 $legacy = @{ 'mdpi' = 48; 'hdpi' = 72; 'xhdpi' = 96; 'xxhdpi' = 144; 'xxxhdpi' = 192 }
@@ -100,6 +166,10 @@ foreach ($density in $foregrounds.Keys) {
   Save-Png (New-Icon $master $size 0.80 $bg) (Join-Path $root "$base/ic_launcher_foreground.png")
 }
 
+# --- Android splash ----------------------------------------------------------
+Save-Png (New-Icon $master 512 1.0 $bg) `
+  (Join-Path $root 'android/app/src/main/res/drawable-nodpi/launch_logo.png')
+
 # --- iOS --------------------------------------------------------------------
 $ios = @{
   'Icon-App-20x20@1x.png' = 20; 'Icon-App-20x20@2x.png' = 40; 'Icon-App-20x20@3x.png' = 60
@@ -115,6 +185,15 @@ foreach ($name in $ios.Keys) {
   $target = "ios/Runner/Assets.xcassets/AppIcon.appiconset/$name"
   Save-Png (New-Icon $master $size 1.0 $bg) (Join-Path $root $target)
 }
+
+# --- iOS launch image -------------------------------------------------------
+$launchDir = 'ios/Runner/Assets.xcassets/LaunchImage.imageset'
+Save-Png (New-Splash $master 168 185 $bg) `
+  (Join-Path $root "$launchDir/LaunchImage.png")
+Save-Png (New-Splash $master 336 370 $bg) `
+  (Join-Path $root "$launchDir/LaunchImage@2x.png")
+Save-Png (New-Splash $master 504 555 $bg) `
+  (Join-Path $root "$launchDir/LaunchImage@3x.png")
 
 # --- macOS ------------------------------------------------------------------
 foreach ($size in @(16, 32, 64, 128, 256, 512, 1024)) {

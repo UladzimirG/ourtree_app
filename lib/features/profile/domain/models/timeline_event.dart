@@ -20,6 +20,8 @@ class TimelineEvent {
     this.memberId,
     this.showElapsed,
     this.showInCalendar,
+    this.showInTimeline,
+    this.recurringYearly,
     this.hiddenFrom = const <String>[],
   });
 
@@ -52,6 +54,17 @@ class TimelineEvent {
   /// `null` и `true` — отмечать, `false` — скрыть.
   final bool? showInCalendar;
 
+  /// Показывать ли событие в таймлайне.
+  ///
+  /// `null` и `true` — показывать, `false` — событие живёт только в календаре.
+  final bool? showInTimeline;
+
+  /// Повторять ли событие каждый год в календаре.
+  ///
+  /// Используется для дат без отдельного события: например, дня рождения
+  /// человека, которого нет среди профилей семьи.
+  final bool? recurringYearly;
+
   /// Идентификаторы аккаунтов и гостевых ссылок, которым событие не видно.
   ///
   /// Поле проверяет сервер (`hiddenFrom` в `validateFamily`), хотя в
@@ -65,6 +78,15 @@ class TimelineEvent {
 
   /// Скрыто ли событие от пользователя [uid].
   bool isHiddenFrom(String? uid) => uid != null && hiddenFrom.contains(uid);
+
+  /// Показывается ли событие в таймлайне (по умолчанию — да).
+  bool get showsInTimeline => showInTimeline != false;
+
+  /// Событие существует только в календаре.
+  bool get isCalendarOnly => showInTimeline == false;
+
+  /// Дата повторяется каждый год.
+  bool get isRecurringYearly => recurringYearly == true;
 
   factory TimelineEvent.fromJson(Map<String, dynamic> json) {
     final position = readMap(json['photoPosition']);
@@ -84,6 +106,8 @@ class TimelineEvent {
       memberId: readNullableString(json['memberId']),
       showElapsed: readBool(json['showElapsed']),
       showInCalendar: readBool(json['showInCalendar']),
+      showInTimeline: readBool(json['showInTimeline']),
+      recurringYearly: readBool(json['recurringYearly']),
       hiddenFrom: readStringList(json['hiddenFrom']),
     );
   }
@@ -102,6 +126,11 @@ class TimelineEvent {
         if (memberId != null) 'memberId': memberId,
         if (showElapsed != null) 'showElapsed': showElapsed,
         if (showInCalendar != null) 'showInCalendar': showInCalendar,
+        // Пишем только не-дефолтные значения: иначе у старых событий
+        // изменится JSON-отпечаток и синхронизация пометит весь архив
+        // как изменённый.
+        if (showInTimeline == false) 'showInTimeline': false,
+        if (recurringYearly == true) 'recurringYearly': true,
         if (hiddenFrom.isNotEmpty) 'hiddenFrom': hiddenFrom,
       };
 
@@ -123,6 +152,8 @@ class TimelineEvent {
     String? Function()? memberId,
     bool? Function()? showElapsed,
     bool? showInCalendar,
+    bool? showInTimeline,
+    bool? recurringYearly,
     List<String>? hiddenFrom,
   }) =>
       TimelineEvent(
@@ -140,6 +171,8 @@ class TimelineEvent {
         memberId: memberId == null ? this.memberId : memberId(),
         showElapsed: showElapsed == null ? this.showElapsed : showElapsed(),
         showInCalendar: showInCalendar ?? this.showInCalendar,
+        showInTimeline: showInTimeline ?? this.showInTimeline,
+        recurringYearly: recurringYearly ?? this.recurringYearly,
         hiddenFrom: hiddenFrom ?? this.hiddenFrom,
       );
 
@@ -160,6 +193,8 @@ class TimelineEvent {
           memberId == other.memberId &&
           showElapsed == other.showElapsed &&
           showInCalendar == other.showInCalendar &&
+          showInTimeline == other.showInTimeline &&
+          recurringYearly == other.recurringYearly &&
           listsEqual(hiddenFrom, other.hiddenFrom);
 
   @override
@@ -177,6 +212,8 @@ class TimelineEvent {
         memberId,
         showElapsed,
         showInCalendar,
+        showInTimeline,
+        recurringYearly,
         listsHash(hiddenFrom),
       ]);
 }

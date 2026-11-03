@@ -485,7 +485,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventTextField => 'Description';
 
   @override
-  String get eventMemberField => 'Related member';
+  String get eventMemberField => 'Main member';
 
   @override
   String get eventMemberNone => 'No member';
@@ -1248,6 +1248,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mediaUploadUnavailableHint =>
+      'These files were stored on another device or lost after reinstall — please add them again.';
+
+  @override
   String mediaOutboxRetry(int count) {
     return 'Queued: $count — retry';
   }
@@ -1263,4 +1267,401 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncStatusError => 'Offline';
+
+  @override
+  String get editModeEnter => 'Edit mode';
+
+  @override
+  String get editModeExit => 'Exit edit mode';
+
+  @override
+  String get editModeBanner => 'Edit mode: tap the pencil on a card';
+
+  @override
+  String get editModeDone => 'Done';
+
+  @override
+  String get adminOnlyAction => 'Admin only';
+
+  @override
+  String get adminOnlyDeleteHint =>
+      'Only an administrator can delete events and members.';
+
+  @override
+  String get adminOnlySettingsHint =>
+      'Backups, accounts and the demo reset are available to administrators only.';
+
+  @override
+  String get accountEntryTitle => 'Account';
+
+  @override
+  String get accountAuthTitle => 'Sign in or create an account';
+
+  @override
+  String get accountSignInTab => 'Sign in';
+
+  @override
+  String get accountSignUpTab => 'Sign up';
+
+  @override
+  String get accountSignInSubtitle => 'Sign in to load your family data.';
+
+  @override
+  String get accountSignUpHint =>
+      'A new account gets the viewer role. An administrator can change it later.';
+
+  @override
+  String get accountFirstAdminHint =>
+      'The first account of the family becomes an administrator.';
+
+  @override
+  String accountSessionTitle(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
+  String get accountManage => 'Manage accounts';
+
+  @override
+  String get accountSwitch => 'Switch account';
+
+  @override
+  String get calendarViewMonth => 'Month';
+
+  @override
+  String get calendarViewYear => 'Year';
+
+  @override
+  String get calendarToday => 'Today';
+
+  @override
+  String get calendarAddEvent => 'Add event';
+
+  @override
+  String get calendarAddDate => 'Add date';
+
+  @override
+  String get calendarEntryTitle => 'Calendar date';
+
+  @override
+  String get calendarEntryTitleField => 'Title';
+
+  @override
+  String get calendarEntryNoteField => 'Note';
+
+  @override
+  String get calendarEntryDateField => 'Date';
+
+  @override
+  String get calendarEntryRecurring => 'Repeat every year';
+
+  @override
+  String get calendarEntryHint =>
+      'This date appears only in the calendar and is not added to the timeline.';
+
+  @override
+  String get calendarEntrySaved => 'Date added to the calendar.';
+
+  @override
+  String get calendarEntryDeleted => 'Date removed from the calendar.';
+
+  @override
+  String get calendarEntryEdit => 'Edit date';
+
+  @override
+  String get calendarEntryDelete => 'Delete date';
+
+  @override
+  String get calendarEntryDeleteConfirmTitle => 'Delete this date?';
+
+  @override
+  String get calendarEntryDeleteConfirmBody =>
+      'The date will disappear from the calendar. Timeline events are not affected.';
+
+  @override
+  String get calendarEntryDefaultTitle => 'Date';
+
+  @override
+  String get calendarLegendEvent => 'Events';
+
+  @override
+  String get calendarLegendBirthday => 'Birthdays';
+
+  @override
+  String get eventShowInTimeline => 'Show in timeline';
+
+  @override
+  String get eventRecurringYearly => 'Repeat every year';
+
+  @override
+  String get eventCalendarOnlyBadge => 'Calendar only';
+
+  @override
+  String get eventMemberHint =>
+      'Affects access and the profile. Tag several people on a photo in \"Who is in the photo\".';
+
+  @override
+  String get eventNewBadge => 'New';
+
+  @override
+  String get timelineOrderLabel => 'Order';
+
+  @override
+  String get timelineOrderOldest => 'Oldest first';
+
+  @override
+  String get timelineOrderNewest => 'Newest first';
+
+  @override
+  String get profileStories => 'Interesting';
+
+  @override
+  String get profileStoriesEmpty => 'No stories yet.';
+
+  @override
+  String get profileStoriesAdd => 'Add story';
+
+  @override
+  String get profileStoryDelete => 'Delete story';
+
+  @override
+  String get profileStoryTitleField => 'Title';
+
+  @override
+  String get profileStoryTextField => 'Story text';
+
+  @override
+  String get readMore => 'Read more';
+
+  @override
+  String get readLess => 'Show less';
+
+  @override
+  String get memberEditorTitle => 'Member';
+
+  @override
+  String get eventEditorTitle => 'Event';
+
+  @override
+  String get memberEdit => 'Edit member';
+
+  @override
+  String get eventEdit => 'Edit event';
+
+  @override
+  String get profileEdit => 'Edit profile';
+
+  @override
+  String get familyCloudInviteCopy => 'Copy code';
+
+  @override
+  String get familyCloudInviteCopyHint =>
+      'The browser blocked copying: tap the copy icon next to the code.';
+
+  @override
+  String get backupDownloadStarted =>
+      'The backup file has been downloaded by the browser.';
+
+  @override
+  String get backupImportWrongFile =>
+      'Please choose an OurTree backup file (.json or .ourtree).';
+
+  @override
+  String backupImportTooLarge(int mb) {
+    return 'The file is larger than $mb MB and may not fit into browser memory. Export a backup without media and try again.';
+  }
+
+  @override
+  String get backupImportUnreadable =>
+      'The selected file could not be read. If it is stored in iCloud, download it to the device first.';
+
+  @override
+  String backupImportPartial(int count) {
+    return '$count media files could not be restored.';
+  }
+
+  @override
+  String get demoEditNoticeTitle => 'Changes stay on this device';
+
+  @override
+  String get demoEditNoticeBody =>
+      'The archive will not be saved to the cloud. Create a family and sign in to an account to keep the data and see it on other devices.';
+
+  @override
+  String get demoEditNoticeAction => 'Create family';
+
+  @override
+  String get demoEditNoticeLater => 'Later';
+
+  @override
+  String get demoLocalOnlyNotice =>
+      'Local archive only: not synced to the cloud';
+
+  @override
+  String get accountNoFamilyAttached =>
+      'This account is not linked to a family yet — connect by invite code in General settings → Cloud.';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String get aboutHint => 'Version, developer, documents and licenses.';
+
+  @override
+  String get aboutDescription =>
+      'OurTree is a family album: profiles, timeline, calendar and media library. Data is kept on the device and synced to the cloud once a family is connected.';
+
+  @override
+  String get aboutVersion => 'Version';
+
+  @override
+  String aboutVersionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutPlatform => 'Platform';
+
+  @override
+  String get aboutDeveloper => 'Developer';
+
+  @override
+  String get aboutContact => 'Contact';
+
+  @override
+  String get aboutPrivacy => 'Privacy policy';
+
+  @override
+  String get aboutTerms => 'Terms of use';
+
+  @override
+  String get aboutLicenses => 'Open source licenses';
+
+  @override
+  String get aboutChangelogTitle => 'What\'s new';
+
+  @override
+  String get aboutChangelog1 =>
+      'Edits arrive from other devices without restarting the app';
+
+  @override
+  String get aboutChangelog2 =>
+      'Photos are uploaded to the cloud automatically in a created family';
+
+  @override
+  String get aboutChangelog3 => 'Backup import works on iPhone (web version)';
+
+  @override
+  String get aboutChangelog4 => 'Invite code is copied automatically';
+
+  @override
+  String get aboutChangelog5 =>
+      'Push notifications about birthdays, events and family updates';
+
+  @override
+  String get aboutSupport => 'Support';
+
+  @override
+  String get aboutFamilyId => 'Family ID';
+
+  @override
+  String get aboutCopyFamilyId => 'Copy family ID';
+
+  @override
+  String get aboutFamilyIdCopied => 'Family ID copied.';
+
+  @override
+  String get aboutNoFamily =>
+      'No family connected yet: connect one in General settings → Cloud.';
+
+  @override
+  String aboutCopyright(int year) {
+    return '© $year OurTree';
+  }
+
+  @override
+  String get aboutLinkFailed => 'Could not open the link.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsHint =>
+      'Birthdays, calendar events and family updates.';
+
+  @override
+  String get notificationsStatusTitle => 'Status on this device';
+
+  @override
+  String get notificationsEnable => 'Enable notifications';
+
+  @override
+  String get notificationsDisable => 'Disable';
+
+  @override
+  String get notificationsRefresh => 'Refresh token';
+
+  @override
+  String get notificationsEnabled =>
+      'Notifications are on: reminders and family updates will arrive on this device.';
+
+  @override
+  String get notificationsDisabled =>
+      'Notifications are off. Enable them to get reminders.';
+
+  @override
+  String get notificationsDenied =>
+      'Notifications are blocked in the browser or system settings. Allow them for this app and try again.';
+
+  @override
+  String get notificationsNoFamily =>
+      'Connect a family first: reminders are sent for your family archive.';
+
+  @override
+  String get notificationsFailed => 'Could not enable notifications.';
+
+  @override
+  String get notificationsFailedNoKey =>
+      'This build has no web-push key (FIREBASE_VAPID_KEY). Rebuild with --dart-define-from-file.';
+
+  @override
+  String get notificationsFailedPermission =>
+      'The browser did not grant permission.';
+
+  @override
+  String get notificationsFailedToken => 'Could not get a device token.';
+
+  @override
+  String get notificationsPrefsTitle => 'What to send';
+
+  @override
+  String get notificationsBirthdays => 'Birthdays';
+
+  @override
+  String get notificationsBirthdaysHint =>
+      'The day before and on the day itself.';
+
+  @override
+  String get notificationsCalendar => 'Calendar events';
+
+  @override
+  String get notificationsCalendarHint => 'Events marked \"show in calendar\".';
+
+  @override
+  String get notificationsFamilyUpdates => 'Family updates';
+
+  @override
+  String get notificationsFamilyUpdatesHint =>
+      'When someone edits the shared archive.';
+
+  @override
+  String get notificationsIosHint =>
+      'On iPhone notifications only work in the app added to the Home Screen (iOS 16.4+).';
+
+  @override
+  String get notificationsUpcoming => 'Coming up';
+
+  @override
+  String get notificationsUpcomingEmpty =>
+      'No birthdays or events in the next 7 days.';
 }

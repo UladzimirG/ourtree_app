@@ -160,11 +160,8 @@ class FirebaseFamilyCleanupService implements FamilyCleanupService {
     String name, {
     Set<String> keep = const <String>{},
   }) async {
-    final snapshot = await _db
-        .collection(_families)
-        .doc(familyId)
-        .collection(name)
-        .get();
+    final snapshot =
+        await _db.collection(_families).doc(familyId).collection(name).get();
     final docs = snapshot.docs
         .where((doc) => !keep.contains(doc.id))
         .toList(growable: false);

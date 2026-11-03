@@ -171,7 +171,8 @@ void main() {
       expect(container.read(accountsProvider).value, isEmpty);
     });
 
-    test('accounts, access rights and passwords survive a new container', () async {
+    test('accounts, access rights and passwords survive a new container',
+        () async {
       final notifier = await accounts();
       notifier.create(
         const AccountInput(
@@ -190,17 +191,19 @@ void main() {
 
       final next = ProviderContainer();
       addTearDown(next.dispose);
-      final restored =
-          await next.read(accountsProvider.future);
+      final restored = await next.read(accountsProvider.future);
 
       expect(restored.single.login, 'grandma');
       expect(restored.single.visibleMemberIds, ['papa']);
       expect(restored.single.allMembersVisible, isFalse);
       expect(
-        next.read(accountsProvider.notifier).authenticate(
+        next
+            .read(accountsProvider.notifier)
+            .authenticate(
               'grandma',
               'secret',
-            )?.id,
+            )
+            ?.id,
         restored.single.id,
       );
       expect(
@@ -213,10 +216,9 @@ void main() {
     });
 
     test('guest links survive a new container', () async {
-      final created =
-          container.read(guestLinksProvider.notifier).create(
-                const GuestLinkInput(label: 'Друг', days: 3),
-              );
+      final created = container.read(guestLinksProvider.notifier).create(
+            const GuestLinkInput(label: 'Друг', days: 3),
+          );
       await container.read(guestLinksProvider.future);
 
       final next = ProviderContainer();

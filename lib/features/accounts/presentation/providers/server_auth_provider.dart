@@ -46,8 +46,7 @@ class ServerSignInResult {
   /// Локальный аккаунт перенесён на сервер при этом входе.
   final bool migrated;
 
-  bool get isSuccess =>
-      status == ServerSignInStatus.success && account != null;
+  bool get isSuccess => status == ServerSignInStatus.success && account != null;
 }
 
 /// Серверная авторизация по логину и паролю.
@@ -213,6 +212,20 @@ class ServerAuth extends _$ServerAuth {
       localUserIdStorageKey,
       result.account.id,
     );
+
+    // Аккаунт уже состоит в семье: запоминаем её до пересборки личности,
+    // чтобы синхронизация сразу подтянула семейный архив.
+    final familyId = result.familyId;
+    if (familyId != null && familyId.isNotEmpty) {
+      try {
+        await ref
+            .read(userStoreProvider)
+            .setActiveFamily(result.account.id, familyId);
+      } catch (error) {
+        debugPrint('ServerAuth: не удалось сохранить активную семью: $error');
+      }
+    }
+
     ref.invalidate(localUserIdProvider);
     ref.invalidate(identityControllerProvider);
     if (result.account.isAdmin) {
@@ -250,7 +263,8 @@ class ServerAuth extends _$ServerAuth {
   ServerSignInStatus _statusFor(AccountsApiException error) {
     return switch (error.kind) {
       AccountsApiErrorKind.badPassword => ServerSignInStatus.invalidCredentials,
-      AccountsApiErrorKind.accountNotFound => ServerSignInStatus.accountNotFound,
+      AccountsApiErrorKind.accountNotFound =>
+        ServerSignInStatus.accountNotFound,
       _ => ServerSignInStatus.unavailable,
     };
   }
@@ -280,4 +294,3 @@ class ServerAuth extends _$ServerAuth {
     return AccountsError.unknown;
   }
 }
-

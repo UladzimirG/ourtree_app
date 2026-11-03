@@ -44,10 +44,17 @@ class AccountsApiException implements Exception {
 
 /// Результат успешного серверного входа.
 class ServerLoginResult {
-  const ServerLoginResult({required this.token, required this.account});
+  const ServerLoginResult({
+    required this.token,
+    required this.account,
+    this.familyId,
+  });
 
   final String token;
   final Account account;
+
+  /// Семья, в которой уже состоит аккаунт; нужна для автоподключения архива.
+  final String? familyId;
 }
 
 /// API серверных аккаунтов (Cloud Functions).
@@ -76,8 +83,8 @@ abstract class AccountsApi {
 /// Реализация поверх HTTPS-callable функций Firebase.
 class FirebaseAccountsApi implements AccountsApi {
   FirebaseAccountsApi({FirebaseFunctions? functions})
-      : _functions = functions ??
-            FirebaseFunctions.instanceFor(region: functionsRegion);
+      : _functions =
+            functions ?? FirebaseFunctions.instanceFor(region: functionsRegion);
 
   /// Регион совпадает с `FUNCTIONS_REGION` в `functions/src/region.ts`.
   static const String functionsRegion = 'europe-west3';
@@ -120,9 +127,11 @@ class FirebaseAccountsApi implements AccountsApi {
         'token',
       );
     }
+    final familyId = map['familyId'];
     return ServerLoginResult(
       token: token,
       account: _account(map['account']),
+      familyId: familyId is String && familyId.isNotEmpty ? familyId : null,
     );
   }
 
@@ -200,7 +209,8 @@ class FirebaseAccountsApi implements AccountsApi {
         return AccountsApiException(AccountsApiErrorKind.unavailable, message);
       case 'not-found':
         return message.contains('account/not-found')
-            ? AccountsApiException(AccountsApiErrorKind.accountNotFound, message)
+            ? AccountsApiException(
+                AccountsApiErrorKind.accountNotFound, message)
             : AccountsApiException(AccountsApiErrorKind.unavailable, message);
       case 'permission-denied':
         return message.contains('account/bad-password')
@@ -219,4 +229,3 @@ class FirebaseAccountsApi implements AccountsApi {
     }
   }
 }
-

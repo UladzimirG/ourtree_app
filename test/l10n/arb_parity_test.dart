@@ -67,9 +67,8 @@ void main() {
   test('@-описания не расходятся с шаблоном', () {
     final enMeta = en.keys.where((key) => key.startsWith('@')).toSet();
     for (final translation in _translations.entries) {
-      final meta = translation.value.keys
-          .where((key) => key.startsWith('@'))
-          .toSet();
+      final meta =
+          translation.value.keys.where((key) => key.startsWith('@')).toSet();
       expect(
         meta.difference(enMeta),
         isEmpty,
@@ -89,7 +88,8 @@ void main() {
       for (final key in pluralKeys) {
         final value = arb[key] as String;
         expect(value, contains('few{'), reason: 'Нет формы few: $locale/$key');
-        expect(value, contains('many{'), reason: 'Нет формы many: $locale/$key');
+        expect(value, contains('many{'),
+            reason: 'Нет формы many: $locale/$key');
         expect(
           value,
           contains('other{'),

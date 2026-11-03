@@ -74,9 +74,8 @@ class MediaOutboxController extends _$MediaOutboxController {
           final uploaded = await ref.read(mediaRepositoryProvider).uploadAsset(
                 asset: MediaAsset(
                   id: item.assetId,
-                  source: item.storedId == null
-                      ? ''
-                      : 'hive://${item.storedId}',
+                  source:
+                      item.storedId == null ? '' : 'hive://${item.storedId}',
                   type: item.type,
                   name: item.name,
                   createdAt: item.createdAt,
@@ -92,16 +91,12 @@ class MediaOutboxController extends _$MediaOutboxController {
                     .read(mediaUploadProgressProvider.notifier)
                     .setProgress(item.assetId, value),
               );
-          ref
-              .read(mediaUploadProgressProvider.notifier)
-              .clear(item.assetId);
+          ref.read(mediaUploadProgressProvider.notifier).clear(item.assetId);
 
           ref.read(familyDataProvider.notifier).upsertMediaAsset(uploaded);
           items = await _outbox.remove(item.assetId);
         } catch (error) {
-          ref
-              .read(mediaUploadProgressProvider.notifier)
-              .clear(item.assetId);
+          ref.read(mediaUploadProgressProvider.notifier).clear(item.assetId);
           items = await _outbox.replace(
             item.copyWith(
               attempts: item.attempts + 1,

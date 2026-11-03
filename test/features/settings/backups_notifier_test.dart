@@ -170,7 +170,8 @@ void main() {
       expect(container.read(familyDataProvider).value!.members, isEmpty);
     });
 
-    test('import restores bundled assets into Hive and rewrites links', () async {
+    test('import restores bundled assets into Hive and rewrites links',
+        () async {
       final notifier = await backups();
       final payload = {
         'format': 'ourtree-backup',
@@ -194,9 +195,11 @@ void main() {
         },
       };
 
-      expect(await notifier.importBytes(Uint8List.fromList(utf8.encode(
-        jsonEncode(payload),
-      ))), isTrue);
+      expect(
+          await notifier.importBytes(Uint8List.fromList(utf8.encode(
+            jsonEncode(payload),
+          ))),
+          isTrue);
 
       final source =
           container.read(familyDataProvider).value!.members.single.photo!;

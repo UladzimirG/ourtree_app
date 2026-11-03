@@ -157,9 +157,7 @@ class AccountsNotifier extends _$AccountsNotifier {
 
   void remove(String id) {
     _set(
-      _accounts
-          .where((account) => account.id != id)
-          .toList(growable: false),
+      _accounts.where((account) => account.id != id).toList(growable: false),
     );
   }
 
@@ -233,8 +231,7 @@ class CurrentAccountId extends _$CurrentAccountId {
 Account? currentAccount(Ref ref) {
   final id = ref.watch(currentAccountIdProvider);
   if (id == null) return null;
-  final accounts =
-      ref.watch(accountsProvider).value ?? const <Account>[];
+  final accounts = ref.watch(accountsProvider).value ?? const <Account>[];
   return _firstOrNull(accounts, (account) => account.id == id);
 }
 
@@ -245,7 +242,8 @@ UserRole currentRole(Ref ref) =>
 
 /// Может ли текущий пользователь управлять аккаунтами.
 @Riverpod(keepAlive: true)
-bool canManageAccounts(Ref ref) => ref.watch(currentRoleProvider) == UserRole.admin;
+bool canManageAccounts(Ref ref) =>
+    ref.watch(currentRoleProvider) == UserRole.admin;
 
 /// Гостевые ссылки, выпущенные для просмотра альбома без аккаунта.
 @Riverpod(keepAlive: true)

@@ -70,8 +70,7 @@ class MediaAsset {
 
   bool get isStored => source.startsWith('hive://');
 
-  String? get storedId =>
-      isStored ? source.substring('hive://'.length) : null;
+  String? get storedId => isStored ? source.substring('hive://'.length) : null;
 
   // --- v2: облако ---
 
@@ -140,7 +139,12 @@ class MediaAsset {
         deletedAt: readInt(json['deletedAt']),
       );
 
-  Map<String, dynamic> toJson() => {
+  /// JSON для локального хранения или облака.
+  ///
+  /// [includeLocalPath] = `false` убирает путь к файлу на конкретном устройстве:
+  /// он не имеет смысла на другом устройстве и не должен уезжать в облако или
+  /// в файл резервной копии.
+  Map<String, dynamic> toJson({bool includeLocalPath = true}) => {
         'id': id,
         'source': source,
         'type': type.wireName,
@@ -154,7 +158,7 @@ class MediaAsset {
         if (downloadUrl != null) 'downloadUrl': downloadUrl,
         if (thumbUrl != null) 'thumbUrl': thumbUrl,
         if (posterUrl != null) 'posterUrl': posterUrl,
-        if (localPath != null) 'localPath': localPath,
+        if (includeLocalPath && localPath != null) 'localPath': localPath,
         if (width != null) 'width': width,
         if (height != null) 'height': height,
         if (durationMs != null) 'durationMs': durationMs,

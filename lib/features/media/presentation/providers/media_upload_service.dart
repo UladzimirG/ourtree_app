@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/core/utils/ids.dart';
+import 'package:ourtree_app/features/accounts/domain/models/identity_state.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
+import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/media/domain/models/media_outbox_item.dart';
@@ -32,6 +34,31 @@ class MediaUploadService extends _$MediaUploadService {
   /// `true`, если новые файлы будут синхронизированы (семья подключена).
   bool get isCloudEnabled => state;
 
+  /// Активная семья; если провайдер ещё грузится — ждём результат.
+  ///
+  /// Без ожидания фото, добавленное сразу после запуска, оставалось бы только
+  /// на этом устройстве: в момент вызова `family` ещё `null`.
+  Future<FamilyModel?> _activeFamily() async {
+    final current = ref.read(activeFamilyControllerProvider).value;
+    if (current != null) return current;
+    try {
+      return await ref.read(activeFamilyControllerProvider.future);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Личность пользователя; при необходимости дожидаемся анонимного входа.
+  Future<IdentityState?> _identity() async {
+    final current = ref.read(identityControllerProvider).value;
+    if (current != null) return current;
+    try {
+      return await ref.read(identityControllerProvider.future);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Сохраняет байты и возвращает готовый ассет.
   Future<MediaAsset> store({
     required Uint8List bytes,
@@ -40,8 +67,8 @@ class MediaUploadService extends _$MediaUploadService {
     MediaType type = MediaType.image,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final family = ref.read(activeFamilyControllerProvider).value;
-    final identity = ref.read(identityControllerProvider).value;
+    final family = await _activeFamily();
+    final identity = await _identity();
 
     if (family != null && identity != null && identity.isSignedIn) {
       final assetId = newMediaAssetId();

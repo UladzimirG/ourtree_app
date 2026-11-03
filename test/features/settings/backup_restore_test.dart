@@ -33,6 +33,7 @@ class _MemoryStateStore implements CloudFamilyStateStore {
     required Map<String, int> stamps,
     required Map<String, int> tombstones,
     required int updatedAt,
+    String? writerId,
   }) async {
     pushes++;
     payload = FamilySyncPayload(
@@ -77,7 +78,6 @@ class _NoFamily extends ActiveFamilyController {
   @override
   Future<FamilyModel?> build() async => null;
 }
-
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -171,7 +171,6 @@ void main() {
     return container;
   }
 
-
   test('бэкап восстанавливается и выгружается в облако', () async {
     final store = _MemoryStateStore();
     final container = createContainer(store);
@@ -231,7 +230,9 @@ void main() {
       stamps: const <String, int>{'settings': 1, 'member:papa': 1},
     );
 
-    await container.read(familySyncControllerProvider.notifier).pull('family-1');
+    await container
+        .read(familySyncControllerProvider.notifier)
+        .pull('family-1');
 
     final data = container.read(familyDataProvider).value!;
     expect(data.familyName, 'Семья из бэкапа');
@@ -239,7 +240,8 @@ void main() {
     expect(data.members.single.photo, startsWith('hive://'));
   });
 
-  test('бэкап, восстановленный до подключения семьи, уезжает в облако', () async {
+  test('бэкап, восстановленный до подключения семьи, уезжает в облако',
+      () async {
     final store = _MemoryStateStore();
 
     // 1. Демо-режим: восстанавливаем бэкап.
@@ -308,9 +310,15 @@ void main() {
           ),
         ],
       ),
-      stamps: const <String, int>{'settings': 1, 'member:papa': 1, 'member:mama': 1},
+      stamps: const <String, int>{
+        'settings': 1,
+        'member:papa': 1,
+        'member:mama': 1
+      },
     );
-    await container.read(familySyncControllerProvider.notifier).pull('family-1');
+    await container
+        .read(familySyncControllerProvider.notifier)
+        .pull('family-1');
     expect(
       container.read(familyDataProvider).value!.members.map((m) => m.id),
       containsAll(<String>['papa', 'mama']),

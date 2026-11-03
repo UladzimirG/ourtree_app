@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -8,6 +10,9 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_sync_provider.dart';
 import 'package:ourtree_app/features/family/presentation/views/home_screen.dart';
+import 'package:ourtree_app/features/media/presentation/providers/media_cloud_sync.dart';
+import 'package:ourtree_app/features/notifications/data/messaging_background.dart';
+import 'package:ourtree_app/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:ourtree_app/features/settings/presentation/providers/locale_provider.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
@@ -18,6 +23,11 @@ Future<void> main() async {
   await AppMigrations().run();
   // Firebase необязателен для старта: при сбое приложение работает офлайн.
   await FirebaseBootstrap.init();
+  // Фоновые пуши обрабатывает отдельный изолят; на вебе обработчика нет —
+  // там push принимает service worker.
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
   await initializeDateFormatting();
   runApp(const ProviderScope(child: OurTreeApp()));
 }
@@ -32,6 +42,10 @@ class OurTreeApp extends ConsumerWidget {
     ref.watch(identityControllerProvider);
     // Синхронизация текстов архива: включается только при подключённой семье.
     ref.watch(familySyncControllerProvider);
+    // Автозагрузка локальных фото в облако, как только семья подключена.
+    ref.watch(mediaCloudSyncProvider);
+    // Уведомления: подписка на сообщения и обновление токена устройства.
+    ref.watch(notificationsControllerProvider);
 
     return MaterialApp(
       // Итоговый язык: выбранный в настройках или язык системы.

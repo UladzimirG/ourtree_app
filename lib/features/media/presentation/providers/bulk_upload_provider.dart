@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:ourtree_app/core/media/media_files.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
+import 'package:ourtree_app/core/media/restored_media.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
@@ -110,9 +111,7 @@ class BulkUploadController extends _$BulkUploadController {
                     .read(mediaUploadProgressProvider.notifier)
                     .setProgress(asset.id, value),
               );
-          ref
-              .read(mediaUploadProgressProvider.notifier)
-              .clear(asset.id);
+          ref.read(mediaUploadProgressProvider.notifier).clear(asset.id);
           ref.read(familyDataProvider.notifier).upsertMediaAsset(updated);
           done++;
         }
@@ -139,7 +138,11 @@ class BulkUploadController extends _$BulkUploadController {
   Future<Uint8List?> _readBytes(MediaAsset asset) async {
     final storedId = asset.storedId;
     if (storedId != null) {
-      return MediaStorage.instance.loadBytes(storedId);
+      final bytes = await MediaStorage.instance.loadBytes(storedId);
+      if (bytes != null) return bytes;
+      // Файл пришёл из восстановленной резервной копии: байты в Hive могли
+      // не пережить переустановку, но сам снимок есть в сборке приложения.
+      return RestoredMedia.instance.bytesFor(storedId);
     }
     final localPath = asset.localPath;
     if (localPath != null && localPath.isNotEmpty) {

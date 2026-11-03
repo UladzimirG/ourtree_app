@@ -158,10 +158,7 @@ class SettingsPhotoField extends ConsumerWidget {
     if (bytes.isEmpty) return;
 
     final hash = sha256.convert(bytes).toString();
-    final existing = ref
-        .read(familyDataProvider)
-        .value
-        ?.findDuplicateMedia(
+    final existing = ref.read(familyDataProvider).value?.findDuplicateMedia(
           hash: hash,
           name: file.name,
           size: bytes.length,
@@ -391,8 +388,7 @@ class _SettingsDateFieldState extends State<SettingsDateField> {
   bool _invalid = false;
 
   /// Формат даты текущего языка; пересчитывается при смене локали.
-  DisplayDatePattern _pattern =
-      DisplayDatePattern.forLocale(defaultDateLocale);
+  DisplayDatePattern _pattern = DisplayDatePattern.forLocale(defaultDateLocale);
   bool _patternApplied = false;
 
   @override
@@ -480,4 +476,3 @@ class _SettingsDateFieldState extends State<SettingsDateField> {
     );
   }
 }
-

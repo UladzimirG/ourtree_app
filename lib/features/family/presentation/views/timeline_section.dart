@@ -1,22 +1,26 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
-import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
-import 'package:ourtree_app/features/media/domain/models/photo_crop.dart';
+import 'package:ourtree_app/features/family/presentation/providers/edit_mode_provider.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/providers/timeline_order_provider.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/event_media_grid.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/page_hero.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
-import 'package:ourtree_app/features/media/presentation/widgets/media_viewer.dart';
 import 'package:ourtree_app/features/profile/domain/models/profile_models.dart';
+import 'package:ourtree_app/features/settings/presentation/views/event_editor_screen.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
 
 const List<double> _tilts = <double>[-1.2, 0.8, -0.5, 1.1, -0.9, 0.4];
 
 /// Таймлайн семейных событий — главный раздел оригинального приложения.
-class TimelineSection extends StatelessWidget {
+class TimelineSection extends ConsumerStatefulWidget {
   const TimelineSection({
     super.key,
     required this.family,
@@ -29,9 +33,84 @@ class TimelineSection extends StatelessWidget {
   final bool showMedia;
 
   @override
+  ConsumerState<TimelineSection> createState() => _TimelineSectionState();
+}
+
+class _TimelineSectionState extends ConsumerState<TimelineSection> {
+  /// Новое событие временно поднимаем наверх, чтобы его было видно сразу.
+  String? _pinnedEventId;
+  String? _highlightedEventId;
+  Timer? _highlightTimer;
+
+  @override
+  void dispose() {
+    _highlightTimer?.cancel();
+    super.dispose();
+  }
+
+  void _pinNewEvent(TimelineEvent event) {
+    _highlightTimer?.cancel();
+    setState(() {
+      _pinnedEventId = event.id;
+      _highlightedEventId = event.id;
+    });
+    _highlightTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (!mounted) return;
+      setState(() => _highlightedEventId = null);
+    });
+  }
+
+  Future<void> _addEvent() async {
+    final l10n = AppLocalizations.of(context)!;
+    final event = TimelineEvent(
+      id: 'event-${DateTime.now().microsecondsSinceEpoch}',
+      date: DateTime.now().toIso8601String().split('T').first,
+      title: l10n.eventDefaultTitle,
+      kind: EventKind.milestone,
+    );
+    ref.read(familyDataProvider.notifier).addTimelineEvent(event);
+    _pinNewEvent(event);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => EventEditorScreen(eventId: event.id),
+      ),
+    );
+  }
+
+  void _openEventEditor(TimelineEvent event) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => EventEditorScreen(eventId: event.id),
+      ),
+    );
+  }
+
+  List<TimelineEvent> _orderedEvents(TimelineOrder order) {
+    final events = widget.family.timelineEvents
+        .where((event) => event.showsInTimeline)
+        .toList(growable: true);
+    events.sort(
+      order == TimelineOrder.newestFirst
+          ? (a, b) => b.date.compareTo(a.date)
+          : (a, b) => a.date.compareTo(b.date),
+    );
+
+    final pinned = _pinnedEventId;
+    if (pinned != null) {
+      final index = events.indexWhere((event) => event.id == pinned);
+      if (index > 0) {
+        events.insert(0, events.removeAt(index));
+      }
+    }
+    return events;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final events = family.sortedTimelineEvents;
+    final editMode = ref.watch(editModeProvider);
+    final order = ref.watch(timelineOrderControllerProvider);
+    final events = _orderedEvents(order);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 120),
@@ -41,19 +120,88 @@ class TimelineSection extends StatelessWidget {
           title: l10n.timelineTitle,
           lede: l10n.timelineLede,
         ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _OrderChip(
+              label: l10n.timelineOrderOldest,
+              selected: order == TimelineOrder.oldestFirst,
+              onTap: () => ref
+                  .read(timelineOrderControllerProvider.notifier)
+                  .select(TimelineOrder.oldestFirst),
+            ),
+            _OrderChip(
+              label: l10n.timelineOrderNewest,
+              selected: order == TimelineOrder.newestFirst,
+              onTap: () => ref
+                  .read(timelineOrderControllerProvider.notifier)
+                  .select(TimelineOrder.newestFirst),
+            ),
+          ],
+        ),
+        if (editMode) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              onPressed: _addEvent,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.eventAdd),
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
         if (events.isEmpty)
           PaperCard(child: Text(l10n.timelineEmpty))
         else
           for (var index = 0; index < events.length; index++)
             _TimelineRow(
-              family: family,
+              family: widget.family,
               event: events[index],
               tilt: _tilts[index % _tilts.length],
               isLast: index == events.length - 1,
-              showMedia: showMedia,
-              onTap: () => onEventTap(events[index]),
+              showMedia: widget.showMedia,
+              editMode: editMode,
+              highlighted: _highlightedEventId == events[index].id,
+              onTap: () => widget.onEventTap(events[index]),
+              onEdit: () => _openEventEditor(events[index]),
             ),
       ],
+    );
+  }
+}
+
+class _OrderChip extends StatelessWidget {
+  const _OrderChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      selected: selected,
+      label: Text(label),
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.moss,
+      // Компактная подпись: две «таблетки» помещаются в одну строку даже на
+      // узком экране, иначе они съедают пол-экрана по высоте.
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : AppColors.ink,
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      backgroundColor: AppColors.paper,
+      side: BorderSide(color: AppColors.kraftDark.withValues(alpha: 0.2)),
     );
   }
 }
@@ -65,7 +213,10 @@ class _TimelineRow extends StatelessWidget {
     required this.tilt,
     required this.isLast,
     required this.showMedia,
+    required this.editMode,
+    required this.highlighted,
     required this.onTap,
+    required this.onEdit,
   });
 
   final FamilyData family;
@@ -73,11 +224,49 @@ class _TimelineRow extends StatelessWidget {
   final double tilt;
   final bool isLast;
   final bool showMedia;
+  final bool editMode;
+  final bool highlighted;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    Widget card = PaperCard(
+      tilt: tilt,
+      onTap: onTap,
+      child: _TimelineCardBody(
+        family: family,
+        event: event,
+        l10n: l10n,
+        showMedia: showMedia,
+      ),
+    );
+
+    if (highlighted) {
+      card = TweenAnimationBuilder<double>(
+        key: ValueKey<String>('highlight-${event.id}'),
+        tween: Tween<double>(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 1600),
+        builder: (context, value, child) => DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AppColors.terracotta.withValues(
+                  alpha: 0.35 * (1 - value),
+                ),
+                blurRadius: 24 * (1 - value) + 4,
+                spreadRadius: 2 * (1 - value),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+        child: card,
+      );
+    }
 
     return Stack(
       children: [
@@ -108,21 +297,75 @@ class _TimelineRow extends StatelessWidget {
                   top: 8,
                   bottom: isLast ? 0 : 24,
                 ),
-                child: PaperCard(
-                  tilt: tilt,
-                  onTap: onTap,
-                  child: _TimelineCardBody(
-                    family: family,
-                    event: event,
-                    l10n: l10n,
-                    showMedia: showMedia,
-                  ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    card,
+                    if (highlighted)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: _NewBadge(label: l10n.eventNewBadge),
+                      ),
+                    if (editMode)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Tooltip(
+                          message: l10n.eventEdit,
+                          child: Material(
+                            color: AppColors.paper,
+                            elevation: 3,
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              onTap: onEdit,
+                              customBorder: const CircleBorder(),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: AppColors.terracotta,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _NewBadge extends StatelessWidget {
+  const _NewBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.terracotta,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -219,13 +462,13 @@ class _TimelineCardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showMedia) ...[
-          _EventMedia(
+          EventMediaGrid(
             media: family.mediaForEvent(event),
             placeholderLabel: l10n.mediaPlaceholder,
-            eyebrow:
-                formatDisplayDateFromIso(event.date, localeName: l10n.localeName),
+            eyebrow: l10n.timelineEyebrow,
             title: event.title,
-            subtitle: event.place,
+            subtitle: dateLabel,
+            openViewer: false,
           ),
           const SizedBox(height: 10),
         ],
@@ -273,236 +516,3 @@ class _TimelineCardBody extends StatelessWidget {
     );
   }
 }
-
-class _EventMedia extends StatelessWidget {
-  const _EventMedia({
-    required this.media,
-    required this.placeholderLabel,
-    required this.eyebrow,
-    required this.title,
-    this.subtitle,
-  });
-
-  final List<FamilyMedia> media;
-  final String placeholderLabel;
-  final String eyebrow;
-  final String title;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = <_MediaEntry>[
-      for (final entry in media)
-        if (entry.source.trim().isNotEmpty)
-          _MediaEntry(
-            source: entry.source.trim(),
-            name: entry.name,
-            type: entry.type,
-            caption: entry.caption,
-            position: entry.position,
-            zoom: entry.zoom,
-          ),
-    ];
-
-    if (items.isEmpty) {
-      return _MediaPlaceholder(label: placeholderLabel);
-    }
-
-    final viewerItems = [
-      for (final entry in items)
-        MediaViewerItem(
-          source: entry.source,
-          type: entry.type,
-          name: entry.name,
-          caption: entry.caption,
-          position: entry.position,
-          zoom: entry.zoom,
-        ),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = items.length == 1
-            ? constraints.maxWidth
-            : (constraints.maxWidth - 8) / 2;
-
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (var index = 0; index < items.length; index++)
-              SizedBox(
-                width: width,
-                child: AspectRatio(
-                  aspectRatio: 4 / 3,
-                  child: _EventMediaFrame(
-                    entry: items[index],
-                    onTap: () => showMediaViewer(
-                      context,
-                      items: viewerItems,
-                      initialIndex: index,
-                      eyebrow: eyebrow,
-                      title: title,
-                      subtitle: subtitle,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _EventMediaFrame extends StatelessWidget {
-  const _EventMediaFrame({required this.entry, required this.onTap});
-
-  final _MediaEntry entry;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final fallback = _PhotoFallback(
-      icon: entry.type == MediaType.video
-          ? Icons.play_circle_outline
-          : Icons.broken_image_outlined,
-    );
-    final content = entry.type == MediaType.video
-        ? const ColoredBox(
-            color: Color(0xFF1C1712),
-            child: Center(
-              child: Icon(
-                Icons.play_arrow,
-                color: AppColors.paper,
-                size: 36,
-              ),
-            ),
-          )
-        : FamilyPhoto(
-            source: entry.source,
-            fit: BoxFit.cover,
-            alignment: photoAlignment(entry.position),
-            zoom: photoZoomOrDefault(entry.zoom),
-            fallback: fallback,
-          );
-    final caption = entry.caption?.trim();
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap,
-            child: ColoredBox(
-              color: const Color(0x1F6F4B2A),
-              child: content,
-            ),
-          ),
-          if (caption != null && caption.isNotEmpty)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(8, 18, 8, 6),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[Color(0x002A1B12), Color(0xCC2A1B12)],
-                  ),
-                ),
-                child: Text(
-                  caption,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.paper,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoFallback extends StatelessWidget {
-  const _PhotoFallback({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Icon(icon, size: 32, color: AppColors.inkSoft),
-    );
-  }
-}
-
-class _MediaEntry {
-  const _MediaEntry({
-    required this.source,
-    required this.type,
-    this.name,
-    this.caption,
-    this.position,
-    this.zoom,
-  });
-
-  final String source;
-  final MediaType type;
-  final String? name;
-  final String? caption;
-  final PhotoPosition? position;
-  final double? zoom;
-}
-
-class _MediaPlaceholder extends StatelessWidget {
-  const _MediaPlaceholder({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 122,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[Color(0x2E8A5A2E), Color(0x1F6F4B2A)],
-        ),
-        border: Border.all(color: const Color(0x1A6F4B2A)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.photo_outlined,
-            size: 26,
-            color: AppColors.inkSoft,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontFamily: 'Georgia',
-                  fontStyle: FontStyle.italic,
-                  color: AppColors.inkSoft,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-

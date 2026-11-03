@@ -125,8 +125,7 @@ void main() {
         .read(accountsProvider.notifier)
         .grantMemberVisibility('editor', 'new-member');
 
-    final account =
-        container.read(accountsProvider).value!.single;
+    final account = container.read(accountsProvider).value!.single;
     expect(account.visibleMemberIds, contains('new-member'));
   });
 }

@@ -101,7 +101,7 @@ final class ServerAuthProvider extends $NotifierProvider<ServerAuth, void> {
   }
 }
 
-String _$serverAuthHash() => r'54ad4eb82086093039fa0bddd9c85416cdbb4a9a';
+String _$serverAuthHash() => r'46c05c03192cc09ab42ce619cd04a3fdeca66ee9';
 
 /// Серверная авторизация по логину и паролю.
 ///

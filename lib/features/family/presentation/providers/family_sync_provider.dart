@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:ourtree_app/core/device_id.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
 import 'package:ourtree_app/features/family/data/repositories/cloud_family_state_store.dart';
@@ -9,6 +11,7 @@ import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/settings/domain/models/sync_status.dart';
+import 'package:ourtree_app/features/settings/presentation/providers/demo_edit_notice_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'family_sync_provider.g.dart';
@@ -29,6 +32,12 @@ class FamilySyncController extends _$FamilySyncController {
   static const Duration pushDebounce = Duration(seconds: 2);
   static const String _metaPrefix = 'family_sync_stamps_';
 
+  /// Префикс ключа «есть изменения, которые ещё не доехали до облака».
+  ///
+  /// Нужен, чтобы правка не терялась, если приложение закрыли раньше, чем
+  /// сработал дебаунс отправки, или если запись не прошла без сети.
+  static const String _pendingPrefix = 'family_sync_pending_push_';
+
   /// Ключ-маркер «локальный архив восстановлен из бэкапа».
   ///
   /// Пока семья не подключена, отметок времени у сущностей нет. Без маркера
@@ -38,6 +47,10 @@ class FamilySyncController extends _$FamilySyncController {
 
   Timer? _debounce;
   String? _familyId;
+
+  /// Подписка на серверный документ состояния: правки с других устройств
+  /// приезжают без перезапуска приложения.
+  StreamSubscription<FamilySyncPayload?>? _watchSub;
 
   /// Данные, которые контроллер только что записал сам (результат серверного
   /// слияния). Их нельзя помечать как локальные правки, иначе следующий push
@@ -71,26 +84,52 @@ class FamilySyncController extends _$FamilySyncController {
 
   @override
   SyncStatus build() {
+    // Смена семьи или её отключение должны снимать подписку на старый документ.
+    ref.onDispose(() {
+      _watchSub?.cancel();
+      _watchSub = null;
+      _debounce?.cancel();
+    });
+
     final family = ref.watch(activeFamilyControllerProvider).value;
     if (family == null) {
       // Семья отключена: забываем её метаданные, синхронизация выключена.
+      _watchSub?.cancel();
+      _watchSub = null;
       _familyId = null;
       _stamps = <String, int>{};
       _tombstones = <String, int>{};
       _fingerprints = <String, String>{};
-      return SyncStatus.saved;
-    }
-
-    if (_familyId != family.id) {
+    } else if (_familyId != family.id) {
       _familyId = family.id;
       _loadMeta(family.id);
-      unawaited(Future<void>.microtask(() => pull(family.id)));
+      _startWatch(family.id);
+      // Архив теперь в облаке — метка «только на этом устройстве» не нужна.
+      unawaited(ref.read(demoEditNoticeProvider.notifier).familyConnected());
+      unawaited(
+        Future<void>.microtask(() async {
+          await pull(family.id);
+          // Правка могла остаться неотправленной с прошлого запуска.
+          await _pushPending(family.id);
+        }),
+      );
     }
 
     ref.listen(familyDataProvider, (previous, next) {
       final data = next.value;
       if (data == null) return;
       if (previous?.value == data) return;
+
+      // Первичная загрузка архива (или перезагрузка после сброса) — это не
+      // правка пользователя: подсказку о демо-режиме по ней не показываем.
+      if (previous?.value == null) return;
+
+      if (family == null) {
+        // Демо-режим: правки сохраняются только на этом устройстве —
+        // предупреждаем об этом при первом изменении.
+        ref.read(demoEditNoticeProvider.notifier).noteLocalEdit();
+        return;
+      }
 
       _archiveVersion++;
 
@@ -99,11 +138,61 @@ class FamilySyncController extends _$FamilySyncController {
       _silentChange = null;
       if (silent != null && silent == data) return;
 
-      _markChanges(data);
-      _schedulePush(family.id, data);
+      // Пушим только когда что-то реально изменилось: иначе слияние с сервера
+      // отправляло бы архив обратно бесконечно.
+      if (_markChanges(data)) _schedulePush(family.id, data);
     });
 
     return SyncStatus.saved;
+  }
+
+  /// Подписка на изменения документа состояния семьи.
+  ///
+  /// Только при наличии возможности: тестовые хранилища поток не реализуют.
+  void _startWatch(String familyId) {
+    _watchSub?.cancel();
+    _watchSub = null;
+
+    final store = ref.read(cloudFamilyStateStoreProvider);
+    if (store is! WatchableCloudFamilyStateStore) return;
+
+    _watchSub =
+        (store as WatchableCloudFamilyStateStore).watch(familyId).listen(
+              (remote) => unawaited(_applyRemote(familyId, remote)),
+              onError: (Object error) => debugPrint(
+                'Синхронизация: поток изменений прерван: $error',
+              ),
+            );
+  }
+
+  /// Применяет серверную версию архива, пришедшую потоком.
+  Future<void> _applyRemote(
+    String familyId,
+    FamilySyncPayload? remote,
+  ) async {
+    if (remote == null || _suspended || _familyId != familyId) return;
+
+    final local = ref.read(familyDataProvider).value;
+    if (local == null) return;
+
+    final merged = mergeSyncPayloads(
+      local: local,
+      localStamps: _stamps,
+      localTombstones: _tombstones,
+      remote: remote,
+    );
+
+    // Отметки применяем всегда: они нужны для следующего слияния.
+    _stamps = merged.stamps;
+    _tombstones = merged.tombstones;
+    _fingerprints = entityFingerprints(merged.data);
+    if (merged.data == local) return;
+
+    _silentChange = merged.data;
+    _archiveVersion++;
+    ref.read(familyDataProvider.notifier).replaceData(merged.data);
+    await _saveMeta(familyId);
+    state = SyncStatus.saved;
   }
 
   Future<void> pull(String familyId) async {
@@ -151,7 +240,7 @@ class FamilySyncController extends _$FamilySyncController {
       // Архив восстановлен из бэкапа, пока семья не была подключена: считаем
       // его содержимое правками этого устройства, иначе слияние отбросит его
       // как «демо» и серверная копия победит.
-      final restoredLocally = _takeRestoredMarker();
+      final restoredLocally = _hasRestoredMarker();
       if (restoredLocally) {
         final now = DateTime.now().millisecondsSinceEpoch;
         for (final key in entityFingerprints(local).keys) {
@@ -181,8 +270,7 @@ class FamilySyncController extends _$FamilySyncController {
       // Пока шёл запрос, архив мог измениться (восстановление из бэкапа,
       // правка): серверную копию не применяем, чтобы не потерять данные.
       final current = ref.read(familyDataProvider).value;
-      if (_archiveVersion != version ||
-          (current != null && current != local)) {
+      if (_archiveVersion != version || (current != null && current != local)) {
         state = SyncStatus.saved;
         return;
       }
@@ -192,10 +280,15 @@ class FamilySyncController extends _$FamilySyncController {
       _stamps = merged.stamps;
       _tombstones = merged.tombstones;
       _fingerprints = entityFingerprints(merged.data);
+      // Маркер снимаем только после успешного слияния: иначе при сбое сети он
+      // потерялся бы, и восстановленный архив снова считался бы демо-архивом.
+      if (restoredLocally) await _clearRestoredMarker();
       await _saveMeta(familyId);
       // Архив из бэкапа только что получил отметки — выгружаем его сразу,
       // иначе он остался бы только на этом устройстве.
       if (restoredLocally) await _push(familyId, merged.data);
+      // Правки, не доехавшие до облака в прошлый раз, отправляем сейчас.
+      await _pushPending(familyId);
       state = SyncStatus.saved;
     } catch (_) {
       state = SyncStatus.error;
@@ -216,8 +309,7 @@ class FamilySyncController extends _$FamilySyncController {
       return;
     }
 
-    final remote =
-        await ref.read(cloudFamilyStateStoreProvider).pull(familyId);
+    final remote = await ref.read(cloudFamilyStateStoreProvider).pull(familyId);
     if (remote == null) return;
 
     _debounce?.cancel();
@@ -262,14 +354,6 @@ class FamilySyncController extends _$FamilySyncController {
     await _clearRestoredMarker();
     await _saveMeta(familyId);
     await _push(familyId, data);
-  }
-
-  /// Снимает и возвращает маркер «архив восстановлен вне семьи».
-  bool _takeRestoredMarker() {
-    final storage = MediaStorage.instance;
-    if (storage.getString(restoredArchiveKey) == null) return false;
-    unawaited(storage.removeString(restoredArchiveKey));
-    return true;
   }
 
   Future<void> _clearRestoredMarker() =>
@@ -405,8 +489,28 @@ class FamilySyncController extends _$FamilySyncController {
     final raw = MediaStorage.instance.getString('$_metaPrefix$familyId');
     _stamps = <String, int>{};
     _tombstones = <String, int>{};
-    if (raw == null || raw.trim().isEmpty) return;
+    if (raw != null && raw.trim().isNotEmpty) {
+      _readMeta(raw);
+    }
 
+    // Удаления, подготовленные миграциями (например, чистка демо-событий):
+    // переносим их в надгробия семьи, чтобы они уехали в облако и не
+    // «воскресли» при первом же слиянии.
+    final pendingRaw =
+        MediaStorage.instance.getString(pendingTombstonesStorageKey);
+    if (pendingRaw != null && pendingRaw.trim().isNotEmpty) {
+      for (final entry in _toIntMap(_decodeJsonMap(pendingRaw)).entries) {
+        final current = _tombstones[entry.key] ?? 0;
+        if (entry.value > current) _tombstones[entry.key] = entry.value;
+      }
+      unawaited(
+        MediaStorage.instance.removeString(pendingTombstonesStorageKey),
+      );
+      unawaited(_saveMeta(familyId));
+    }
+  }
+
+  void _readMeta(String raw) {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map) return;
@@ -422,6 +526,16 @@ class FamilySyncController extends _$FamilySyncController {
       // Битые метаданные не должны мешать синхронизации.
       _stamps = <String, int>{};
       _tombstones = <String, int>{};
+    }
+  }
+
+  /// Разбирает JSON-строку в карту; `null` при ошибке разбора.
+  static Map<String, dynamic>? _decodeJsonMap(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map ? decoded.cast<String, dynamic>() : null;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -441,7 +555,9 @@ class FamilySyncController extends _$FamilySyncController {
     return result;
   }
 
-  void _markChanges(FamilyData data) {
+  /// Помечает изменения локальными правками. Возвращает `true`, если что-то
+  /// действительно изменилось (тогда нужен push).
+  bool _markChanges(FamilyData data) {
     final fresh = entityFingerprints(data);
     final now = DateTime.now().millisecondsSinceEpoch;
     var changed = false;
@@ -466,12 +582,42 @@ class FamilySyncController extends _$FamilySyncController {
 
     _fingerprints = fresh;
     final familyId = _familyId;
-    if (changed && familyId != null) unawaited(_saveMeta(familyId));
+    if (changed && familyId != null) {
+      unawaited(_saveMeta(familyId));
+      unawaited(_markPending(familyId));
+    }
+    return changed;
   }
 
   void _schedulePush(String familyId, FamilyData data) {
     _debounce?.cancel();
     _debounce = Timer(pushDebounce, () => unawaited(_push(familyId, data)));
+  }
+
+  /// Запоминает, что есть неотправленные изменения.
+  ///
+  /// Если приложение закроют до срабатывания дебаунса или запись не пройдёт
+  /// без сети, отправка повторится при следующем запуске.
+  Future<void> _markPending(String familyId) =>
+      MediaStorage.instance.putString('$_pendingPrefix$familyId', '1');
+
+  bool _hasPendingPush(String familyId) =>
+      MediaStorage.instance.getString('$_pendingPrefix$familyId') != null;
+
+  Future<void> _clearPending(String familyId) =>
+      MediaStorage.instance.removeString('$_pendingPrefix$familyId');
+
+  /// Отправляет архив, если с прошлого раза остались неотправленные правки.
+  Future<void> _pushPending(String familyId) async {
+    if (!_hasPendingPush(familyId) || _suspended) return;
+    FamilyData? data;
+    try {
+      data = await ref.read(familyDataProvider.future);
+    } catch (_) {
+      return;
+    }
+    if (data == null) return;
+    await _push(familyId, data);
   }
 
   Future<void> _push(String familyId, FamilyData data) async {
@@ -483,9 +629,15 @@ class FamilySyncController extends _$FamilySyncController {
             stamps: _stamps,
             tombstones: _tombstones,
             updatedAt: DateTime.now().millisecondsSinceEpoch,
+            writerId: localDeviceId(),
           );
+      await _clearPending(familyId);
       state = SyncStatus.saved;
-    } catch (_) {
+    } catch (error) {
+      // Отметка «есть неотправленное» остаётся: повторим при следующем
+      // запуске или подключении. Причину пишем в консоль — без неё отказ
+      // правил Firestore (например, из-за сбитых часов) не отличить от сети.
+      debugPrint('Синхронизация: не удалось отправить архив: $error');
       state = SyncStatus.error;
     }
   }

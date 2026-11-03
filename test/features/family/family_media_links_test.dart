@@ -42,7 +42,9 @@ void main() {
     final family = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
       members: [
-        member('papa', gallery: [GalleryShot(media: [tagged])]),
+        member('papa', gallery: [
+          GalleryShot(media: [tagged])
+        ]),
         member('mama'),
       ],
       timelineEvents: const [
@@ -64,7 +66,9 @@ void main() {
     final family = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
       members: [
-        member('papa', gallery: [GalleryShot(media: [tagged])]),
+        member('papa', gallery: [
+          GalleryShot(media: [tagged])
+        ]),
         member('mama'),
       ],
     );
@@ -119,8 +123,12 @@ void main() {
     final family = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
       members: [
-        member('papa', gallery: [GalleryShot(media: [first])]),
-        member('mama', gallery: [GalleryShot(media: [second])]),
+        member('papa', gallery: [
+          GalleryShot(media: [first])
+        ]),
+        member('mama', gallery: [
+          GalleryShot(media: [second])
+        ]),
       ],
     ).normalizeMediaLibrary();
 
@@ -156,7 +164,11 @@ void main() {
     );
     final normalized = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
-      members: [member('papa', gallery: [GalleryShot(media: [link])])],
+      members: [
+        member('papa', gallery: [
+          GalleryShot(media: [link])
+        ])
+      ],
     ).normalizeMediaLibrary();
     final asset = normalized.mediaLibrary.single;
 
@@ -180,7 +192,9 @@ void main() {
     final normalized = FamilyData(
       settings: const FamilySettings(familyName: 'Family'),
       members: [
-        member('papa', gallery: [GalleryShot(media: [link])]),
+        member('papa', gallery: [
+          GalleryShot(media: [link])
+        ]),
       ],
       timelineEvents: const [
         TimelineEvent(id: 'e1', date: '2020-01-01', title: 'E', media: [link]),
@@ -274,5 +288,58 @@ void main() {
     expect(hiddenMember.showInCalendar, isFalse);
     expect(visibleMember.showInCalendar, isNull);
     expect(event.toJson()['showInCalendar'], isFalse);
+  });
+
+  test('выгрузка ассета переводит ссылки и обложки на облачный URL', () {
+    const localSource = 'hive://restored-0123456789abcdef01234567';
+    const cloudUrl = 'https://cdn.example.com/a.jpg';
+    const asset = MediaAsset(id: 'asset-1', source: localSource);
+
+    final family = FamilyData(
+      settings: const FamilySettings(
+        familyName: 'Family',
+        familyPhoto: localSource,
+      ),
+      members: [
+        const FamilyMember(
+          id: 'papa',
+          role: 'Папа',
+          name: 'papa',
+          nickname: '',
+          birthday: '2000-01-01',
+          photo: localSource,
+          birthdayMedia: [FamilyMedia(id: 'link-1', source: localSource)],
+        ),
+      ],
+      timelineEvents: const [
+        TimelineEvent(
+          id: 'e1',
+          date: '2020-01-01',
+          title: 'Event',
+          photo: localSource,
+        ),
+      ],
+      mediaLibrary: const [asset],
+    );
+
+    final uploaded = family.withUpdatedMediaAsset(
+      asset.copyWith(
+        source: cloudUrl,
+        storagePath: () => 'families/f/media/asset-1/original.jpg',
+        uploadState: MediaUploadState.ready,
+      ),
+    );
+
+    // Связь была без mediaId и матчилась только по старому источнику.
+    final link = uploaded.members.single.birthdayMedia.single;
+    expect(link.source, cloudUrl);
+    expect(link.mediaId, 'asset-1');
+
+    // Обложки хранятся строкой — их тоже нужно обновить, иначе после
+    // переустановки снова появится заглушка.
+    expect(uploaded.settings.familyPhoto, cloudUrl);
+    expect(uploaded.members.single.photo, cloudUrl);
+    expect(uploaded.timelineEvents.single.photo, cloudUrl);
+    expect(uploaded.mediaLibrary.single.source, cloudUrl);
   });
 }

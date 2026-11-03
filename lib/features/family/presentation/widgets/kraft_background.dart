@@ -226,9 +226,10 @@ class _KraftTexturePainter extends CustomPainter {
     double area,
   ) {
     final clusters = (area / 100000).clamp(4, 18).round();
-    final dark = Paint()..color = const Color(0xFF3B2614).withValues(alpha: 0.09);
-    final light =
-        Paint()..color = const Color(0xFFFFF7E7).withValues(alpha: 0.08);
+    final dark = Paint()
+      ..color = const Color(0xFF3B2614).withValues(alpha: 0.09);
+    final light = Paint()
+      ..color = const Color(0xFFFFF7E7).withValues(alpha: 0.08);
 
     for (var cluster = 0; cluster < clusters; cluster++) {
       final center = Offset(

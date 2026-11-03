@@ -11,7 +11,13 @@ import 'package:ourtree_app/l10n/app_localizations.dart';
 /// Показывается только когда семья подключена: в демо-режиме синхронизации нет,
 /// и лишняя иконка только путала бы.
 class SyncStatusBadge extends ConsumerWidget {
-  const SyncStatusBadge({super.key});
+  const SyncStatusBadge({super.key, this.showLabel = true});
+
+  /// Показывать текст рядом с иконкой.
+  ///
+  /// В шапке с несколькими действиями текст скрывается, а подпись остаётся
+  /// в Tooltip.
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,14 +56,16 @@ class SyncStatusBadge extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(color: color),
-          ),
+          Icon(icon, size: showLabel ? 16 : 20, color: color),
+          if (showLabel) ...<Widget>[
+            const SizedBox(width: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ],
         ],
       ),
     );

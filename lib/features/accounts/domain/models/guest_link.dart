@@ -121,9 +121,7 @@ class CreatedGuestLink {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CreatedGuestLink &&
-          link == other.link &&
-          token == other.token;
+      other is CreatedGuestLink && link == other.link && token == other.token;
 
   @override
   int get hashCode => Object.hash(link, token);

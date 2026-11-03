@@ -67,12 +67,11 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
         }
 
         final hash = sha256.convert(mediaBytes).toString();
-        final existing =
-            ref.read(familyDataProvider).value?.findDuplicateMedia(
-                  hash: hash,
-                  name: prepared.name,
-                  size: mediaBytes.length,
-                );
+        final existing = ref.read(familyDataProvider).value?.findDuplicateMedia(
+              hash: hash,
+              name: prepared.name,
+              size: mediaBytes.length,
+            );
         if (existing != null) {
           error = l10n.mediaDuplicateFound;
           continue;
@@ -115,8 +114,14 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     if (!mounted) return;
 
     if (result.failed > 0) {
+      // Если не удалось ничего, подсказываем причину: файлы могли остаться
+      // на другом устройстве и здесь их просто нет.
+      final message = result.done == 0
+          ? '${l10n.mediaUploadAllFailed(result.failed)}\n'
+              '${l10n.mediaUploadUnavailableHint}'
+          : l10n.mediaUploadAllFailed(result.failed);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.mediaUploadAllFailed(result.failed))),
+        SnackBar(content: Text(message)),
       );
     } else if (result.done > 0) {
       ScaffoldMessenger.of(context).showSnackBar(
