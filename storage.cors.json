@@ -1,0 +1,27 @@
+[
+  {
+    "origin": [
+      "https://ourtree-dev.web.app",
+      "https://ourtree-dev.firebaseapp.com",
+      "http://localhost:*",
+      "http://127.0.0.1:*"
+    ],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range",
+      "Accept",
+      "Accept-Ranges",
+      "Authorization",
+      "Origin",
+      "User-Agent",
+      "Range",
+      "Cache-Control",
+      "If-Modified-Since",
+      "If-None-Match",
+      "ETag"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

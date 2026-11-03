@@ -418,6 +418,39 @@ firebase functions:artifacts:setpolicy --location europe-west3 --force
 ## Android signing report (SHA-1 / SHA-256)
 
 
+### CORS для медиа (обязательно для веба)
+
+Flutter Web (CanvasKit) загружает изображения через `fetch`, поэтому Storage
+обязан отдавать `Access-Control-Allow-Origin`. Без этого загруженные в облако
+фото и видео видны на Android, но **не отображаются на вебе/PWA** (демо-фото из
+сборки работают всегда — они лежат в бандле).
+
+Конфигурация хранится в `storage.cors.json`. Применить к бакету:
+
+```powershell
+# через gsutil (Google Cloud SDK)
+gsutil cors set storage.cors.json gs://ourtree-dev.firebasestorage.app
+```
+
+Без gcloud SDK — тем же содержимым через REST API Storage:
+
+```
+PATCH https://storage.googleapis.com/storage/v1/b/ourtree-dev.firebasestorage.app?fields=cors
+Authorization: Bearer <access-token проекта>
+Content-Type: application/json
+
+{ "cors": [ ...содержимое storage.cors.json... ] }
+```
+
+Проверка (должен появиться заголовок `Access-Control-Allow-Origin`):
+
+```powershell
+curl.exe -sI -H "Origin: https://ourtree-dev.web.app" "<download-url>" |
+  Select-String -Pattern "Access-Control-Allow-Origin"
+```
+
+Если появится собственный домен — добавьте его в `origin` и примените заново.
+
 ## Что нового в 0.6.0
 
 - **Push-уведомления (FCM).** Cloud Function `notifyFamilyUpdated` присылает
