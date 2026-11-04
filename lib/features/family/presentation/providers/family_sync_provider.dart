@@ -45,6 +45,14 @@ class FamilySyncController extends _$FamilySyncController {
   /// и был бы заменён серверной копией.
   static const String restoredArchiveKey = 'family_archive_restored';
 
+  /// Маркер «локальный архив — это демо-версия».
+  ///
+  /// Демо-архив существует только для отката: при подключённой семье он должен
+  /// быть целиком заменён серверной копией, а его отметки времени не имеют
+  /// права перетирать семейные данные (id демо-людей, например `papa`/`mama`,
+  /// совпадают с id участников реальной семьи).
+  static const String demoArchiveKey = 'family_archive_demo';
+
   Timer? _debounce;
   String? _familyId;
 
@@ -237,10 +245,15 @@ class FamilySyncController extends _$FamilySyncController {
         return;
       }
 
+      // Локальный архив — демо-версия: его нельзя пускать в слияние даже при
+      // оставшихся отметках времени. Иначе демо-люди и общее фото семьи
+      // «переезжают» в семейный архив (id демо-данных совпадают с семейными).
+      final demoLocal = _hasDemoMarker();
+      final restoredLocally = !demoLocal && _hasRestoredMarker();
+
       // Архив восстановлен из бэкапа, пока семья не была подключена: считаем
       // его содержимое правками этого устройства, иначе слияние отбросит его
       // как «демо» и серверная копия победит.
-      final restoredLocally = _hasRestoredMarker();
       if (restoredLocally) {
         final now = DateTime.now().millisecondsSinceEpoch;
         for (final key in entityFingerprints(local).keys) {
@@ -257,14 +270,19 @@ class FamilySyncController extends _$FamilySyncController {
           remote.data.timelineEvents.isNotEmpty ||
           remote.data.mediaLibrary.isNotEmpty;
 
+      // Демо-архив участвует в слиянии как «пустой»: серверная копия забирает
+      // себе и настройки (общее фото семьи), и всех участников.
+      final localStamps = demoLocal ? const <String, int>{} : _stamps;
+      final localTombstones = demoLocal ? const <String, int>{} : _tombstones;
+
       final merged = mergeSyncPayloads(
         local: local,
-        localStamps: _stamps,
-        localTombstones: _tombstones,
+        localStamps: localStamps,
+        localTombstones: localTombstones,
         remote: remote,
         // Сущности без локальной отметки — демо-архив или архив другой семьи:
         // при подключении по коду их место занимает серверная копия.
-        dropUnstampedLocal: remoteHasContent && _stamps.isEmpty,
+        dropUnstampedLocal: remoteHasContent && localStamps.isEmpty,
       );
 
       // Пока шёл запрос, архив мог измениться (восстановление из бэкапа,
@@ -283,6 +301,8 @@ class FamilySyncController extends _$FamilySyncController {
       // Маркер снимаем только после успешного слияния: иначе при сбое сети он
       // потерялся бы, и восстановленный архив снова считался бы демо-архивом.
       if (restoredLocally) await _clearRestoredMarker();
+      // Демо-архив заменён семейным — маркер больше не нужен.
+      if (demoLocal) await _clearDemoMarker();
       await _saveMeta(familyId);
       // Архив из бэкапа только что получил отметки — выгружаем его сразу,
       // иначе он остался бы только на этом устройстве.
@@ -321,12 +341,64 @@ class FamilySyncController extends _$FamilySyncController {
     // Серверная копия уже объединена: не помечаем её как локальную правку.
     _silentChange = remote.data;
     ref.read(familyDataProvider.notifier).replaceData(remote.data);
+    await _clearDemoMarker();
     await _saveMeta(familyId);
     state = SyncStatus.saved;
   }
 
   bool _hasRestoredMarker() =>
       MediaStorage.instance.getString(restoredArchiveKey) != null;
+
+  bool _hasDemoMarker() =>
+      MediaStorage.instance.getString(demoArchiveKey) != null;
+
+  Future<void> _clearDemoMarker() =>
+      MediaStorage.instance.removeString(demoArchiveKey);
+
+  /// Возвращает локальный архив к демо-версии и стирает следы синхронизации.
+  ///
+  /// Демо-архив нужен только для «отката»: пока он в силе, при подключении
+  /// семьи он целиком заменяется серверной копией — иначе демо-люди, фото и
+  /// общее фото семьи «просачивались» бы в семейный архив. Если семья уже
+  /// подключена, её архив сразу подтягивается обратно.
+  Future<void> resetToDemoArchive() async {
+    final family = ref.read(activeFamilyControllerProvider).value;
+    final wasSuspended = _suspended;
+
+    _suspended = true;
+    _debounce?.cancel();
+    _silentChange = null;
+    try {
+      if (family != null) {
+        // Стираем отметки и надгробия: с ними демо-сущности считались бы
+        // локальными правками и перетирали семейные данные.
+        await forgetFamily(family.id);
+      } else {
+        _familyId = null;
+        _stamps = <String, int>{};
+        _tombstones = <String, int>{};
+        _fingerprints = <String, String>{};
+      }
+
+      await MediaStorage.instance.removeString(restoredArchiveKey);
+      await MediaStorage.instance.putString(demoArchiveKey, '1');
+      await ref.read(familyRepositoryProvider).clearSaved();
+      ref.invalidate(familyDataProvider);
+      try {
+        // Ждём загрузку демо-архива, иначе следующий шаг слияния увидит null.
+        await ref.read(familyDataProvider.future);
+      } catch (_) {
+        // Ошибку загрузки демо показывает экран; синхронизации она не мешает.
+      }
+    } finally {
+      _suspended = wasSuspended;
+    }
+
+    if (family != null) {
+      // Семья подключена — сразу возвращаем её архив вместо демо.
+      await pull(family.id);
+    }
+  }
 
   /// Загружает локальный архив в только что созданную семью.
   ///
@@ -352,6 +424,8 @@ class FamilySyncController extends _$FamilySyncController {
     _tombstones = <String, int>{};
     _fingerprints = fresh;
     await _clearRestoredMarker();
+    // Локальный архив стал архивом семьи — демо-маркер больше не нужен.
+    await _clearDemoMarker();
     await _saveMeta(familyId);
     await _push(familyId, data);
   }

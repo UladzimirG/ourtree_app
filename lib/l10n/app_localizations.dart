@@ -2999,6 +2999,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No birthdays or events in the next 7 days.'**
   String get notificationsUpcomingEmpty;
+
+  /// No description provided for @settingsResetLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to the cloud copy'**
+  String get settingsResetLocal;
+
+  /// No description provided for @settingsResetLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace local edits with the family data'**
+  String get settingsResetLocalHint;
+
+  /// No description provided for @settingsResetLocalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace local data?'**
+  String get settingsResetLocalTitle;
+
+  /// No description provided for @settingsResetLocalConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Local edits will be replaced with the current family copy from the cloud. The demo archive is not kept inside a connected family.'**
+  String get settingsResetLocalConfirmBody;
+
+  /// No description provided for @settingsResetLocalAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get settingsResetLocalAction;
+
+  /// No description provided for @settingsResetLocalDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data replaced with the cloud copy.'**
+  String get settingsResetLocalDone;
+
+  /// No description provided for @mediaSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press a file to select several.'**
+  String get mediaSelectHint;
+
+  /// No description provided for @mediaSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String mediaSelectedCount(int count);
+
+  /// No description provided for @mediaSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get mediaSelectAll;
+
+  /// No description provided for @mediaSelectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get mediaSelectNone;
+
+  /// No description provided for @mediaDeleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get mediaDeleteSelected;
+
+  /// No description provided for @mediaDeleteManyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected files?'**
+  String get mediaDeleteManyTitle;
+
+  /// No description provided for @mediaDeleteManyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Files ({count}) will be removed from the archive and the cloud.'**
+  String mediaDeleteManyBody(int count);
+
+  /// No description provided for @mediaDeleteManyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted files: {count}'**
+  String mediaDeleteManyDone(int count);
 }
 
 class _AppLocalizationsDelegate

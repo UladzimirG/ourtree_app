@@ -126,6 +126,18 @@ class FamilyDataNotifier extends _$FamilyDataNotifier {
     _update((data) => data.withoutMediaAsset(assetId));
   }
 
+  /// Удаляет несколько файлов разом — одним обновлением архива.
+  void removeMediaAssets(Iterable<String> assetIds) {
+    final targets = assetIds.toSet();
+    if (targets.isEmpty) return;
+    _update(
+      (data) => targets.fold<FamilyData>(
+        data,
+        (current, id) => current.withoutMediaAsset(id),
+      ),
+    );
+  }
+
   /// Заменяет данные целиком — используется восстановлением из копии.
   void replaceData(FamilyData data) {
     final normalized = data.normalizeMediaLibrary();

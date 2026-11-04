@@ -483,5 +483,19 @@
   "notificationsFamilyUpdatesHint": "Коли хтось редагує спільний архів.",
   "notificationsIosHint": "На iPhone сповіщення працюють лише в застосунку, доданому на екран «Домівка» (iOS 16.4+).",
   "notificationsUpcoming": "Найближче",
-  "notificationsUpcomingEmpty": "У найближчі 7 днів днів народження та подій немає."
+  "notificationsUpcomingEmpty": "У найближчі 7 днів днів народження та подій немає.",
+  "settingsResetLocal": "Скинути до версії з хмари",
+  "settingsResetLocalHint": "Замінити локальні правки даними родини",
+  "settingsResetLocalTitle": "Замінити локальні дані?",
+  "settingsResetLocalConfirmBody": "Локальні правки буде замінено поточною версією родини з хмари. Демо-архів у підключеній родині не зберігається.",
+  "settingsResetLocalAction": "Замінити",
+  "settingsResetLocalDone": "Локальні дані замінено версією з хмари.",
+  "mediaSelectHint": "Довге натискання на файл — вибрати кілька.",
+  "mediaSelectedCount": "Вибрано: {count}",
+  "mediaSelectAll": "Вибрати всі",
+  "mediaSelectNone": "Зняти вибір",
+  "mediaDeleteSelected": "Видалити вибрані",
+  "mediaDeleteManyTitle": "Видалити вибрані файли?",
+  "mediaDeleteManyBody": "Файли ({count}) буде видалено з архіву та з хмари.",
+  "mediaDeleteManyDone": "Видалено файлів: {count}"
 }

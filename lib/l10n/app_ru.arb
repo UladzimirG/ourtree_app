@@ -718,5 +718,19 @@
   "notificationsFamilyUpdatesHint": "Когда кто-то правит общий архив.",
   "notificationsIosHint": "На iPhone уведомления работают только в приложении, добавленном на экран «Домой» (iOS 16.4+).",
   "notificationsUpcoming": "Ближайшее",
-  "notificationsUpcomingEmpty": "В ближайшие 7 дней дней рождения и событий нет."
+  "notificationsUpcomingEmpty": "В ближайшие 7 дней дней рождения и событий нет.",
+  "settingsResetLocal": "Сбросить к версии из облака",
+  "settingsResetLocalHint": "Заменить локальные правки данными семьи",
+  "settingsResetLocalTitle": "Заменить локальные данные?",
+  "settingsResetLocalConfirmBody": "Локальные правки будут заменены текущей версией семьи из облака. Демо-архив в подключённой семье не сохраняется.",
+  "settingsResetLocalAction": "Заменить",
+  "settingsResetLocalDone": "Локальные данные заменены версией из облака.",
+  "mediaSelectHint": "Долгое нажатие на файл — выбрать несколько.",
+  "mediaSelectedCount": "Выбрано: {count}",
+  "mediaSelectAll": "Выбрать все",
+  "mediaSelectNone": "Снять выбор",
+  "mediaDeleteSelected": "Удалить выбранные",
+  "mediaDeleteManyTitle": "Удалить выбранные файлы?",
+  "mediaDeleteManyBody": "Файлы ({count}) будут удалены из архива и из облака.",
+  "mediaDeleteManyDone": "Удалено файлов: {count}"
 }

@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:ourtree_app/core/device_id.dart';
 import 'package:ourtree_app/core/media/media_storage.dart';
 import 'package:ourtree_app/features/accounts/domain/models/identity_state.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/identity_provider.dart';
+import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/notifications/data/device_token_store.dart';
@@ -331,6 +333,9 @@ class NotificationsController extends _$NotificationsController {
           prefs: state.prefs,
           authUid: identity.authUid,
           userId: identity.userId,
+          role: ref.read(currentRoleProvider) == UserRole.admin
+              ? 'admin'
+              : 'member',
         );
     return true;
   }

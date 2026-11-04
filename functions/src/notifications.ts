@@ -30,6 +30,7 @@ type Device = {
   locale: string;
   offsetMinutes: number;
   prefs: Prefs;
+  role: string;
 };
 
 type PushText = { title: string; body: string; type: string };
@@ -106,7 +107,11 @@ async function loadDevices(
     if (!token) continue;
 
     const prefs = readPrefs(data.prefs);
-    if (need === 'familyUpdates' && !prefs.familyUpdates) continue;
+    const role = typeof data.role === 'string' ? data.role : 'member';
+    if (need === 'familyUpdates') {
+      // «Кто-то изменил данные семьи» присылаем только администратору.
+      if (!prefs.familyUpdates || role !== 'admin') continue;
+    }
     if (need === 'reminders' && !prefs.birthdays && !prefs.calendar) continue;
 
     devices.push({
@@ -118,6 +123,7 @@ async function loadDevices(
           ? data.timezoneOffsetMinutes
           : 0,
       prefs,
+      role,
     });
   }
   return devices;
@@ -239,7 +245,19 @@ export const notifyFamilyUpdated = onDocumentWritten(
     const devices = (await loadDevices(familyId, 'familyUpdates')).filter(
       (device) => device.id !== writerId,
     );
-    if (!devices.length) return;
+    if (!devices.length) {
+      logger.info('push: нет устройства администратора для уведомления', {
+        familyId,
+        changed,
+        writerId,
+      });
+      return;
+    }
+    logger.info('push: изменения семьи', {
+      familyId,
+      changed,
+      devices: devices.length,
+    });
 
     const byLocale = new Map<string, Device[]>();
     for (const device of devices) {

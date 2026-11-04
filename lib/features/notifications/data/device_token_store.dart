@@ -16,6 +16,7 @@ abstract class DeviceTokenStore {
     required NotificationPrefs prefs,
     required String authUid,
     required String userId,
+    String role = 'member',
   });
 
   Future<void> savePrefs({
@@ -60,6 +61,7 @@ class FirestoreDeviceTokenStore implements DeviceTokenStore {
     required NotificationPrefs prefs,
     required String authUid,
     required String userId,
+    String role = 'member',
   }) =>
       _doc(familyId, deviceId).set(
         {
@@ -70,6 +72,8 @@ class FirestoreDeviceTokenStore implements DeviceTokenStore {
           'prefs': prefs.toJson(),
           'authUid': authUid,
           'userId': userId,
+          // Роль нужна серверу: «изменения семьи» присылаем только админу.
+          'role': role,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         },
         SetOptions(merge: true),

@@ -92,7 +92,7 @@ final class NotificationsControllerProvider
 }
 
 String _$notificationsControllerHash() =>
-    r'8a7179fdadfb645f594ba350d0bbe9dd0070b274';
+    r'f78800157dd810a0e820ed2734c8cdb4031d2ab8';
 
 /// Включение уведомлений, токен устройства и настройки.
 

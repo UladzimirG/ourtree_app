@@ -11,6 +11,7 @@ import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/providers/family_sync_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_cloud_panel.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
@@ -375,6 +376,8 @@ class _GeneralSection extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isAdmin = ref.watch(currentRoleProvider) == UserRole.admin;
+    final hasFamily =
+        ref.watch(activeFamilyControllerProvider).value != null;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
@@ -426,8 +429,12 @@ class _GeneralSection extends ConsumerWidget {
           const SizedBox(height: 10),
           _SettingsLink(
             icon: Icons.restore,
-            title: l10n.settingsResetDemo,
-            subtitle: l10n.settingsResetDemoHint,
+            title: hasFamily
+                ? l10n.settingsResetLocal
+                : l10n.settingsResetDemo,
+            subtitle: hasFamily
+                ? l10n.settingsResetLocalHint
+                : l10n.settingsResetDemoHint,
             onTap: () => _resetToDemo(context, ref),
           ),
         ] else ...[
@@ -464,12 +471,20 @@ class _GeneralSection extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.settingsResetDemoConfirmTitle),
+        title: Text(
+          hasCloud
+              ? l10n.settingsResetLocalTitle
+              : l10n.settingsResetDemoConfirmTitle,
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.settingsResetDemoConfirmBody),
+            Text(
+              hasCloud
+                  ? l10n.settingsResetLocalConfirmBody
+                  : l10n.settingsResetDemoConfirmBody,
+            ),
             if (hasCloud) ...[
               const SizedBox(height: 10),
               Text(
@@ -490,7 +505,11 @@ class _GeneralSection extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.settingsResetDemoAction),
+            child: Text(
+              hasCloud
+                  ? l10n.settingsResetLocalAction
+                  : l10n.settingsResetDemoAction,
+            ),
           ),
         ],
       ),
@@ -498,11 +517,17 @@ class _GeneralSection extends ConsumerWidget {
 
     if (confirmed != true) return;
 
-    await ref.read(familyDataProvider.notifier).resetToDemo();
+    // Стирает отметки синхронизации и локальный архив; если семья подключена,
+    // её копия сразу подтягивается обратно — демо в семейные данные не попадает.
+    await ref.read(familySyncControllerProvider.notifier).resetToDemoArchive();
     onArchiveReset();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.settingsResetDemoDone)),
+      SnackBar(
+        content: Text(
+          hasCloud ? l10n.settingsResetLocalDone : l10n.settingsResetDemoDone,
+        ),
+      ),
     );
   }
 

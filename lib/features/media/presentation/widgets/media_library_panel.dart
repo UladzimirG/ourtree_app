@@ -7,6 +7,7 @@ import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_photo.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/features/media/domain/media_pending.dart';
 import 'package:ourtree_app/features/media/domain/models/media_asset.dart';
 import 'package:ourtree_app/features/media/presentation/providers/bulk_upload_provider.dart';
@@ -33,6 +34,10 @@ class MediaLibraryPanel extends ConsumerStatefulWidget {
 class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
   bool _busy = false;
   bool _onlyUnused = false;
+
+  /// Режим массового выбора файлов (включается долгим нажатием).
+  bool _selectionMode = false;
+  final Set<String> _selected = <String>{};
 
   Future<void> _upload() async {
     final l10n = AppLocalizations.of(context)!;
@@ -130,6 +135,109 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     }
   }
 
+  /// Начинает массовый выбор с долгого нажатия на файл.
+  void _startSelection(String assetId) {
+    setState(() {
+      _selectionMode = true;
+      _selected
+        ..clear()
+        ..add(assetId);
+    });
+  }
+
+  void _toggleSelection(String assetId) {
+    setState(() {
+      if (!_selected.remove(assetId)) _selected.add(assetId);
+    });
+  }
+
+  void _cancelSelection() {
+    setState(() {
+      _selectionMode = false;
+      _selected.clear();
+    });
+  }
+
+  void _selectAll(List<MediaAsset> assets) {
+    setState(() {
+      final all = assets.map((asset) => asset.id).toSet();
+      if (_selected.length == all.length) {
+        _selected.clear();
+      } else {
+        _selected
+          ..clear()
+          ..addAll(all);
+      }
+    });
+  }
+
+  /// Удаляет объект из Storage и локальную копию файла.
+  Future<void> _disposeAsset(MediaAsset asset) async {
+    if ((asset.storagePath ?? '').isNotEmpty) {
+      try {
+        await ref.read(mediaRepositoryProvider).deleteAsset(asset);
+      } catch (_) {
+        // Облако могло быть недоступно — запись всё равно убираем из архива.
+      }
+    }
+    final storedId = asset.storedId;
+    if (storedId != null) {
+      await MediaStorage.instance.deleteBytes(storedId);
+    }
+  }
+
+  /// Удаляет все выбранные файлы одним действием.
+  Future<void> _deleteSelected(AppLocalizations l10n) async {
+    final family = ref.read(familyDataProvider).value;
+    if (family == null) return;
+
+    final ids = _selected.toSet();
+    final assets = family.mediaLibrary
+        .where((asset) => ids.contains(asset.id))
+        .toList(growable: false);
+    if (assets.isEmpty) {
+      _cancelSelection();
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.mediaDeleteManyTitle),
+        content: Text(l10n.mediaDeleteManyBody(assets.length)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.mediaDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    var removed = 0;
+    for (final asset in assets) {
+      await _disposeAsset(asset);
+      removed++;
+    }
+    ref.read(familyDataProvider.notifier).removeMediaAssets(ids);
+    if (!mounted) return;
+
+    setState(() {
+      _busy = false;
+      _selectionMode = false;
+      _selected.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.mediaDeleteManyDone(removed))),
+    );
+  }
+
   Future<void> _addByLink() async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
@@ -207,18 +315,7 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
     if (confirmed != true || !mounted) return;
 
     // Сначала удаляем объект из облака и локальную копию, иначе останется мусор.
-    if ((asset.storagePath ?? '').isNotEmpty) {
-      try {
-        await ref.read(mediaRepositoryProvider).deleteAsset(asset);
-      } catch (_) {
-        // Облако могло быть недоступно — запись всё равно убираем из архива.
-      }
-    }
-
-    final storedId = asset.storedId;
-    if (storedId != null) {
-      await MediaStorage.instance.deleteBytes(storedId);
-    }
+    await _disposeAsset(asset);
     ref.read(familyDataProvider.notifier).removeMediaAsset(asset.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -319,6 +416,11 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
       children: [
         Text(l10n.settingsMediaHint, style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 4),
+        Text(
+          l10n.mediaSelectHint,
+          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkSoft),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -383,21 +485,46 @@ class _MediaLibraryPanelState extends ConsumerState<MediaLibraryPanel> {
           ),
         ),
         const SizedBox(height: 14),
+        if (_selectionMode) ...[
+          _SelectionToolbar(
+            selectedCount: _selected.length,
+            allSelected: _selected.length == assets.length && assets.isNotEmpty,
+            busy: _busy,
+            onSelectAll: () => _selectAll(assets),
+            onCancel: _cancelSelection,
+            onDelete: () => _deleteSelected(l10n),
+            l10n: l10n,
+          ),
+          const SizedBox(height: 12),
+        ],
         if (assets.isEmpty)
           Text(l10n.mediaLibraryEmpty, style: theme.textTheme.bodyLarge)
         else if (family != null)
-          for (var index = 0; index < assets.length; index++) ...[
-            _MediaAssetCard(
-              key: ValueKey(assets[index].id),
-              asset: assets[index],
-              family: family,
-              l10n: l10n,
-              onOpen: () => _openViewer(assets, index),
-              onUse: () => _use(assets[index], l10n),
-              onDelete: () => _delete(assets[index], l10n),
-            ),
-            const SizedBox(height: 12),
-          ],
+          if (_selectionMode)
+            for (final asset in assets) ...[
+              _SelectableAssetTile(
+                key: ValueKey('select-${asset.id}'),
+                asset: asset,
+                selected: _selected.contains(asset.id),
+                l10n: l10n,
+                onTap: () => _toggleSelection(asset.id),
+              ),
+              const SizedBox(height: 8),
+            ]
+          else
+            for (var index = 0; index < assets.length; index++) ...[
+              _MediaAssetCard(
+                key: ValueKey(assets[index].id),
+                asset: assets[index],
+                family: family,
+                l10n: l10n,
+                onOpen: () => _openViewer(assets, index),
+                onUse: () => _use(assets[index], l10n),
+                onDelete: () => _delete(assets[index], l10n),
+                onLongPress: () => _startSelection(assets[index].id),
+              ),
+              const SizedBox(height: 12),
+            ],
       ],
     );
   }
@@ -412,6 +539,7 @@ class _MediaAssetCard extends ConsumerWidget {
     required this.onOpen,
     required this.onUse,
     required this.onDelete,
+    this.onLongPress,
   });
 
   final MediaAsset asset;
@@ -420,6 +548,9 @@ class _MediaAssetCard extends ConsumerWidget {
   final VoidCallback onOpen;
   final VoidCallback onUse;
   final VoidCallback onDelete;
+
+  /// Долгое нажатие включает режим массового выбора.
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -438,6 +569,7 @@ class _MediaAssetCard extends ConsumerWidget {
         leading: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onOpen,
+          onLongPress: onLongPress,
           child: SizedBox(
             width: 52,
             height: 52,
@@ -491,12 +623,15 @@ class _MediaAssetCard extends ConsumerWidget {
             ),
           ),
         ),
-        title: Text(
-          asset.name?.trim().isNotEmpty == true
-              ? asset.name!
-              : l10n.mediaLibraryTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        title: GestureDetector(
+          onLongPress: onLongPress,
+          child: Text(
+            asset.name?.trim().isNotEmpty == true
+                ? asset.name!
+                : l10n.mediaLibraryTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         subtitle: Text(
           [
@@ -742,3 +877,143 @@ String _formatSize(int bytes, AppLocalizations l10n) {
   }
   return l10n.backupSizeMb((bytes / (1024 * 1024)).toStringAsFixed(1));
 }
+
+/// Панель массового выбора: сколько выбрано и что с этим делать.
+class _SelectionToolbar extends StatelessWidget {
+  const _SelectionToolbar({
+    required this.selectedCount,
+    required this.allSelected,
+    required this.busy,
+    required this.onSelectAll,
+    required this.onCancel,
+    required this.onDelete,
+    required this.l10n,
+  });
+
+  final int selectedCount;
+  final bool allSelected;
+  final bool busy;
+  final VoidCallback onSelectAll;
+  final VoidCallback onCancel;
+  final VoidCallback onDelete;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return PaperCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.mediaSelectedCount(selectedCount),
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              TextButton(
+                onPressed: onSelectAll,
+                child: Text(
+                  allSelected ? l10n.mediaSelectNone : l10n.mediaSelectAll,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: busy ? null : onCancel,
+                  icon: const Icon(Icons.close),
+                  label: Text(l10n.cancel),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: (busy || selectedCount == 0) ? null : onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(l10n.mediaDeleteSelected),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Компактная строка файла с галочкой для массового выбора.
+class _SelectableAssetTile extends StatelessWidget {
+  const _SelectableAssetTile({
+    super.key,
+    required this.asset,
+    required this.selected,
+    required this.l10n,
+    required this.onTap,
+  });
+
+  final MediaAsset asset;
+  final bool selected;
+  final AppLocalizations l10n;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: selected ? AppColors.paper : AppColors.kraftWash,
+      elevation: 0,
+      child: ListTile(
+        onTap: onTap,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(value: selected, onChanged: (_) => onTap()),
+            const SizedBox(width: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: asset.isVideo
+                    ? const ColoredBox(
+                        color: AppColors.paper,
+                        child: Icon(Icons.videocam_outlined),
+                      )
+                    : FamilyPhoto(
+                        source: asset.source,
+                        fallback: const ColoredBox(
+                          color: AppColors.paper,
+                          child: Icon(Icons.image_outlined),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+        title: Text(
+          asset.name?.trim().isNotEmpty == true
+              ? asset.name!
+              : l10n.mediaLibraryTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          [
+            asset.isVideo ? l10n.mediaTypeVideo : l10n.mediaTypeImage,
+            if (asset.size != null) _formatSize(asset.size!, l10n),
+          ].join(' · '),
+          style: theme.textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
+}
+

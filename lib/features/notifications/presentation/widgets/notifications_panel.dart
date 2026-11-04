@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
+import 'package:ourtree_app/features/auth/domain/models/user_role.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/providers/family_provider.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
@@ -36,6 +38,16 @@ class _NotificationsPanelState extends ConsumerState<NotificationsPanel> {
     final family = ref.watch(activeFamilyControllerProvider).value;
     final familyData = ref.watch(familyDataProvider).value;
     final notifier = ref.read(notificationsControllerProvider.notifier);
+    final isAdmin = ref.watch(currentRoleProvider) == UserRole.admin;
+
+    // «Изменения семьи» — уведомление только для администратора: остальным
+    // эта категория не нужна и сервер её не отправляет.
+    if (!isAdmin && state.prefs.familyUpdates) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        notifier.updatePrefs(state.prefs.copyWith(familyUpdates: false));
+      });
+    }
 
     final upcoming = familyData == null
         ? const <UpcomingReminder>[]
@@ -63,6 +75,7 @@ class _NotificationsPanelState extends ConsumerState<NotificationsPanel> {
         _PrefsCard(
           prefs: state.prefs,
           onChanged: notifier.updatePrefs,
+          showFamilyUpdates: isAdmin,
         ),
         const SizedBox(height: 12),
         _UpcomingCard(upcoming: upcoming, dateFormat: dateFormat),
@@ -183,10 +196,17 @@ class _StatusCard extends StatelessWidget {
 
 /// Тумблеры: какие уведомления присылать.
 class _PrefsCard extends StatelessWidget {
-  const _PrefsCard({required this.prefs, required this.onChanged});
+  const _PrefsCard({
+    required this.prefs,
+    required this.onChanged,
+    this.showFamilyUpdates = true,
+  });
 
   final NotificationPrefs prefs;
   final Future<void> Function(NotificationPrefs prefs) onChanged;
+
+  /// Показывать категорию «Изменения семьи» (только для администратора).
+  final bool showFamilyUpdates;
 
   @override
   Widget build(BuildContext context) {
@@ -217,13 +237,14 @@ class _PrefsCard extends StatelessWidget {
             title: Text(l10n.notificationsCalendar),
             subtitle: Text(l10n.notificationsCalendarHint),
           ),
-          SwitchListTile.adaptive(
-            value: prefs.familyUpdates,
-            onChanged: (value) =>
-                onChanged(prefs.copyWith(familyUpdates: value)),
-            title: Text(l10n.notificationsFamilyUpdates),
-            subtitle: Text(l10n.notificationsFamilyUpdatesHint),
-          ),
+          if (showFamilyUpdates)
+            SwitchListTile.adaptive(
+              value: prefs.familyUpdates,
+              onChanged: (value) =>
+                  onChanged(prefs.copyWith(familyUpdates: value)),
+              title: Text(l10n.notificationsFamilyUpdates),
+              subtitle: Text(l10n.notificationsFamilyUpdatesHint),
+            ),
         ],
       ),
     );

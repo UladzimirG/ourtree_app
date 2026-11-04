@@ -1683,4 +1683,54 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get notificationsUpcomingEmpty =>
       'У найближчі 7 днів днів народження та подій немає.';
+
+  @override
+  String get settingsResetLocal => 'Скинути до версії з хмари';
+
+  @override
+  String get settingsResetLocalHint => 'Замінити локальні правки даними родини';
+
+  @override
+  String get settingsResetLocalTitle => 'Замінити локальні дані?';
+
+  @override
+  String get settingsResetLocalConfirmBody =>
+      'Локальні правки буде замінено поточною версією родини з хмари. Демо-архів у підключеній родині не зберігається.';
+
+  @override
+  String get settingsResetLocalAction => 'Замінити';
+
+  @override
+  String get settingsResetLocalDone =>
+      'Локальні дані замінено версією з хмари.';
+
+  @override
+  String get mediaSelectHint => 'Довге натискання на файл — вибрати кілька.';
+
+  @override
+  String mediaSelectedCount(int count) {
+    return 'Вибрано: $count';
+  }
+
+  @override
+  String get mediaSelectAll => 'Вибрати всі';
+
+  @override
+  String get mediaSelectNone => 'Зняти вибір';
+
+  @override
+  String get mediaDeleteSelected => 'Видалити вибрані';
+
+  @override
+  String get mediaDeleteManyTitle => 'Видалити вибрані файли?';
+
+  @override
+  String mediaDeleteManyBody(int count) {
+    return 'Файли ($count) буде видалено з архіву та з хмари.';
+  }
+
+  @override
+  String mediaDeleteManyDone(int count) {
+    return 'Видалено файлів: $count';
+  }
 }

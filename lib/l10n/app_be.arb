@@ -483,5 +483,19 @@
   "notificationsFamilyUpdatesHint": "Калі хтосьці правіць агульны архіў.",
   "notificationsIosHint": "На iPhone апавяшчэнні працуюць толькі ў праграме, дададзенай на экран «Хатні» (iOS 16.4+).",
   "notificationsUpcoming": "Бліжэйшае",
-  "notificationsUpcomingEmpty": "У бліжэйшыя 7 дзён дзён нараджэння і падзей няма."
+  "notificationsUpcomingEmpty": "У бліжэйшыя 7 дзён дзён нараджэння і падзей няма.",
+  "settingsResetLocal": "Скінуць да версіі з воблака",
+  "settingsResetLocalHint": "Замяніць лакальныя праўкі данымі сям'і",
+  "settingsResetLocalTitle": "Замяніць лакальныя даныя?",
+  "settingsResetLocalConfirmBody": "Лакальныя праўкі будуць заменены бягучай версіяй сям'і з воблака. Дэма-архіў у падключанай сям'і не захоўваецца.",
+  "settingsResetLocalAction": "Замяніць",
+  "settingsResetLocalDone": "Лакальныя даныя заменены версіяй з воблака.",
+  "mediaSelectHint": "Доўгае націсканне на файл — выбраць некалькі.",
+  "mediaSelectedCount": "Выбрана: {count}",
+  "mediaSelectAll": "Выбраць усе",
+  "mediaSelectNone": "Зняць выбар",
+  "mediaDeleteSelected": "Выдаліць выбраныя",
+  "mediaDeleteManyTitle": "Выдаліць выбраныя файлы?",
+  "mediaDeleteManyBody": "Файлы ({count}) будуць выдалены з архіва і з воблака.",
+  "mediaDeleteManyDone": "Выдалена файлаў: {count}"
 }

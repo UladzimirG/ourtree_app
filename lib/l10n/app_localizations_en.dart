@@ -1664,4 +1664,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationsUpcomingEmpty =>
       'No birthdays or events in the next 7 days.';
+
+  @override
+  String get settingsResetLocal => 'Reset to the cloud copy';
+
+  @override
+  String get settingsResetLocalHint =>
+      'Replace local edits with the family data';
+
+  @override
+  String get settingsResetLocalTitle => 'Replace local data?';
+
+  @override
+  String get settingsResetLocalConfirmBody =>
+      'Local edits will be replaced with the current family copy from the cloud. The demo archive is not kept inside a connected family.';
+
+  @override
+  String get settingsResetLocalAction => 'Replace';
+
+  @override
+  String get settingsResetLocalDone =>
+      'Local data replaced with the cloud copy.';
+
+  @override
+  String get mediaSelectHint => 'Long-press a file to select several.';
+
+  @override
+  String mediaSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get mediaSelectAll => 'Select all';
+
+  @override
+  String get mediaSelectNone => 'Clear selection';
+
+  @override
+  String get mediaDeleteSelected => 'Delete selected';
+
+  @override
+  String get mediaDeleteManyTitle => 'Delete selected files?';
+
+  @override
+  String mediaDeleteManyBody(int count) {
+    return 'Files ($count) will be removed from the archive and the cloud.';
+  }
+
+  @override
+  String mediaDeleteManyDone(int count) {
+    return 'Deleted files: $count';
+  }
 }

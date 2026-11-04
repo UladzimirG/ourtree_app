@@ -1684,4 +1684,55 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get notificationsUpcomingEmpty =>
       'В ближайшие 7 дней дней рождения и событий нет.';
+
+  @override
+  String get settingsResetLocal => 'Сбросить к версии из облака';
+
+  @override
+  String get settingsResetLocalHint =>
+      'Заменить локальные правки данными семьи';
+
+  @override
+  String get settingsResetLocalTitle => 'Заменить локальные данные?';
+
+  @override
+  String get settingsResetLocalConfirmBody =>
+      'Локальные правки будут заменены текущей версией семьи из облака. Демо-архив в подключённой семье не сохраняется.';
+
+  @override
+  String get settingsResetLocalAction => 'Заменить';
+
+  @override
+  String get settingsResetLocalDone =>
+      'Локальные данные заменены версией из облака.';
+
+  @override
+  String get mediaSelectHint => 'Долгое нажатие на файл — выбрать несколько.';
+
+  @override
+  String mediaSelectedCount(int count) {
+    return 'Выбрано: $count';
+  }
+
+  @override
+  String get mediaSelectAll => 'Выбрать все';
+
+  @override
+  String get mediaSelectNone => 'Снять выбор';
+
+  @override
+  String get mediaDeleteSelected => 'Удалить выбранные';
+
+  @override
+  String get mediaDeleteManyTitle => 'Удалить выбранные файлы?';
+
+  @override
+  String mediaDeleteManyBody(int count) {
+    return 'Файлы ($count) будут удалены из архива и из облака.';
+  }
+
+  @override
+  String mediaDeleteManyDone(int count) {
+    return 'Удалено файлов: $count';
+  }
 }

@@ -1682,4 +1682,55 @@ class AppLocalizationsBe extends AppLocalizations {
   @override
   String get notificationsUpcomingEmpty =>
       'У бліжэйшыя 7 дзён дзён нараджэння і падзей няма.';
+
+  @override
+  String get settingsResetLocal => 'Скінуць да версіі з воблака';
+
+  @override
+  String get settingsResetLocalHint =>
+      'Замяніць лакальныя праўкі данымі сям\'і';
+
+  @override
+  String get settingsResetLocalTitle => 'Замяніць лакальныя даныя?';
+
+  @override
+  String get settingsResetLocalConfirmBody =>
+      'Лакальныя праўкі будуць заменены бягучай версіяй сям\'і з воблака. Дэма-архіў у падключанай сям\'і не захоўваецца.';
+
+  @override
+  String get settingsResetLocalAction => 'Замяніць';
+
+  @override
+  String get settingsResetLocalDone =>
+      'Лакальныя даныя заменены версіяй з воблака.';
+
+  @override
+  String get mediaSelectHint => 'Доўгае націсканне на файл — выбраць некалькі.';
+
+  @override
+  String mediaSelectedCount(int count) {
+    return 'Выбрана: $count';
+  }
+
+  @override
+  String get mediaSelectAll => 'Выбраць усе';
+
+  @override
+  String get mediaSelectNone => 'Зняць выбар';
+
+  @override
+  String get mediaDeleteSelected => 'Выдаліць выбраныя';
+
+  @override
+  String get mediaDeleteManyTitle => 'Выдаліць выбраныя файлы?';
+
+  @override
+  String mediaDeleteManyBody(int count) {
+    return 'Файлы ($count) будуць выдалены з архіва і з воблака.';
+  }
+
+  @override
+  String mediaDeleteManyDone(int count) {
+    return 'Выдалена файлаў: $count';
+  }
 }
