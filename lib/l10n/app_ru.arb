@@ -732,5 +732,7 @@
   "mediaDeleteSelected": "Удалить выбранные",
   "mediaDeleteManyTitle": "Удалить выбранные файлы?",
   "mediaDeleteManyBody": "Файлы ({count}) будут удалены из архива и из облака.",
-  "mediaDeleteManyDone": "Удалено файлов: {count}"
+  "mediaDeleteManyDone": "Удалено файлов: {count}",
+  "demoAfterLoginNotice": "Вы вошли в аккаунт, но в приложении всё ещё демонстрационные данные. Откройте «Семья в облаке», чтобы загрузить данные вашей семьи.",
+  "demoAfterLoginAction": "Открыть"
 }

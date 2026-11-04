@@ -794,6 +794,8 @@
   "mediaDeleteManyTitle": "Delete selected files?",
   "mediaDeleteManyBody": "Files ({count}) will be removed from the archive and the cloud.",
   "mediaDeleteManyDone": "Deleted files: {count}",
+  "demoAfterLoginNotice": "You are signed in, but the app is still showing demo data. Open \"Family in the cloud\" to load your family data.",
+  "demoAfterLoginAction": "Open",
   "@mediaSelectedCount": {"placeholders": {"count": {"type": "int"}}},
   "@mediaDeleteManyBody": {"placeholders": {"count": {"type": "int"}}},
   "@mediaDeleteManyDone": {"placeholders": {"count": {"type": "int"}}},

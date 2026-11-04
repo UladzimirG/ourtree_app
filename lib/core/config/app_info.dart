@@ -3,8 +3,8 @@
 /// Р’РµСЂСЃРёСЏ РґРѕР»Р¶РЅР° СЃРѕРІРїР°РґР°С‚СЊ СЃ `version:` РІ `pubspec.yaml` вЂ” Р·Р° СЌС‚РёРј СЃР»РµРґРёС‚
 /// С‚РµСЃС‚ `test/core/app_info_test.dart`, С‡С‚РѕР±С‹ СЃС‚СЂР°РЅРёС†Р° РЅРµ РїРѕРєР°Р·С‹РІР°Р»Р° СЃС‚Р°СЂРѕРµ
 /// Р·РЅР°С‡РµРЅРёРµ РїРѕСЃР»Рµ СЂРµР»РёР·Р°.
-const String appVersion = '0.6.1';
-const int appBuildNumber = 7;
+const String appVersion = '0.6.2';
+const int appBuildNumber = 8;
 
 /// Р’РµСЂСЃРёСЏ РІ РІРёРґРµ `0.5.0+5` вЂ” РєР°Рє РІ `pubspec.yaml`.
 const String appVersionLabel = '$appVersion+$appBuildNumber';

@@ -7,13 +7,19 @@
 #
 # Запуск: powershell -ExecutionPolicy Bypass -File tools/generate_icons.ps1
 
+param(
+  # Мастер иконки. По умолчанию — исходный; для крафтового фона используется
+  # design/app_icon_master_kraft.png (рисунок «карточкой» на фоне приложения).
+  [string]$MasterFile = 'design/app_icon_master.jpg'
+)
+
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$masterPath = Join-Path $root 'design/app_icon_master.jpg'
+$masterPath = if ([System.IO.Path]::IsPathRooted($MasterFile)) { $MasterFile } else { Join-Path $root $MasterFile }
 if (-not (Test-Path $masterPath)) { throw "Не найден мастер: $masterPath" }
 
 function Get-CornerColor([System.Drawing.Image]$img) {
@@ -144,9 +150,25 @@ function New-Splash([System.Drawing.Image]$img, [int]$width, [int]$height,
 }
 
 $master = [System.Drawing.Image]::FromFile($masterPath)
-$master = Get-CroppedMaster $master
-# Тёплый бумажный фон вместо почти белого: дерево видно на белом лаунчере.
-$bg = [System.Drawing.Color]::FromArgb(255, 255, 244, 222)
+# Фон иконки берём из угла мастера: для крафтового мастера это цвет фона
+# приложения, поэтому иконка, splash и подложка adaptive-иконки совпадают с UI.
+$cornerBmp = New-Object System.Drawing.Bitmap($masterPath)
+$corner = $cornerBmp.GetPixel(2, 2)
+$cornerBmp.Dispose()
+
+# Исходный мастер почти белый: обрезаем поля, чтобы рисунок был крупнее.
+# Крафтовый мастер уже скомпонован — его не трогаем.
+$isWhiteMaster = $corner.R -gt 240 -and $corner.G -gt 240 -and $corner.B -gt 235
+if ($isWhiteMaster) {
+  $master = Get-CroppedMaster $master
+}
+
+$bg = if ($isWhiteMaster) {
+  # Тёплый бумажный фон вместо почти белого: дерево видно на белом лаунчере.
+  [System.Drawing.Color]::FromArgb(255, 255, 244, 222)
+} else {
+  [System.Drawing.Color]::FromArgb(255, $corner.R, $corner.G, $corner.B)
+}
 Write-Host ("Фон иконки: #{0:X2}{1:X2}{2:X2}" -f $bg.R, $bg.G, $bg.B)
 
 # --- Android: legacy + adaptive ---------------------------------------------

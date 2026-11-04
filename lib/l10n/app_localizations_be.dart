@@ -1733,4 +1733,11 @@ class AppLocalizationsBe extends AppLocalizations {
   String mediaDeleteManyDone(int count) {
     return 'Выдалена файлаў: $count';
   }
+
+  @override
+  String get demoAfterLoginNotice =>
+      'Вы ўвайшлі ў акаўнт, але ў праграме ўсё яшчэ дэма-даныя. Адкрыйце «Сям\'я ў воблаку», каб загрузіць даныя вашай сям\'і.';
+
+  @override
+  String get demoAfterLoginAction => 'Адкрыць';
 }

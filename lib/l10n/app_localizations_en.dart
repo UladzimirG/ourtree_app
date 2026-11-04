@@ -1715,4 +1715,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String mediaDeleteManyDone(int count) {
     return 'Deleted files: $count';
   }
+
+  @override
+  String get demoAfterLoginNotice =>
+      'You are signed in, but the app is still showing demo data. Open \"Family in the cloud\" to load your family data.';
+
+  @override
+  String get demoAfterLoginAction => 'Open';
 }

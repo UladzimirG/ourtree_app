@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ourtree_app/core/theme/app_theme.dart';
 import 'package:ourtree_app/core/utils/dates.dart';
 import 'package:ourtree_app/core/utils/rich_text.dart';
+import 'package:ourtree_app/features/accounts/presentation/providers/accounts_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/providers/access_provider.dart';
 import 'package:ourtree_app/features/accounts/presentation/widgets/account_button.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
@@ -19,6 +20,7 @@ import 'package:ourtree_app/features/family/presentation/widgets/edit_mode_banne
 import 'package:ourtree_app/features/family/presentation/widgets/edit_mode_button.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/event_media_grid.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_bottom_nav.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/family_cloud_panel.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/family_header.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/sync_status_badge.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
@@ -46,6 +48,10 @@ class HomeScreen extends ConsumerWidget {
     final sync = ref.watch(familySyncControllerProvider);
     final syncing = activeFamily != null && sync == SyncStatus.loading;
     final demoNotice = ref.watch(demoEditNoticeProvider);
+    final account = ref.watch(currentAccountProvider);
+    // Вход выполнен, но семья не подключена — показываем демо-архив.
+    final signedInWithoutFamily =
+        activeFamily == null && account != null && account.serverBacked;
 
     // Первая правка демо-архива: честно сообщаем, что в облако она не попадёт.
     ref.listen(demoEditNoticeProvider, (previous, next) {
@@ -111,7 +117,14 @@ class HomeScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                       child: _DemoLocalOnlyNotice(
-                        onSettingsTap: () => _openSettings(context),
+                        onSettingsTap: () => showFamilyCloudPage(context),
+                      ),
+                    ),
+                  if (signedInWithoutFamily)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: _DemoAfterLoginNotice(
+                        onOpenCloud: () => showFamilyCloudPage(context),
                       ),
                     ),
                   const EditModeBanner(),
@@ -384,3 +397,43 @@ class _HomeStatus extends StatelessWidget {
     );
   }
 }
+
+/// Подсказка после входа: семья есть, но в приложении всё ещё демо-архив.
+class _DemoAfterLoginNotice extends StatelessWidget {
+  const _DemoAfterLoginNotice({required this.onOpenCloud});
+
+  final VoidCallback onOpenCloud;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return PaperCard(
+      tilt: 0.15,
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.cloud_download_outlined,
+            size: 18,
+            color: AppColors.terracotta,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.demoAfterLoginNotice,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          TextButton(
+            onPressed: onOpenCloud,
+            child: Text(l10n.demoAfterLoginAction),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

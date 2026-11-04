@@ -6,8 +6,65 @@ import 'package:ourtree_app/features/accounts/presentation/providers/identity_pr
 import 'package:ourtree_app/features/family/domain/models/family_join_exception.dart';
 import 'package:ourtree_app/features/family/domain/models/family_models.dart';
 import 'package:ourtree_app/features/family/presentation/providers/cloud_family_provider.dart';
+import 'package:ourtree_app/features/family/presentation/widgets/kraft_background.dart';
 import 'package:ourtree_app/features/family/presentation/widgets/paper_card.dart';
 import 'package:ourtree_app/l10n/app_localizations.dart';
+
+/// Открывает страницу подключения и создания семьи отдельным маршрутом.
+///
+/// Нужен для прямых переходов: из подсказки о демо-архиве и из уведомления
+/// после входа в аккаунт, когда данные семьи ещё не загружены.
+Future<void> showFamilyCloudPage(BuildContext context) {
+  return Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => const _FamilyCloudScreen()),
+  );
+}
+
+/// Полноэкранная обёртка над [FamilyCloudPanel] с кнопкой «назад».
+class _FamilyCloudScreen extends StatelessWidget {
+  const _FamilyCloudScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return KraftBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      tooltip:
+                          MaterialLocalizations.of(context).backButtonTooltip,
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        l10n.familyCloudTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Expanded(child: FamilyCloudPanel()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// Подключение устройства к облачной семье.
 ///

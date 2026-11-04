@@ -497,5 +497,7 @@
   "mediaDeleteSelected": "Выдаліць выбраныя",
   "mediaDeleteManyTitle": "Выдаліць выбраныя файлы?",
   "mediaDeleteManyBody": "Файлы ({count}) будуць выдалены з архіва і з воблака.",
-  "mediaDeleteManyDone": "Выдалена файлаў: {count}"
+  "mediaDeleteManyDone": "Выдалена файлаў: {count}",
+  "demoAfterLoginNotice": "Вы ўвайшлі ў акаўнт, але ў праграме ўсё яшчэ дэма-даныя. Адкрыйце «Сям'я ў воблаку», каб загрузіць даныя вашай сям'і.",
+  "demoAfterLoginAction": "Адкрыць"
 }

@@ -497,5 +497,7 @@
   "mediaDeleteSelected": "Видалити вибрані",
   "mediaDeleteManyTitle": "Видалити вибрані файли?",
   "mediaDeleteManyBody": "Файли ({count}) буде видалено з архіву та з хмари.",
-  "mediaDeleteManyDone": "Видалено файлів: {count}"
+  "mediaDeleteManyDone": "Видалено файлів: {count}",
+  "demoAfterLoginNotice": "Ви увійшли в акаунт, але в застосунку все ще демонстраційні дані. Відкрийте «Родина в хмарі», щоб завантажити дані вашої родини.",
+  "demoAfterLoginAction": "Відкрити"
 }

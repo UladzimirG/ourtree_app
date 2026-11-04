@@ -84,6 +84,14 @@ maskable, `apple-touch-icon`, favicon):
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\generate_icons.ps1
 ```
 
+Фон иконки берётся из угла мастера. Чтобы иконка и splash совпадали по цвету с
+фоном приложения (крафт `#DCC7A6`), используется скомпонованный мастер:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\generate_icons.ps1 `
+  -MasterFile design/app_icon_master_kraft.png
+```
+
 Для магазинов: Google Play — 512×512 PNG (32-bit, ≤ 1 МБ), App Store —
 1024×1024 PNG без alpha; `design/app_icon_1024.png` подходит для обеих консолей.
 Цвет подложки adaptive-иконки берётся из угла мастера и пишется в

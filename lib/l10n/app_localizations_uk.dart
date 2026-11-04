@@ -1733,4 +1733,11 @@ class AppLocalizationsUk extends AppLocalizations {
   String mediaDeleteManyDone(int count) {
     return 'Видалено файлів: $count';
   }
+
+  @override
+  String get demoAfterLoginNotice =>
+      'Ви увійшли в акаунт, але в застосунку все ще демонстраційні дані. Відкрийте «Родина в хмарі», щоб завантажити дані вашої родини.';
+
+  @override
+  String get demoAfterLoginAction => 'Відкрити';
 }

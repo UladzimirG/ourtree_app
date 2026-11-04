@@ -3083,6 +3083,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deleted files: {count}'**
   String mediaDeleteManyDone(int count);
+
+  /// No description provided for @demoAfterLoginNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in, but the app is still showing demo data. Open \"Family in the cloud\" to load your family data.'**
+  String get demoAfterLoginNotice;
+
+  /// No description provided for @demoAfterLoginAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get demoAfterLoginAction;
 }
 
 class _AppLocalizationsDelegate
